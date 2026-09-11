@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ดูสินค้า </title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green-900:#0f3d24;
+    --green-700:#1a5c37;
+    --green-600:#22703f;
+    --green-500:#2d8a4e;
+    --green-100:#e7f3ea;
+    --green-050:#f5faf6;
+    --cream:#fdfcf8;
+    --ink:#152016;
+    --ink-soft:#4c5c50;
+    --line:#dbe8dd;
+    --white:#ffffff;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Sarabun', sans-serif;
+    color:var(--ink);
+    background:var(--cream);
+    line-height:1.6;
+  }
+  img, .ph{display:block; width:100%; height:100%; object-fit:cover;}
+  a{text-decoration:none; color:inherit;}
+  ul{list-style:none;}
+  .wrap{max-width:1240px; margin:0 auto; padding:0 32px;}
+  button{font-family:inherit;}
+
+  .ph{
+    background:
+      linear-gradient(135deg, var(--green-100) 25%, transparent 25%) -10px 0/20px 20px,
+      linear-gradient(225deg, var(--green-100) 25%, transparent 25%) -10px 0/20px 20px,
+      linear-gradient(315deg, var(--green-100) 25%, transparent 25%) 0 0/20px 20px,
+      linear-gradient(45deg, var(--green-100) 25%, var(--green-050) 25%) 0 0/20px 20px;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--green-600);
+    font-size:13px;
+    font-weight:500;
+    text-align:center;
+    border:1.5px dashed #b9d6c1;
+    border-radius:14px;
+    min-height:100px;
+  }
+  .ph span{background:rgba(255,255,255,.85); padding:5px 12px; border-radius:20px;}
+
+  /* ===== Header (same as homepage) ===== */
+  header{
+    position:sticky; top:0; z-index:100;
+    background:var(--white);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-row{
+    display:flex; align-items:center; justify-content:space-between;
+    height:78px;
+  }
+  .brand{display:flex; align-items:center; gap:14px;}
+  .logo-slot{
+    width:52px; height:52px; border-radius:12px;
+    border:1.5px dashed #b9d6c1;
+    background:var(--green-050);
+    display:flex; align-items:center; justify-content:center;
+    font-size:10px; color:var(--green-600); text-align:center; line-height:1.3;
+    flex-shrink:0;
+  }
+  .brand-text .name{font-size:20px; font-weight:700; color:var(--green-900);}
+  .brand-text .tagline{font-size:12.5px; color:var(--ink-soft); margin-top:1px;}
+
+  nav.main-nav ul{display:flex; gap:38px;}
+  nav.main-nav a{
+    font-size:15.5px; font-weight:500; color:var(--ink);
+    padding:6px 0; position:relative;
+  }
+  nav.main-nav a.active{color:var(--green-700); font-weight:600;}
+  nav.main-nav a.active::after{
+    content:""; position:absolute; left:0; right:0; bottom:-4px;
+    height:2px; background:var(--green-600); border-radius:2px;
+  }
+  .nav-cta{
+    padding:11px 22px; background:var(--green-700); color:var(--white);
+    border-radius:8px; font-weight:600; font-size:14.5px;
+    white-space:nowrap;
+  }
+  .mobile-toggle{display:none; background:none; border:none; cursor:pointer; padding:6px;}
+  .mobile-toggle span{display:block; width:24px; height:2px; background:var(--green-900); margin:5px 0; border-radius:2px;}
+
+  /* ===== Page header ===== */
+  .page-head{
+    background:linear-gradient(180deg, var(--green-050) 0%, var(--cream) 100%);
+    padding:48px 0 36px;
+  }
+  .page-head .eyebrow-tag{
+    display:inline-block; font-size:13.5px; font-weight:600; color:var(--green-700);
+    background:var(--green-100); padding:6px 14px; border-radius:20px; margin-bottom:14px;
+  }
+  .page-head h1{font-size:34px; font-weight:700; color:var(--green-900); letter-spacing:-.3px;}
+  .page-head p{font-size:15px; color:var(--ink-soft); margin-top:8px; max-width:520px;}
+
+  /* ===== Filter bar ===== */
+  .filter-bar{
+    background:var(--white); border:1px solid var(--line); border-radius:18px;
+    padding:22px 26px; margin-top:28px;
+    display:flex; flex-direction:column; gap:18px;
+  }
+  .search-row{display:flex; gap:12px;}
+  .search-field{
+    flex:1; position:relative; display:flex; align-items:center;
+  }
+  .search-field svg{
+    position:absolute; left:16px; width:18px; height:18px; stroke:var(--ink-soft); fill:none; pointer-events:none;
+  }
+  .search-field input{
+    width:100%; padding:13px 16px 13px 44px; border:1.5px solid var(--line);
+    border-radius:10px; font-family:inherit; font-size:15px; color:var(--ink);
+    background:var(--cream); transition:border-color .15s ease;
+  }
+  .search-field input:focus{outline:none; border-color:var(--green-500);}
+  .search-field input::placeholder{color:#8ea294;}
+  .clear-btn{
+    padding:13px 20px; border:1.5px solid var(--line); border-radius:10px;
+    background:var(--white); color:var(--ink-soft); font-size:14.5px; font-weight:600;
+    cursor:pointer; white-space:nowrap; transition:background .15s ease, border-color .15s ease;
+  }
+  .clear-btn:hover{background:var(--green-050); border-color:#b9d6c1;}
+
+  .chip-row{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+  .chip-label{font-size:13px; font-weight:600; color:var(--ink-soft); margin-right:2px;}
+  .chip{
+    padding:9px 18px; border-radius:20px; border:1.5px solid var(--line);
+    background:var(--white); color:var(--ink); font-size:14px; font-weight:500;
+    cursor:pointer; transition:all .15s ease;
+  }
+  .chip:hover{border-color:var(--green-500); color:var(--green-700);}
+  .chip.active{background:var(--green-700); border-color:var(--green-700); color:#fff;}
+
+  /* ===== Results meta ===== */
+  .results-meta{
+    display:flex; justify-content:space-between; align-items:center;
+    margin:28px 0 20px; gap:16px; flex-wrap:wrap;
+  }
+  .results-count{font-size:14.5px; color:var(--ink-soft);}
+  .results-count b{color:var(--green-900);}
+  .sort-select{
+    padding:10px 14px; border:1.5px solid var(--line); border-radius:9px;
+    background:var(--white); font-family:inherit; font-size:14px; color:var(--ink);
+    cursor:pointer;
+  }
+
+  /* ===== Product grid ===== */
+  .section{padding:0 0 76px;}
+  .prod-grid{
+    display:grid; grid-template-columns:repeat(4, 1fr); gap:24px;
+  }
+  .prod-card{
+    border:1px solid var(--line); border-radius:16px; overflow:hidden; background:var(--white);
+    transition:transform .18s ease, box-shadow .18s ease;
+    display:flex; flex-direction:column;
+  }
+  .prod-card:hover{transform:translateY(-4px); box-shadow:0 16px 34px rgba(15,61,36,.09);}
+  .prod-card .ph{aspect-ratio:4/3; border-radius:0; border:none; border-bottom:1px solid var(--line);}
+  .prod-tag{
+    position:relative;
+  }
+  .badge{
+    display:none;
+    position:absolute; top:12px; left:12px; z-index:2;
+    background:var(--green-700); color:#fff; font-size:11.5px; font-weight:600;
+    padding:5px 11px; border-radius:20px;
+  }
+  .prod-body{padding:18px 18px 20px; display:flex; flex-direction:column; gap:8px; flex:1;}
+  .prod-cat{font-size:12px; font-weight:600; color:var(--green-600);}
+  .prod-body h3{font-size:16.5px; font-weight:700; color:var(--green-900); line-height:1.35;}
+  .prod-body p{font-size:13.5px; color:var(--ink-soft); flex:1;}
+  .prod-price{font-size:19px; font-weight:700; color:var(--green-700);}
+  .prod-updated{
+    font-size:12px; color:var(--ink-soft); display:flex; align-items:center; gap:5px;
+  }
+  .prod-updated svg{width:13px; height:13px; stroke:#8ea294; fill:none; flex-shrink:0;}
+  .prod-foot{
+    display:flex; justify-content:space-between; align-items:center; margin-top:6px; padding-top:12px;
+    border-top:1px dashed var(--line);
+  }
+  .prod-foot .loc{font-size:12.5px; color:var(--ink-soft); display:flex; align-items:center; gap:5px;}
+  .prod-foot .loc svg{width:14px; height:14px; stroke:var(--green-600); fill:none; flex-shrink:0;}
+  .prod-link{font-size:13px; font-weight:600; color:var(--green-700);}
+
+  .empty-state{
+    display:none; text-align:center; padding:70px 20px; border:1.5px dashed var(--line);
+    border-radius:18px; background:var(--green-050);
+  }
+  .empty-state.show{display:block;}
+  .empty-state h3{font-size:18px; color:var(--green-900); font-weight:700; margin-bottom:6px;}
+  .empty-state p{font-size:14px; color:var(--ink-soft); margin-bottom:18px;}
+  .empty-state button{
+    padding:11px 22px; background:var(--green-700); color:#fff; border:none; border-radius:9px;
+    font-size:14.5px; font-weight:600; cursor:pointer;
+  }
+
+  /* ===== Footer ===== */
+  footer{background:var(--green-900); color:#cfe4d5; padding:56px 0 26px;}
+  .foot-grid{
+    display:grid; grid-template-columns:1.6fr 1fr 1fr 1.2fr; gap:36px;
+    padding-bottom:36px; border-bottom:1px solid rgba(255,255,255,.12);
+  }
+  .foot-brand .brand{margin-bottom:14px;}
+  .foot-brand .logo-slot{border-color:rgba(255,255,255,.3); background:rgba(255,255,255,.06); color:#cfe4d5;}
+  .foot-brand .name{color:#fff;}
+  .foot-brand p{font-size:13.5px; color:#b9d2c0; max-width:280px; margin-top:6px;}
+  footer h4{font-size:14.5px; font-weight:700; color:#fff; margin-bottom:14px;}
+  footer ul li{margin-bottom:9px; font-size:13.5px; color:#b9d2c0;}
+  .foot-bottom{
+    padding-top:22px; display:flex; justify-content:space-between; font-size:12.5px; color:#8fab97; flex-wrap:wrap; gap:8px;
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width:1080px){
+    .prod-grid{grid-template-columns:repeat(3,1fr);}
+  }
+  @media (max-width:780px){
+    nav.main-nav, .nav-cta{display:none;}
+    .mobile-toggle{display:block;}
+    .page-head h1{font-size:27px;}
+    .prod-grid{grid-template-columns:repeat(2,1fr);}
+    .search-row{flex-direction:column;}
+    .foot-grid{grid-template-columns:1fr 1fr;}
+  }
+  @media (max-width:520px){
+    .prod-grid{grid-template-columns:1fr;}
+    .foot-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav-row">
+    <div class="brand">
+      <div class="logo-slot">ใส่โลโก้</div>
+      <div class="brand-text">
+        <div class="name">เกษตร</div>
+        <div class="tagline">สินค้า</div>
+      </div>
+    </div>
+    <nav class="main-nav">
+      <ul>
+        <li><a href="#" class="active">หน้าแรก</a></li>
+        <li><a href="product.html" class="active">สินค้า</a></li>
+        <li><a href="#">เกี่ยวกับเรา</a></li>
+        <li><a href="#">บทความ</a></li>
+        <li><a href="#">ติดต่อเรา</a></li>
+      </ul>
+    </nav>
+    <a href="#" class="nav-cta">ติดต่อเรา</a>
+    <button class="mobile-toggle" aria-label="เปิดเมนู"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<section class="page-head">
+  <div class="wrap">
+    <span class="eyebrow-tag">สินค้าทั้งหมด</span>
+    <h1>ดูสินค้า</h1>
+    <p>ข้อความ</p>
+
+    <div class="filter-bar">
+      <div class="search-row">
+        <div class="search-field">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="text" id="searchInput" placeholder="ค้นหาสินค้า เช่น ชื่อสินค้า...">
+        </div>
+        <button class="clear-btn" id="clearBtn">ล้างตัวกรอง</button>
+      </div>
+      <div class="chip-row" id="chipRow">
+        <span class="chip-label">หมวดหมู่:</span>
+        <button class="chip active" data-cat="all">ทั้งหมด</button>
+        <button class="chip" data-cat="cat1">ข้อความ</button>
+        <button class="chip" data-cat="cat2">ข้อความ</button>
+        <button class="chip" data-cat="cat3">ข้อความ</button>
+        <button class="chip" data-cat="cat4">ข้อความ</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="results-meta">
+      <div class="results-count">พบสินค้า <b id="resultCount">8</b> รายการ</div>
+      <select class="sort-select" id="sortSelect">
+        <option value="new">เรียงตาม: ล่าสุด</option>
+        <option value="name">เรียงตาม: ชื่อสินค้า</option>
+      </select>
+    </div>
+
+    <div class="prod-grid" id="prodGrid">
+      <!-- Card 1 -->
+      <div class="prod-card" data-cat="cat1" data-name="ข้อความ">
+        <div class="prod-tag"><span class="badge">ข้อความ</span>
+          <div class="ph"><span>รูปสินค้า</span></div>
+        </div>
+        <div class="prod-body">
+          <div class="prod-cat">ข้อความ</div>
+          <h3>ข้อความ</h3>
+          <p>ข้อความ</p>
+          <div class="prod-price">ข้อความ</div>
+          <div class="prod-updated"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>แก้ไขล่าสุด: ข้อความ</div>
+          <div class="prod-foot">
+            <span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2C7 6 5 10 5 14a7 7 0 0014 0c0-4-2-8-7-12z"/></svg>ข้อความ</span>
+            <a href="#" class="prod-link">ดูรายละเอียด</a>
+          </div>
+        </div>
+      </div>
+      <!-- Card 2 -->
+      <div class="prod-card" data-cat="cat2" data-name="ข้อความ">
+        <div class="prod-tag">
+          <div class="ph"><span>รูปสินค้า</span></div>
+        </div>
+        <div class="prod-body">
+          <div class="prod-cat">ข้อความ</div>
+          <h3>ข้อความ</h3>
+          <p>ข้อความ</p>
+          <div class="prod-price">ข้อความ</div>
+          <div class="prod-updated"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>แก้ไขล่าสุด: ข้อความ</div>
+          <div class="prod-foot">
+            <span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2C7 6 5 10 5 14a7 7 0 0014 0c0-4-2-8-7-12z"/></svg>ข้อความ</span>
+            <a href="#" class="prod-link">ดูรายละเอียด</a>
+          </div>
+        </div>
+      </div>
+      <!-- Card 3 -->
+      <div class="prod-card" data-cat="cat3" data-name="ข้อความ">
+        <div class="prod-tag"><span class="badge">ข้อความ</span>
+          <div class="ph"><span>รูปสินค้า</span></div>
+        </div>
+        <div class="prod-body">
+          <div class="prod-cat">ข้อความ</div>
+          <h3>ข้อความ</h3>
+          <p>ข้อความ</p>
+          <div class="prod-price">ข้อความ</div>
+          <div class="prod-updated"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>แก้ไขล่าสุด: ข้อความ</div>
+          <div class="prod-foot">
+            <span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2C7 6 5 10 5 14a7 7 0 0014 0c0-4-2-8-7-12z"/></svg>ข้อความ</span>
+            <a href="#" class="prod-link">ดูรายละเอียด</a>
+          </div>
+        </div>
+      </div>
+      <!-- Card 4 -->
+      <div class="prod-card" data-cat="cat4" data-name="ข้อความ">
+        <div class="prod-tag">
+          <div class="ph"><span>รูปสินค้า</span></div>
+        </div>
+        <div class="prod-body">
+          <div class="prod-cat">ข้อความ</div>
+          <h3>ข้อความ</h3>
+          <p>ข้อความ</p>
+          <div class="prod-price">ข้อความ</div>
+          <div class="prod-updated"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>แก้ไขล่าสุด: ข้อความ</div>
+          <div class="prod-foot">
+            <span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2C7 6 5 10 5 14a7 7 0 0014 0c0-4-2-8-7-12z"/></svg>ข้อความ</span>
+            <a href="#" class="prod-link">ดูรายละเอียด</a>
+          </div>
+        </div>
+      </div>
+      <!-- Card 5 -->
+      <div class="prod-card" data-cat="cat1" data-name="ข้อความ">
+        <div class="prod-tag">
+          <div class="ph"><span>รูปสินค้า</span></div>
+        </div>
+        <div class="prod-body">
+          <div class="prod-cat">ข้อความ</div>
+          <h3>ข้อความ</h3>
+          <p>ข้อความ</p>
+          <div class="prod-price">ข้อความ</div>
+          <div class="prod-updated"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>แก้ไขล่าสุด: ข้อความ</div>
+          <div class="prod-foot">
+            <span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2C7 6 5 10 5 14a7 7 0 0014 0c0-4-2-8-7-12z"/></svg>ข้อความ</span>
+            <a href="#" class="prod-link">ดูรายละเอียด</a>
+          </div>
+        </div>
+      </div>
+      <!-- Card 6 -->
+      <div class="prod-card" data-cat="cat2" data-name="ข้อความ">
+        <div class="prod-tag"><span class="badge">ข้อความ</span>
+          <div class="ph"><span>รูปสินค้า</span></div>
+        </div>
+        <div class="prod-body">
+          <div class="prod-cat">ข้อความ</div>
+          <h3>ข้อความ</h3>
+          <p>ข้อความ</p>
+          <div class="prod-price">ข้อความ</div>
+          <div class="prod-updated"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>แก้ไขล่าสุด: ข้อความ</div>
+          <div class="prod-foot">
+            <span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2C7 6 5 10 5 14a7 7 0 0014 0c0-4-2-8-7-12z"/></svg>ข้อความ</span>
+            <a href="#" class="prod-link">ดูรายละเอียด</a>
+          </div>
+        </div>
+      </div>
+      <!-- Card 7 -->
+      <div class="prod-card" data-cat="cat3" data-name="ข้อความ">
+        <div class="prod-tag">
+          <div class="ph"><span>รูปสินค้า</span></div>
+        </div>
+        <div class="prod-body">
+          <div class="prod-cat">ข้อความ</div>
+          <h3>ข้อความ</h3>
+          <p>ข้อความ</p>
+          <div class="prod-price">ข้อความ</div>
+          <div class="prod-updated"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>แก้ไขล่าสุด: ข้อความ</div>
+          <div class="prod-foot">
+            <span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2C7 6 5 10 5 14a7 7 0 0014 0c0-4-2-8-7-12z"/></svg>ข้อความ</span>
+            <a href="#" class="prod-link">ดูรายละเอียด</a>
+          </div>
+        </div>
+      </div>
+      <!-- Card 8 -->
+      <div class="prod-card" data-cat="cat4" data-name="ข้อความ">
+        <div class="prod-tag">
+          <div class="ph"><span>รูปสินค้า</span></div>
+        </div>
+        <div class="prod-body">
+          <div class="prod-cat">ข้อความ</div>
+          <h3>ข้อความ</h3>
+          <p>ข้อความ</p>
+          <div class="prod-price">ข้อความ</div>
+          <div class="prod-updated"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>แก้ไขล่าสุด: ข้อความ</div>
+          <div class="prod-foot">
+            <span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2C7 6 5 10 5 14a7 7 0 0014 0c0-4-2-8-7-12z"/></svg>ข้อความ</span>
+            <a href="#" class="prod-link">ดูรายละเอียด</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" id="emptyState">
+      <h3>ไม่พบสินค้าที่ค้นหา</h3>
+      <p>ลองเปลี่ยนคำค้นหาหรือเลือกหมวดหมู่อื่น</p>
+      <button id="resetBtn">ล้างตัวกรองทั้งหมด</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <div class="brand">
+          <div class="logo-slot">ใส่โลโก้</div>
+          <div class="brand-text"><div class="name">ข้อความ</div></div>
+        </div>
+        <p>ข้อความ</p>
+      </div>
+      <div>
+        <h4>เมนู</h4>
+        <ul>
+          <li><a href="#">หน้าแรก</a></li>
+          <li><a href="#">สินค้า</a></li>
+          <li><a href="#">เกี่ยวกับเรา</a></li>
+          <li><a href="#">บทความ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>หมวดหมู่สินค้า</h4>
+        <ul>
+          <li><a href="#">ข้อความ</a></li>
+          <li><a href="#">ข้อความ</a></li>
+          <li><a href="#">ข้อความ</a></li>
+          <li><a href="#">ข้อความ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>ติดต่อเรา</h4>
+        <ul>
+          <li>อีเมล: info@gmail.com</li>
+          <li>โทร: 0X-XXX-XXXX</li>
+          <li>ที่อยู่: กรอกที่อยู่หน่วยงาน</li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <div>© 2569 ข้อความ</div>
+      <div>เว็บไซต์นี้จัดทำขึ้นเพื่อประชาสัมพันธ์สินค้าการเกษตรเท่านั้น ไม่มีระบบซื้อขายสินค้า</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const searchInput = document.getElementById('searchInput');
+  const clearBtn = document.getElementById('clearBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const chips = document.querySelectorAll('.chip');
+  const cards = Array.from(document.querySelectorAll('.prod-card'));
+  const resultCount = document.getElementById('resultCount');
+  const emptyState = document.getElementById('emptyState');
+  const prodGrid = document.getElementById('prodGrid');
+  const sortSelect = document.getElementById('sortSelect');
+
+  let activeCat = 'all';
+
+  function applyFilters(){
+    const q = searchInput.value.trim().toLowerCase();
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+      const matchesCat = activeCat === 'all' || card.dataset.cat === activeCat;
+      const matchesSearch = q === '' || card.dataset.name.toLowerCase().includes(q);
+      const show = matchesCat && matchesSearch;
+      card.style.display = show ? '' : 'none';
+      if(show) visibleCount++;
+    });
+
+    resultCount.textContent = visibleCount;
+    emptyState.classList.toggle('show', visibleCount === 0);
+    prodGrid.style.display = visibleCount === 0 ? 'none' : 'grid';
+  }
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      chips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeCat = chip.dataset.cat;
+      applyFilters();
+    });
+  });
+
+  searchInput.addEventListener('input', applyFilters);
+
+  function clearAll(){
+    searchInput.value = '';
+    activeCat = 'all';
+    chips.forEach(c => c.classList.remove('active'));
+    document.querySelector('.chip[data-cat="all"]').classList.add('active');
+    applyFilters();
+  }
+
+  clearBtn.addEventListener('click', clearAll);
+  resetBtn.addEventListener('click', clearAll);
+
+  sortSelect.addEventListener('change', () => {
+    const cardsArr = Array.from(prodGrid.querySelectorAll('.prod-card'));
+    if(sortSelect.value === 'name'){
+      cardsArr.sort((a,b) => a.dataset.name.localeCompare(b.dataset.name, 'th'));
+    } else {
+      cardsArr.sort((a,b) => cards.indexOf(a) - cards.indexOf(b));
+    }
+    cardsArr.forEach(c => prodGrid.appendChild(c));
+  });
+</script>
+
+</body>
+</html>
