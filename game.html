@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>สวนกล้วยทองม้วน v4 | Banana Farm 16-bit</title>
+<title>สวนกล้วยทองม้วน v5 | Banana Farm 16-bit</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&display=swap" rel="stylesheet">
@@ -92,11 +92,9 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated;image-rend
 <script>
 "use strict";
 /*==========================================================================
-  มาตราส่วนกลางของเกม :  M = 14 px = 1 เมตร   (ใช้เหมือนกันทุกฉาก)
-  ผู้เล่น 14x20 (1.45 ม.) | ประตู 28x28 (2 ม.) | บ้าน 152x96 (10.9x6.9 ม.)
-  ต้นกล้วยโตเต็มที่ สูง 62 (4.4 ม.) | โต๊ะ/เตา 48x26 | ราวตาก 44x22
-  ถนนดินกว้าง 26 px (1.9 ม.) | ถนนตลาด 32 px (2.3 ม.)
-  *** แปลงกล้วยทุกแปลงถูกวางนอกเขตถนน และมีรั้วไม้+ประตูรั้วคั่น ***
+  มาตราส่วน : 14 px = 1 เมตร
+  ผู้เล่น "น้องกล้วย" 18x26 px (≈1.85 ม. รวมหมวก / ตัวจริง 1.6 ม.)
+  NPC 16x24 px | ประตู 28x28 | บ้าน 152x96 | ต้นกล้วยโต 62
 ==========================================================================*/
 const VW=480,VH=270;
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;
@@ -124,37 +122,190 @@ const sfx={ok:()=>snd(640,.09),door:()=>{snd(320,.07,'square',.04);setTimeout(()
  bad:()=>snd(150,.19,'sawtooth',.05),plant:()=>snd(400,.11,'triangle',.06),water:()=>snd(760,.08,'sine',.05),
  ripe:()=>{snd(784,.09,'triangle',.05);setTimeout(()=>snd(1175,.14,'triangle',.05),90);}};
 
-/*========================= PLAYER SPRITE 14x20 =========================*/
-const PAL={'.':null,k:'#22180f',s:'#f4c99c',S:'#d89a69',h:'#f2d178',H:'#c9a244',n:'#3a2416',
- b:'#4a90d9',B:'#2f6db0',w:'#eaf2f7',p:'#6b4a2f',P:'#452f1c'};
+/*========================= 👩‍🌾 ตัวละคร "น้องกล้วย" 18x26 =========================
+  โทนสี: ผมน้ำตาลเข้มถักเปีย · หมวกสานฟาง ริบบิ้นแดง · เสื้อฟ้าลายดอก
+  ผ้ากันเปื้อนครีม · กระโปรงเขียวมิ้นต์ · ถุงมือสวนเหลือง · รองเท้าบูทน้ำตาล
+===============================================================================*/
+const PAL={'.':null,
+ o:'#1b1208',            /* outline เข้ม */
+ k:'#2a1c0d',            /* เส้นรอง */
+ s:'#ffdcb2', S:'#e8b184', c:'#ffeed4',   /* ผิว / เงา / ไฮไลต์ */
+ r:'#e05a7a', R:'#ff8fa8',                /* แก้ม/ริบบิ้น */
+ h:'#f6d98a', H:'#d4a94e', y:'#fff0bd',   /* หมวกสาน */
+ n:'#4a2c17', N:'#6b4223', m:'#8a5a2f',   /* ผมน้ำตาล */
+ b:'#6fc3f0', B:'#3f96c9', w:'#fdfdfd',   /* เสื้อฟ้า */
+ f:'#fff3b0',                              /* ลายดอกบนเสื้อ */
+ a:'#fff6e2', A:'#e2d3b4',                /* ผ้ากันเปื้อน */
+ g:'#6fd9a8', G:'#3fa87c',                /* กระโปรงมิ้นต์ */
+ t:'#ffd86b', T:'#d9a72f',                /* ถุงมือ */
+ p:'#7a4f2a', P:'#553venue'};
+PAL.P='#55341a';
 function mk(rows){const w=rows[0].length,h=rows.length,c=document.createElement('canvas');c.width=w;c.height=h;
  const x=c.getContext('2d');for(let j=0;j<h;j++)for(let i=0;i<w;i++){const q=PAL[rows[j][i]];if(q){x.fillStyle=q;x.fillRect(i,j,1,1);}}return c;}
 function mir(c0){const c=document.createElement('canvas');c.width=c0.width;c.height=c0.height;
  const x=c.getContext('2d');x.translate(c0.width,0);x.scale(-1,1);x.drawImage(c0,0,0);return c;}
-const HAT=['.....kkkk.....','...kkhhhhkk...','..khhhhhhhhk..','.kHHHHHHHHHHk.','..kkkkkkkkkk..'];
-const FD=['...kssssssk...','...kskssksk...','...kssssssk...','...ksSssSsk...','...kSSSSSSk...'];
-const FU=['...knnnnnnk...','...knnnnnnk...','...knnnnnnk...','...knnnnnnk...','...kSSSSSSk...'];
-const TR=['..kbbbbbbbbk..','.ksbbbwwbbbsk.','.ksbBBwwBBbsk.','.ksbbbwwbbbsk.','..kbbbbbbbbk..','..kbbbbbbbbk..'];
-const LF=[['..kppppppppk..','..kpppkkpppk..','..kPPkkkkPPk..','..kPPk..kPPk..'],
-          ['..kppppppppk..','..kppkkppppk..','.kPPkk..kPPk..','.kPPk....kPk..'],
-          ['..kppppppppk..','..kppppkkppk..','..kPPk..kkPPk.','..kPk....kPPk.']];
-const SD=['....kkkkkk....','..kkhhhhhhkk..','.khhhhhhhhhhk.','kHHHHHHHHHHHHk','.kkkkkkkkkkkk.',
- '...kssssskk...','...ksskssk....','...kssssssk...','...kssssk.....','...kSSSSk.....',
- '..kbbbbbbk....','.kbbbbbbwsk...','.kbbbbbbwsk...','.kbbbbbbwsk...','.kBBBBBBbk....','..kbbbbbbk....'];
-const LS=[['..kppppppk....','..kpppkppk....','..kPPkkPPk....','..kPPk.kPk....'],
-          ['..kppppppk....','..kppkpppk....','.kPPk..kPPk...','.kPPk...kPk...'],
-          ['..kppppppk....','..kpppkppk....','...kPPkPPk....','...kPk.kPk....']];
-const SPR={down:LF.map(l=>mk(HAT.concat(FD,TR,l))),up:LF.map(l=>mk(HAT.concat(FU,TR,l))),right:LS.map(l=>mk(SD.concat(l)))};
+
+/* ---- หมวกสานปีกกว้าง (กว้าง 18) ---- */
+const HAT_D=[
+'......oooooo......',
+'....oohhhhhhoo....',
+'...ohyyhhhhyyho...',
+'..ohhhhhhhhhhhho..',
+'.oHHHHHHHHHHHHHHo.',
+'ooHHHHHHHHHHHHHHoo',
+'.oooooooooooooooo.'];
+const HAT_U=[
+'......oooooo......',
+'....oohhhhhhoo....',
+'...ohhhhhhhhhho...',
+'..ohhhhhhhhhhhho..',
+'.oHHHHHHHHHHHHHHo.',
+'ooHHHHHHHHHHHHHHoo',
+'.oooooooooooooooo.'];
+/* ---- ใบหน้าหันหน้า (มีตาโต ขนตา แก้มชมพู) ---- */
+const FACE_D=[
+'...onnnnnnnnnno...',
+'..onsssssssssno...',
+'..onscsssssscno...',
+'..onsoosssoosno...',
+'..onsooswwoosno...',   /* ตา */
+'..onssrsssrssno...',   /* แก้มชมพู */
+'..onsssrrrsssno...',   /* ปากยิ้ม */
+'..onnsSSSSSsnno...',
+'...onnNNNNnno.....'];
+/* ---- ใบหน้าหันหลัง (เห็นผมถักเปีย) ---- */
+const FACE_U=[
+'...onnnnnnnnnno...',
+'..onnnnnnnnnnnno..',
+'..onnNNNNNNNNnno..',
+'..onnNNmmmmNNnno..',
+'..onnNNmmmmNNnno..',
+'..onnNNNNNNNNnno..',
+'...onnnNNNNnnno...',
+'....onnNNNNnno....',
+'.....oonnnnoo.....'];
+/* ---- ลำตัว: เสื้อฟ้าลายดอก + ผ้ากันเปื้อน ---- */
+const BODY_D=[
+'..tooBBBBBBBBoot..',
+'.toosbfbbbbfbsoot.',
+'.tosbbfbbbbfbbsot.',
+'.tosbbbaaaabbbsot.',
+'..oosbaaaaaabsoo..',
+'..oosbaaffaabsoo..',
+'...osbaaaaaabso...',
+'...oosaaaaaasoo...'];
+const BODY_U=[
+'..tooBBBBBBBBoot..',
+'.toosbbbbbbbbsoot.',
+'.tosbbbbbbbbbbsot.',
+'.tosbbbbBBbbbbsot.',
+'..oosbbbBBbbbsoo..',
+'..oosbbbbbbbbsoo..',
+'...osbbbbbbbbso...',
+'...oosbbbbbbsoo...'];
+/* ---- กระโปรง + ขา 4 เฟรมเดิน ---- */
+const LEG=[
+ ['..ogggggggggggo..','.oGGGGGGGGGGGGGo.','.oooGGGGGGGGooo..','...osssossso.....','...opppoppp o....'.replace(' ',''),'...oPPPoPPPo.....'],
+ ['..ogggggggggggo..','.oGGGGGGGGGGGGGo.','.ooGGGGGGGGGoo...','..osss.ossso.....','..opppo.opppo....','..oPPPo..oPPo....'],
+ ['..ogggggggggggo..','.oGGGGGGGGGGGGGo.','.oooGGGGGGGGooo..','...osssossso.....','...opppopppo.....','...oPPPoPPPo.....'],
+ ['..ogggggggggggo..','.oGGGGGGGGGGGGGo.','...ooGGGGGGGGoo..','.....osssossso...','....opppo.opppo..','....oPPo..oPPPo..']];
+/* ---- ท่าด้านข้าง ---- */
+const SIDE_HEAD=[
+'.....oooooo.......',
+'...oohhhhhhoo.....',
+'..ohhhhhhhhhho....',
+'.oHHHHHHHHHHHHo...',
+'ooHHHHHHHHHHHHoo..',
+'.oooooooooooooo...',
+'...onnnnnnnno.....',
+'..onsssssssno.....',
+'..onscssssono.....',
+'..onsooswsono.....',   /* ตาข้าง */
+'..onssrssnnno.....',
+'..onsssrsnnnno....',   /* เปียสะบัดหลัง */
+'...onnSSSnnnnno...',
+'....onnnnnnnnno...'];
+const SIDE_BODY=[
+'..tooBBBBBBoot....',
+'.toosbfbbfbsoot...',
+'.tosbbbaaabbsot...',
+'..oosbaaaaabsoo...',
+'..oosbaaffabsoo...',
+'...osbaaaaabso....',
+'...oosaaaaasoo....'];
+const SIDE_LEG=[
+ ['..oggggggggo.....','.oGGGGGGGGGGo....','.oooGGGGGGooo....','...osssosso......','...opppoppo......','...oPPPoPPo......'],
+ ['..oggggggggo.....','.oGGGGGGGGGGo....','..ooGGGGGGoo.....','..osss.osso......','..opppo.oppo.....','.oPPPo...oPPo....'],
+ ['..oggggggggo.....','.oGGGGGGGGGGo....','.oooGGGGGGooo....','...osssosso......','...opppoppo......','...oPPPoPPo......'],
+ ['..oggggggggo.....','.oGGGGGGGGGGo....','...ooGGGGGGoo....','.....osssosso....','....opppo.oppo...','...oPPo...oPPo...']];
+const SPR={
+ down:LEG.map(l=>mk(HAT_D.concat(FACE_D,BODY_D,l))),
+ up:  LEG.map(l=>mk(HAT_U.concat(FACE_U,BODY_U,l))),
+ right:SIDE_LEG.map(l=>mk(SIDE_HEAD.concat(SIDE_BODY,l)))};
 SPR.left=SPR.right.map(mir);
-const PW=14,PH=20;
+const PW=18,PH=SPR.down[0].height;
+
+/*========================= 👥 NPC ระบบใหม่ =========================*/
+const NPCDEF={
+ vendorF:{skin:'#ffd9ae',skinS:'#dfa97e',hair:'#2e1c0f',hair2:'#4a2c18',style:'bun',
+   top:'#e8556f',top2:'#b83a52',apron:'#fff3d8',bottom:'#8a4a5e',hat:null,name:'แม่ค้าผลไม้'},
+ vendorM:{skin:'#e8b98c',skinS:'#c1925f',hair:'#1f1710',hair2:'#3a2a1a',style:'short',
+   top:'#4a90d9',top2:'#2f6db0',apron:null,bottom:'#3a4149',hat:'#dcc089',name:'พ่อค้าหาบเร่'},
+ customer:{skin:'#fbe0c2',skinS:'#dcb894',hair:'#5a3a1e',hair2:'#7a5228',style:'long',
+   top:'#9b6fd4',top2:'#7148ad',apron:null,bottom:'#e8e2d2',hat:null,name:'ลูกค้า'},
+ clerk:{skin:'#ffd9ae',skinS:'#dfa97e',hair:'#241a10',hair2:'#3d2a18',style:'pony',
+   top:'#2f9c68',top2:'#1f6f4a',apron:'#f2f7f4',bottom:'#37424d',hat:null,name:'พนักงานสหกรณ์'},
+ kid:{skin:'#ffe3c4',skinS:'#e0bb98',hair:'#3a2210',hair2:'#5a3a1c',style:'short',
+   top:'#ffd86b',top2:'#d9a72f',apron:null,bottom:'#5f8fd4',hat:null,name:'เด็กน้อย'}};
+/* วาด NPC แบบละเอียด (16x24 / เด็ก 13x19) */
+function drawNPC(g,x,y,def,t,seed,small){
+ const sc=small?0.78:1, bob=Math.sin(t*1.9+seed)*0.9, sw=Math.sin(t*2.6+seed)*1.1;
+ const H=24*sc, W=16*sc, ox=Math.round(x-W/2), oy=Math.round(y-H+bob);
+ const px=(a,b,w,h,c)=>{g.fillStyle=c;g.fillRect(Math.round(ox+a*sc),Math.round(oy+b*sc),Math.max(1,Math.round(w*sc)),Math.max(1,Math.round(h*sc)));};
+ /* เงา */
+ g.fillStyle='rgba(0,0,0,.26)';g.beginPath();g.ellipse(x,y+1,W*.42,W*.16,0,0,7);g.fill();
+ /* ขา */
+ px(4,20,3,4,'#3d2a18');px(9,20,3,4,'#3d2a18');
+ px(3,19+(sw>0?0:1),4,2,'#241a10');px(9,19+(sw>0?1:0),4,2,'#241a10');
+ /* ท่อนล่าง */
+ px(3,15,10,6,def.bottom);px(3,15,10,1,'rgba(255,255,255,.25)');
+ /* ลำตัว */
+ px(3,8,10,8,def.top);px(3,8,10,2,def.top2);
+ px(2,9,1,6,def.top2);px(13,9,1,6,def.top2);
+ if(def.apron){px(5,11,6,6,def.apron);px(5,11,6,1,'rgba(0,0,0,.12)');px(6,13,1,1,'rgba(0,0,0,.15)');}
+ /* แขนแกว่ง */
+ px(1,9+(sw>0?0:1),2,6,def.top2);px(13,9+(sw>0?1:0),2,6,def.top2);
+ px(1,15+(sw>0?0:1),2,2,def.skin);px(13,15+(sw>0?1:0),2,2,def.skin);
+ /* คอ+หัว */
+ px(6,7,4,2,def.skinS);
+ px(3,1,10,7,def.skin);
+ px(3,1,10,1,def.skinS);px(3,7,10,1,def.skinS);
+ /* ทรงผม */
+ if(def.style==='bun'){px(3,0,10,3,def.hair);px(4,-2,8,3,def.hair2);px(6,-4,4,3,def.hair);
+  px(2,2,2,4,def.hair);px(12,2,2,4,def.hair);}
+ else if(def.style==='long'){px(3,0,10,3,def.hair);px(2,1,2,9,def.hair);px(12,1,2,9,def.hair);
+  px(2,9,2,2,def.hair2);px(12,9,2,2,def.hair2);}
+ else if(def.style==='pony'){px(3,0,10,3,def.hair);px(2,2,2,3,def.hair);px(12,2,2,3,def.hair);
+  px(13,4,2,7,def.hair2);px(13,10,2,2,def.hair);}
+ else{px(3,0,10,3,def.hair);px(2,1,2,3,def.hair);px(12,1,2,3,def.hair);}
+ if(def.hat){px(2,-1,12,2,def.hat);px(0,1,16,2,def.hat);px(0,1,16,1,'rgba(255,255,255,.3)');}
+ /* ใบหน้า */
+ px(5,4,2,2,'#241a10');px(9,4,2,2,'#241a10');
+ px(5,4,1,1,'#ffffff');px(9,4,1,1,'#ffffff');
+ px(4,6,1,1,'rgba(230,110,130,.55)');px(11,6,1,1,'rgba(230,110,130,.55)');
+ px(7,6,2,1,'#c25a6a');
+}
+/* ผู้เล่น */
+function player(g,t){
+ const set=SPR[P.dir],f=P.moving?[0,1,2,3][Math.floor(P.anim*7.5)%4]:0;
+ const img=set[f],bob=P.moving?Math.round(Math.sin(P.anim*15)*0.5):0;
+ g.fillStyle='rgba(0,0,0,.28)';g.beginPath();g.ellipse(P.x,P.y+1,8,3,0,0,7);g.fill();
+ g.drawImage(img,Math.round(P.x-PW/2),Math.round(P.y-img.height+bob));}
 
 /*========================= STATE =========================*/
-/* แปลงกล้วย : แปลง A (บน) y=116  |  แปลง B (ล่าง) y=240   — ทั้งคู่อยู่นอกถนน */
 const PLOTS=[[248,116],[306,116],[364,116],[422,116],[248,240],[306,240],[364,240],[422,240]];
 const RACKS=[[170,152],[240,152],[310,152],[170,206],[240,206],[310,206]];
-const ST=[0,7,9,11,13,16];      /* เวลาแต่ละระยะการโต */
-const TH=[0,12,22,36,50,62,62]; /* ความสูงต้น (px) */
-const RIPEN=16;                 /* วินาทีที่ต้องรอให้กล้วยดิบสุก */
+const ST=[0,7,9,11,13,16],TH=[0,12,22,36,50,62,62],RIPEN=16;
 const PRICE={ripe:12,green:5,dried:9,roll:60};
 const SCNAME={farm:'สวนกล้วย & บ้าน',backyard:'หลังบ้าน (ลานตาก)',kitchen:'ครัวแปรรูป',market:'ตลาดสด',coop:'ร้านค้าสหกรณ์'};
 function fresh(){return{money:60,inv:{green:0,ripe:0,slice:0,dried:0,flour:0,roll:0},
@@ -162,78 +313,65 @@ function fresh(){return{money:60,inv:{green:0,ripe:0,slice:0,dried:0,flour:0,rol
  plots:PLOTS.map(()=>({stage:0,prog:0,water:0,rp:0})),racks:RACKS.map(()=>({item:0,prog:0})),
  stats:{plant:0,hg:0,hr:0,earn:0,roll:0,trips:0},q:0,scene:'farm',px:150,py:154,clock:.3};}
 let S=fresh();
-try{const v=localStorage.getItem('bnf16v4');if(v){const o=JSON.parse(v);if(o&&o.inv)S=Object.assign(fresh(),o);}}catch(e){}
-function save(){try{S.px=P.x;S.py=P.y;S.scene=scene;localStorage.setItem('bnf16v4',JSON.stringify(S));}catch(e){}}
+try{const v=localStorage.getItem('bnf16v5');if(v){const o=JSON.parse(v);if(o&&o.inv)S=Object.assign(fresh(),o);}}catch(e){}
+function save(){try{S.px=P.x;S.py=P.y;S.scene=scene;localStorage.setItem('bnf16v5',JSON.stringify(S));}catch(e){}}
 setInterval(save,5000);addEventListener('visibilitychange',save);
 const P={x:S.px,y:S.py,dir:'down',anim:0,moving:false};
-let scene=S.scene,busy=null,trans=null,mg=null,pk=null,dust=[],drops=[],cool=.6;
+let scene=S.scene,busy=null,trans=null,mg=null,pk=null,dust=[],drops=[],cool=.8;
 
-/*========================= SCENE DATA =========================
-  ⚠️ ผังพิกัด (ตรวจแล้วว่าถนน/แปลง/อาคาร ไม่ทับกัน)
-  FARM : ถนนแนวนอน y140-166 | ถนนแนวตั้ง x188-214 (y0-140)
-         แปลง A ดิน y106-126  (ห่างถนน 14px) + รั้ว y130
-         แปลง B ดิน y230-250  (ห่างถนน 64px) + รั้ว y176
-         บ้าน x26-178 y18-114 | บ่อน้ำ x32-66 y186-208
-===============================================================*/
+/*========================= SCENES (แก้ตลาดแล้ว) =========================*/
 const SC={
  farm:{out:1,bounds:[12,26,468,252],
-  roads:[[0,140,480,26],[188,0,26,140]],
-  fences:[[222,130,84,5],[330,130,132,5],[222,174,84,5],[330,174,132,5]],
   solids:[[26,18,152,96],[32,186,34,22],[222,130,84,5],[330,130,132,5],[222,174,84,5],[330,174,132,5]],
-  exits:[{r:[88,114,28,14],d:'up',to:'kitchen',sx:240,sy:206,n:'ครัว'},
-         {r:[0,140,16,26],d:'left',to:'backyard',sx:448,sy:111,n:'หลังบ้าน'},
-         {r:[464,140,16,26],d:'right',to:'market',sx:44,sy:190,n:'ตลาด'},
-         {r:[188,26,26,14],d:'up',to:'coop',sx:240,sy:212,n:'สหกรณ์'}],
-  labels:[{x:102,y:104,t:'🚪 ประตูบ้าน → ครัว',c:'door'},{x:48,y:130,t:'← หลังบ้าน'},
-   {x:432,y:130,t:'ตลาด →'},{x:201,y:50,t:'↑ สหกรณ์'},
-   {x:318,y:122,t:'🚧 ประตูรั้วแปลง A',c:'field'},{x:318,y:186,t:'🚧 ประตูรั้วแปลง B',c:'field'}]},
+  exits:[{r:[88,110,28,12],d:'up',to:'kitchen',sx:240,sy:200,n:'ครัว'},
+         {r:[0,142,14,22],d:'left',to:'backyard',sx:440,sy:112,n:'หลังบ้าน'},
+         {r:[466,142,14,22],d:'right',to:'market',sx:60,sy:192,n:'ตลาด'},
+         {r:[190,26,22,10],d:'up',to:'coop',sx:240,sy:206,n:'สหกรณ์'}],
+  labels:[{x:102,y:102,t:'🚪 ประตูบ้าน → ครัว',c:'door'},{x:46,y:130,t:'← หลังบ้าน'},
+   {x:434,y:130,t:'ตลาด →'},{x:201,y:50,t:'↑ สหกรณ์'},
+   {x:318,y:122,t:'🚧 ประตูรั้ว A',c:'field'},{x:318,y:186,t:'🚧 ประตูรั้ว B',c:'field'}]},
 
- backyard:{out:1,bounds:[14,100,466,250],
-  roads:[[0,98,480,26]],fences:[],
+ backyard:{out:1,bounds:[14,100,466,248],
   solids:[[46,150,64,30],[386,146,66,52]],
-  exits:[{r:[226,96,28,10],d:'up',to:'kitchen',sx:318,sy:120,n:'ครัว (ประตูหลัง)'},
-         {r:[464,98,16,26],d:'right',to:'farm',sx:30,sy:153,n:'สวนกล้วย'}],
+  exits:[{r:[226,96,28,10],d:'up',to:'kitchen',sx:316,sy:118,n:'ครัว (ประตูหลัง)'},
+         {r:[466,100,14,22],d:'right',to:'farm',sx:30,sy:152,n:'สวนกล้วย'}],
   labels:[{x:240,y:88,t:'🚪 ประตูหลัง → ครัว',c:'door'},{x:78,y:142,t:'🔪 ปอก/หั่นกล้วยดิบ'},
-   {x:240,y:134,t:'☀️ ลานตากกล้วย'},{x:419,y:138,t:'⚙️ เครื่องบดแป้ง'},{x:432,y:88,t:'สวน →'}]},
+   {x:240,y:134,t:'☀️ ลานตากกล้วย'},{x:419,y:138,t:'⚙️ เครื่องบดแป้ง'},{x:436,y:92,t:'สวน →'}]},
 
- kitchen:{bounds:[150,100,330,226],
-  roads:[],fences:[],solids:[[158,98,48,26],[252,98,48,26]],
-  exits:[{r:[226,220,28,14],d:'down',to:'farm',sx:102,sy:136,n:'ออกหน้าบ้าน'},
-         {r:[304,100,28,12],d:'up',to:'backyard',sx:240,sy:116,n:'หลังบ้าน'}],
+ kitchen:{bounds:[152,102,328,222],
+  solids:[[158,98,48,26],[252,98,48,26]],
+  exits:[{r:[228,218,24,10],d:'down',to:'farm',sx:102,sy:132,n:'ออกหน้าบ้าน'},
+         {r:[306,102,24,10],d:'up',to:'backyard',sx:240,sy:114,n:'หลังบ้าน'}],
   labels:[{x:182,y:92,t:'🥠 เตาทองม้วน'},{x:276,y:92,t:'📦 โต๊ะบรรจุ'},
-   {x:318,y:78,t:'🚪 หลังบ้าน',c:'door'},{x:240,y:246,t:'🚪 ออกหน้าบ้าน',c:'door'}],dim:1},
+   {x:318,y:80,t:'🚪 หลังบ้าน',c:'door'},{x:240,y:242,t:'🚪 ออกหน้าบ้าน',c:'door'}],dim:1},
 
- market:{bounds:[22,152,458,248],
-  roads:[[0,176,480,32]],fences:[],solids:[],
-  exits:[{r:[0,176,16,32],d:'left',to:'farm',sx:450,sy:153,n:'สวนกล้วย'},
-         {r:[464,176,16,32],d:'right',to:'coop',sx:118,sy:170,n:'สหกรณ์'}],
-  labels:[{x:244,y:96,t:'🍌 แผงรับซื้อกล้วย'},{x:52,y:166,t:'← สวน'},{x:428,y:166,t:'สหกรณ์ →'}]},
+ /* ★★★ แก้บั๊ก: bounds กว้างขึ้น / exit ชิดขอบ / spawn อยู่กลางถนน ★★★ */
+ market:{bounds:[24,150,456,250],
+  solids:[[172,104,144,44]],
+  exits:[{r:[0,180,14,26],d:'left',to:'farm',sx:452,sy:152,n:'สวนกล้วย'},
+         {r:[466,180,14,26],d:'right',to:'coop',sx:120,sy:172,n:'สหกรณ์'}],
+  labels:[{x:244,y:96,t:'🍌 แผงรับซื้อกล้วย'},{x:44,y:170,t:'← สวน'},{x:436,y:170,t:'สหกรณ์ →'}]},
 
- coop:{bounds:[96,136,388,230],
-  roads:[],fences:[],solids:[],
-  exits:[{r:[226,224,28,14],d:'down',to:'farm',sx:201,sy:50,n:'ถนนกลับสวน'},
-         {r:[92,150,14,40],d:'left',to:'market',sx:444,sy:190,n:'ตลาด'}],
+ coop:{bounds:[98,138,384,228],
+  solids:[[278,90,108,42],[112,94,108,34]],
+  exits:[{r:[228,222,24,10],d:'down',to:'farm',sx:201,sy:52,n:'ถนนกลับสวน'},
+         {r:[96,158,12,32],d:'left',to:'market',sx:440,sy:192,n:'ตลาด'}],
   labels:[{x:166,y:86,t:'💰 ขายทองม้วน'},{x:332,y:82,t:'🛒 ซื้อของ / อัปเกรด'},
-   {x:112,y:140,t:'🚪 ตลาด',c:'door'},{x:240,y:246,t:'🚪 กลับสวน',c:'door'}],dim:1}};
+   {x:116,y:148,t:'🚪 ตลาด',c:'door'},{x:240,y:244,t:'🚪 กลับสวน',c:'door'}],dim:1}};
 
-/*========================= TEXTURE HELPERS =========================*/
+/*========================= TEXTURES =========================*/
 function grass(g,x,y,w,h){g.fillStyle='#58a340';g.fillRect(x,y,w,h);
  for(let j=y;j<y+h;j+=4)for(let i=x;i<x+w;i+=4){const r=hash(i,j);
   if(r<.26){g.fillStyle='#4c9238';g.fillRect(i,j,4,4);}else if(r<.37){g.fillStyle='#66b14b';g.fillRect(i,j,4,4);}
   if(r>.945){g.fillStyle='#3d7a2d';g.fillRect(i+1,j+1,2,1);g.fillRect(i+2,j+2,1,1);}}}
-/* ถนนดิน — มีขอบหิน ร่องล้อ และเศษกรวด */
-function road(g,x,y,w,h,vert){
- g.fillStyle='#c4a377';g.fillRect(x,y,w,h);
+function road(g,x,y,w,h,vert){g.fillStyle='#c4a377';g.fillRect(x,y,w,h);
  for(let j=y;j<y+h;j+=3)for(let i=x;i<x+w;i+=3){const r=hash(i*5,j*3);
   if(r<.22){g.fillStyle='rgba(120,92,60,.30)';g.fillRect(i,j,3,3);}
   else if(r>.86){g.fillStyle='rgba(255,244,220,.22)';g.fillRect(i,j,2,2);}}
  g.fillStyle='#a9885c';
  if(vert){g.fillRect(x,y,3,h);g.fillRect(x+w-3,y,3,h);}else{g.fillRect(x,y,w,3);g.fillRect(x,y+h-3,w,3);}
  g.fillStyle='rgba(150,118,78,.45)';
- if(vert){g.fillRect(x+7,y,3,h);g.fillRect(x+w-10,y,3,h);}else{g.fillRect(x,y+7,w,3);g.fillRect(x,y+h-10,w,3);}
- g.fillStyle='#8f7149';
- if(vert){for(let j=y;j<y+h;j+=9)if(hash(j,x)>.55)g.fillRect(x+1,j,2,4);}
- else{for(let i=x;i<x+w;i+=9)if(hash(i,y)>.55)g.fillRect(i,y+1,4,2);}}
+ if(vert){g.fillRect(x+7,y,3,h);g.fillRect(x+w-10,y,3,h);}else{g.fillRect(x,y+7,w,3);g.fillRect(x,y+h-10,w,3);}}
 function dirt(g,x,y,w,h,c){g.fillStyle=c||'#b78a5c';g.fillRect(x,y,w,h);
  for(let j=y;j<y+h;j+=3)for(let i=x;i<x+w;i+=3){const r=hash(i*3,j*7);
   if(r<.24){g.fillStyle='rgba(0,0,0,.09)';g.fillRect(i,j,3,3);}else if(r>.9){g.fillStyle='rgba(255,255,255,.12)';g.fillRect(i,j,2,2);}}}
@@ -242,18 +380,15 @@ function planks(g,x,y,w,h,a,b,v){g.fillStyle=a;g.fillRect(x,y,w,h);g.fillStyle=b
 function tiles(g,x,y,w,h,a,b){for(let j=y;j<y+h;j+=12)for(let i=x;i<x+w;i+=12){
  g.fillStyle=(((i/12|0)+(j/12|0))%2)?a:b;g.fillRect(i,j,12,12);
  g.fillStyle='rgba(0,0,0,.08)';g.fillRect(i,j+11,12,1);g.fillRect(i+11,j,1,12);}}
-/* รั้วไม้กั้นแปลงกับถนน */
 function fenceRun(g,x,y,w){g.fillStyle='#7d5a33';g.fillRect(x,y,w,4);g.fillStyle='#9c7442';g.fillRect(x,y,w,1);
  g.fillStyle='#6a4a29';g.fillRect(x,y+6,w,3);
  for(let i=x;i<x+w;i+=15){g.fillStyle='#5d4023';g.fillRect(i,y-7,4,17);g.fillStyle='#8a6335';g.fillRect(i,y-7,1,17);}}
 function gatePost(g,x,y){g.fillStyle='#5d4023';g.fillRect(x-3,y-11,5,21);g.fillStyle='#8a6335';g.fillRect(x-3,y-11,1,21);
  g.fillStyle='#ffd86b';g.fillRect(x-2,y-14,3,3);}
-/* ประตูมาตรฐาน 28x28 (2 เมตร) */
 function door(g,x,y,open){g.fillStyle='#4a2d15';g.fillRect(x-2,y-2,32,32);
  g.fillStyle=open?'#221709':'#7a4a24';g.fillRect(x,y,28,28);
  if(!open){g.fillStyle='#8f5a2c';g.fillRect(x+3,y+3,22,11);g.fillStyle='#6b3f1e';g.fillRect(x+3,y+17,22,8);
   g.fillStyle='#ffd86b';g.fillRect(x+22,y+15,3,3);}else{g.fillStyle='#120c07';g.fillRect(x+3,y+3,22,25);}}
-/* บ้าน 152x96 */
 function house(g,x,y){const w=152,rh=40;
  planks(g,x+5,y+rh,w-10,56,'#dcbb85','#b89060',true);
  g.fillStyle='#7c4f2a';g.fillRect(x+5,y+rh,w-10,3);
@@ -271,75 +406,56 @@ function well(g,x,y){g.fillStyle='#6c6f78';g.fillRect(x,y+8,34,16);g.fillStyle='
  g.fillStyle='#9c3a2a';g.beginPath();g.moveTo(x-3,y-6);g.lineTo(x+17,y-17);g.lineTo(x+37,y-6);g.closePath();g.fill();}
 function soil(g,x,y){g.fillStyle='#4f351f';g.beginPath();g.ellipse(x,y,24,10,0,0,7);g.fill();
  g.fillStyle='#6f4c2b';g.beginPath();g.ellipse(x,y-1,22,8,0,0,7);g.fill();
- for(let i=-18;i<18;i+=5){g.fillStyle='rgba(0,0,0,.14)';g.fillRect(x+i,y-4,1,7);}
- g.fillStyle='rgba(255,255,255,.07)';g.beginPath();g.ellipse(x-6,y-3,9,3,0,0,7);g.fill();}
+ for(let i=-18;i<18;i+=5){g.fillStyle='rgba(0,0,0,.14)';g.fillRect(x+i,y-4,1,7);}}
 function signpost(g,x,y){g.fillStyle='#6f4f2a';g.fillRect(x-2,y,5,20);
  g.fillStyle='#a5773f';g.fillRect(x-18,y-16,38,16);g.fillStyle='#c49356';g.fillRect(x-17,y-15,36,6);
  g.fillStyle='#4a3018';for(let i=0;i<4;i++)g.fillRect(x-14+i*8,y-6,6,2);}
 
-/*========================= BACKGROUND PAINTERS =========================*/
+/*========================= BACKGROUNDS =========================*/
 const bgc={};
 function BG(n){if(bgc[n])return bgc[n];const c=document.createElement('canvas');c.width=VW;c.height=VH;
  const g=c.getContext('2d');g.imageSmoothingEnabled=false;DBG[n](g);bgc[n]=c;return c;}
 const DBG={
  farm(g){grass(g,0,0,VW,VH);
-  /* แปลงเพาะปลูก (พื้นดินร่วน) — อยู่คนละโซนกับถนน */
   dirt(g,224,92,238,38,'#9d7a4e');dirt(g,224,216,238,38,'#9d7a4e');
-  /* ถนน */
   road(g,0,140,480,26,false);road(g,188,0,26,140,true);
-  /* รั้วกั้นแปลงกับถนน + ประตูรั้ว */
   fenceRun(g,222,130,84);fenceRun(g,330,130,132);gatePost(g,308,132);gatePost(g,332,132);
   fenceRun(g,222,174,84);fenceRun(g,330,174,132);gatePost(g,308,176);gatePost(g,332,176);
-  /* อาคาร */
-  house(g,26,18);well(g,32,186);
-  /* รั้วรอบแปลงเกษตรด้านบน-ล่าง */
-  fenceRun(g,10,256,462);
-  /* ไม้ประดับ (หลบถนน/แปลง) */
+  house(g,26,18);well(g,32,186);fenceRun(g,10,256,462);
   for(let i=0;i<26;i++){const x=14+hash(i,3)*450,y=32+hash(i,9)*214;
    if(x>20&&x<192&&y<126)continue;if(x>182&&x<220)continue;if(y>132&&y<176)continue;if(x>218&&y>86&&y<256)continue;
    g.fillStyle='#3f7d2e';g.beginPath();g.ellipse(x,y,4,3,0,0,7);g.fill();
    g.fillStyle=['#ffd86b','#ff8fb1','#ffffff'][i%3];g.fillRect(x-1,y-3,2,2);}
   signpost(g,160,176);
-  /* หญ้าริมถนน */
   for(let i=0;i<480;i+=11){g.fillStyle='#41852f';g.fillRect(i+hash(i,1)*5,136,2,4);g.fillRect(i+hash(i,2)*5,166,2,4);}},
-
  backyard(g){grass(g,0,0,VW,VH);dirt(g,0,124,VW,VH-124,'#a8814f');
   planks(g,164,0,152,92,'#dcbb85','#ab8452',true);
   g.fillStyle='#7c4f2a';g.fillRect(164,86,152,6);g.fillStyle='#6d2418';g.fillRect(156,0,168,12);
   [[178,26],[276,26]].forEach(p=>{g.fillStyle='#5b3b1f';g.fillRect(p[0]-2,p[1]-2,26,24);
-   g.fillStyle='#8fd3f0';g.fillRect(p[0],p[1],22,20);g.fillStyle='#c3ecff';g.fillRect(p[0],p[1],22,7);
-   g.fillStyle='#5b3b1f';g.fillRect(p[0]+10,p[1],2,20);});
-  door(g,226,58);
-  grass(g,0,0,164,92);grass(g,316,0,164,92);
+   g.fillStyle='#8fd3f0';g.fillRect(p[0],p[1],22,20);g.fillStyle='#c3ecff';g.fillRect(p[0],p[1],22,7);});
+  door(g,226,58);grass(g,0,0,164,92);grass(g,316,0,164,92);
   for(let i=0;i<6;i++){g.fillStyle='#2f6d28';g.beginPath();g.ellipse(22+i*26,62,13,15,0,0,7);g.fill();}
   for(let i=0;i<6;i++){g.fillStyle='#2f6d28';g.beginPath();g.ellipse(340+i*26,62,13,15,0,0,7);g.fill();}
   road(g,0,98,480,26,false);
-  /* โต๊ะปอก 64x30 */
   g.fillStyle='#5b3b1f';g.fillRect(46,150,64,30);planks(g,48,152,60,22,'#c79a5c','#a67c47',false);
   g.fillStyle='#3a2a18';g.fillRect(50,174,6,14);g.fillRect(100,174,6,14);
   g.fillStyle='#c8dae6';g.fillRect(82,158,24,4);g.fillStyle='#6d7a84';g.fillRect(66,160,18,3);
-  g.fillStyle='#9fd14f';g.beginPath();g.ellipse(64,167,8,5,0,0,7);g.fill();
-  /* เครื่องบด 66x52 */
   g.fillStyle='#49545f';g.fillRect(386,146,66,52);g.fillStyle='#69757f';g.fillRect(388,148,62,14);
   g.fillStyle='#2f3740';g.fillRect(394,166,50,26);g.fillStyle='#8a99a6';g.fillRect(400,170,38,6);
-  g.fillStyle='#ffd86b';g.fillRect(438,152,6,6);
-  fenceRun(g,0,252,480);},
-
+  g.fillStyle='#ffd86b';g.fillRect(438,152,6,6);fenceRun(g,0,252,480);},
  kitchen(g){g.fillStyle='#070b10';g.fillRect(0,0,VW,VH);
   g.fillStyle='#6b4a2a';g.fillRect(136,64,208,178);
   planks(g,138,66,204,30,'#cbd9e3','#adbcc7',true);
   tiles(g,146,96,188,142,'#c8a06a','#b18a57');
   g.fillStyle='#8a6238';g.fillRect(146,94,188,4);
   g.fillStyle='#7b4f2c';g.fillRect(150,68,84,24);g.fillStyle='#9a6a3d';g.fillRect(152,70,80,20);
-  g.fillStyle='#5e3a1f';g.fillRect(190,70,2,20);g.fillStyle='#ffd86b';g.fillRect(184,77,4,4);g.fillRect(194,77,4,4);
+  g.fillStyle='#ffd86b';g.fillRect(184,77,4,4);g.fillRect(194,77,4,4);
   door(g,304,66,1);
   g.fillStyle='#3a4149';g.fillRect(158,98,48,26);g.fillStyle='#57616b';g.fillRect(160,100,44,7);
   g.fillStyle='#1f242a';g.beginPath();g.ellipse(182,116,17,8,0,0,7);g.fill();
   g.fillStyle='#5b3b1f';g.fillRect(252,98,48,26);planks(g,254,100,44,18,'#c79a5c','#a67c47',false);
-  g.fillStyle='#e0c89a';g.fillRect(258,102,16,11);g.fillStyle='#c9ab77';g.fillRect(258,102,16,3);
-  g.fillStyle='#e0c89a';g.fillRect(278,102,16,11);g.fillStyle='#c9ab77';g.fillRect(278,102,16,3);
+  g.fillStyle='#e0c89a';g.fillRect(258,102,16,11);g.fillRect(278,102,16,11);
   door(g,226,216,1);g.fillStyle='#3a2a1a';g.fillRect(146,234,188,4);},
-
  market(g){tiles(g,0,0,VW,VH,'#c8b69c','#b9a68c');
   for(let i=0;i<3;i++){const x=18+i*158;
    g.fillStyle='#5b3b1f';g.fillRect(x,42,140,58);planks(g,x+2,44,136,54,'#c79a5c','#a67c47',false);
@@ -351,12 +467,10 @@ const DBG={
   for(let i=0;i<9;i++){const x=182+i*16;g.strokeStyle=i%3?'#f5c518':'#9fd14f';g.lineWidth=3;g.lineCap='round';
    g.beginPath();g.arc(x,98,7,Math.PI*.15,Math.PI*.85);g.stroke();}
   road(g,0,176,480,32,false);
-  g.fillStyle='#a89madeup';
-  g.fillStyle='#a8957b';g.fillRect(0,148,480,4);g.fillRect(0,208,480,4);
-  [[36,228],[420,228]].forEach(p=>{g.fillStyle='#7a4a24';g.fillRect(p[0],p[1],20,20);
+  g.fillStyle='#a8957b';g.fillRect(0,150,480,3);g.fillRect(0,212,480,3);
+  [[36,232],[420,232]].forEach(p=>{g.fillStyle='#7a4a24';g.fillRect(p[0],p[1],20,18);
    g.fillStyle='#3f9e3a';g.beginPath();g.ellipse(p[0]+10,p[1]-5,15,12,0,0,7);g.fill();});
-  signpost(g,452,222);},
-
+  signpost(g,452,226);},
  coop(g){g.fillStyle='#070b10';g.fillRect(0,0,VW,VH);
   g.fillStyle='#6a5c46';g.fillRect(78,48,326,200);
   planks(g,80,50,322,28,'#e8e2d2','#cfc7b2',true);
@@ -374,20 +488,18 @@ const DBG={
   g.fillStyle='#3a4149';g.fillRect(156,82,32,16);g.fillStyle='#7fd0ff';g.fillRect(159,85,26,9);
   door(g,226,220,1);g.fillStyle='#3a2a1a';g.fillRect(88,234,306,4);}};
 
-/*========================= OBJECT DRAW =========================*/
+/*========================= OBJECTS =========================*/
 function leaf(g,x,y,len,wid,ang,c1,c2){g.save();g.translate(x,y);g.rotate(ang);
  g.fillStyle=c1;g.beginPath();g.moveTo(0,0);g.quadraticCurveTo(len*.5,-wid,len,wid*.25);
  g.quadraticCurveTo(len*.5,wid,0,0);g.fill();
  g.strokeStyle=c2;g.lineWidth=1;g.beginPath();g.moveTo(0,0);g.lineTo(len,wid*.2);g.stroke();g.restore();}
-/* rp = 0 (ดิบ) → 1 (สุกเต็มที่) */
-function bunch(g,x,y,rp){
- const c=mixc([124,198,62],[247,203,34],rp),cs=mixc([88,154,43],[201,151,15],rp);
+function bunch(g,x,y,rp){const c=mixc([124,198,62],[247,203,34],rp),cs=mixc([88,154,43],[201,151,15],rp);
  g.fillStyle='#5b3b1f';g.fillRect(x-1,y-9,3,11);
  for(let r=0;r<3;r++){const yy=y+r*6;
   for(let i=-1;i<=1;i++){const xx=x+i*7;
    g.strokeStyle=cs;g.lineWidth=4;g.lineCap='round';g.beginPath();g.arc(xx,yy,6,Math.PI*.12,Math.PI*.9);g.stroke();
    g.strokeStyle=c;g.lineWidth=2.4;g.beginPath();g.arc(xx,yy,6,Math.PI*.15,Math.PI*.87);g.stroke();}}
- if(rp>=1){g.fillStyle='rgba(255,255,190,.6)';g.fillRect(x-9,y-2,3,2);g.fillRect(x+5,y+9,2,2);}}
+ if(rp>=1){g.fillStyle='rgba(255,255,190,.6)';g.fillRect(x-9,y-2,3,2);}}
 function tree(g,cx,by,pl,t){if(pl.stage===0)return;
  const h=TH[pl.stage]+(pl.stage<5?(TH[pl.stage+1]-TH[pl.stage])*pl.prog:0);
  const sw=Math.sin(t*1.35+cx*.11)*(h*.035),tw=Math.max(3,h*.12);
@@ -396,22 +508,18 @@ function tree(g,cx,by,pl,t){if(pl.stage===0)return;
  gd.addColorStop(0,'#6b8a3d');gd.addColorStop(.42,'#96b157');gd.addColorStop(1,'#5a7532');
  g.fillStyle=gd;g.beginPath();g.moveTo(cx-tw,by);g.quadraticCurveTo(cx-tw*.6+sw,by-h*.6,cx-tw*.45+sw,by-h);
  g.lineTo(cx+tw*.45+sw,by-h);g.quadraticCurveTo(cx+tw*.6+sw,by-h*.6,cx+tw,by);g.closePath();g.fill();
- for(let i=1;i<4;i++){g.fillStyle='rgba(0,0,0,.1)';g.fillRect(cx-tw*.5,by-h*(i/4),tw,1);}
  const tx=cx+sw,ty=by-h,n=Math.min(7,2+(pl.stage*1.3|0)),L=h*.82+8;
  for(let i=0;i<n;i++){const sd=i%2?1:-1,k=i/n;
   const a=sd*(.34+k*.76)+Math.sin(t*1.1+i)*.045;
   leaf(g,tx,ty+2+i*1.2,L*(.7+.3*(1-k))*sd,h*.15+4,sd>0?a:Math.PI-a,i%2?'#3f9e3a':'#4cb244','#2c7a29');}
  if(pl.stage>=5)bunch(g,tx+6,ty+10,pl.stage===6?1:cl(pl.rp/RIPEN,0,.85));
- /* แถบสถานะ */
  if(pl.stage>=1&&pl.stage<=4){g.fillStyle='rgba(0,0,0,.45)';g.fillRect(cx-12,by+3,24,5);
   g.fillStyle=pl.water>.15?'#6ee27a':'#ffd86b';g.fillRect(cx-11,by+4,22*pl.prog,3);
   if(pl.water<=.15){g.fillStyle='#7fd0ff';g.fillRect(cx-16,by+2,3,6);g.fillRect(cx-17,by+4,5,2);}}
  else if(pl.stage===5){g.fillStyle='rgba(0,0,0,.5)';g.fillRect(cx-14,by+3,28,5);
-  g.fillStyle='#ffb03a';g.fillRect(cx-13,by+4,26*cl(pl.rp/RIPEN,0,1),3);
-  g.fillStyle='#d7ff9a';g.fillRect(cx-17,by+3,3,5);}
+  g.fillStyle='#ffb03a';g.fillRect(cx-13,by+4,26*cl(pl.rp/RIPEN,0,1),3);}
  else if(pl.stage===6){const b=.6+Math.sin(t*4)*.4;
-  g.fillStyle='rgba(255,216,107,'+b+')';g.fillRect(cx-4,by+3,8,5);
-  g.fillStyle='#fff3c4';g.fillRect(cx-2,by+4,4,3);}}
+  g.fillStyle='rgba(255,216,107,'+b+')';g.fillRect(cx-4,by+3,8,5);}}
 function rack(g,x,y,r,t){g.fillStyle='rgba(0,0,0,.2)';g.beginPath();g.ellipse(x,y+20,24,5,0,0,7);g.fill();
  g.fillStyle='#5b3b1f';g.fillRect(x-22,y,44,3);g.fillRect(x-20,y+3,4,17);g.fillRect(x+16,y+3,4,17);
  g.fillStyle='#7a5330';for(let i=-20;i<22;i+=6)g.fillRect(x+i,y-5,3,5);
@@ -419,23 +527,14 @@ function rack(g,x,y,r,t){g.fillStyle='rgba(0,0,0,.2)';g.beginPath();g.ellipse(x,
   g.fillStyle=d>=1?'#c9922f':'rgb('+Math.round(228-62*d)+','+Math.round(214-72*d)+','+Math.round(122-42*d)+')';
   g.beginPath();g.ellipse(px,y-7,3,2.2,0,0,7);g.fill();}
   g.fillStyle='rgba(0,0,0,.5)';g.fillRect(x-13,y+22,26,4);
-  g.fillStyle=r.prog>=1?'#6ee27a':'#ffd86b';g.fillRect(x-12,y+23,24*Math.min(1,r.prog),2);
-  if(r.prog>=1){g.fillStyle='#6ee27a';g.beginPath();g.arc(x+21,y-10+Math.sin(t*3)*1.6,3,0,7);g.fill();}}}
-function npc(g,x,y,shirt,t){const b=Math.sin(t*2+x)*.8;
- g.fillStyle='rgba(0,0,0,.25)';g.beginPath();g.ellipse(x,y+1,6,2.5,0,0,7);g.fill();
- g.fillStyle='#22180f';g.fillRect(x-6,y-19+b,12,19);g.fillStyle='#f4c99c';g.fillRect(x-5,y-18+b,10,8);
- g.fillStyle='#3a2416';g.fillRect(x-5,y-19+b,10,3);g.fillStyle='#22180f';g.fillRect(x-3,y-14+b,1,1);g.fillRect(x+2,y-14+b,1,1);
- g.fillStyle=shirt;g.fillRect(x-5,y-10+b,10,7);g.fillStyle='#452f1c';g.fillRect(x-5,y-3+b,10,3);}
+  g.fillStyle=r.prog>=1?'#6ee27a':'#ffd86b';g.fillRect(x-12,y+23,24*Math.min(1,r.prog),2);}}
 function bike(g,x,y){g.fillStyle='rgba(0,0,0,.2)';g.beginPath();g.ellipse(x,y+1,21,5,0,0,7);g.fill();
  g.fillStyle='#2b3038';g.beginPath();g.arc(x-10,y-5,6,0,7);g.fill();g.beginPath();g.arc(x+10,y-5,6,0,7);g.fill();
  g.fillStyle='#8e9aa6';g.beginPath();g.arc(x-10,y-5,2,0,7);g.fill();g.beginPath();g.arc(x+10,y-5,2,0,7);g.fill();
  g.fillStyle='#d94f3d';g.fillRect(x-13,y-15,26,8);g.fillStyle='#f07a63';g.fillRect(x-13,y-15,26,2);
  g.fillStyle='#3a4149';g.fillRect(x+6,y-22,3,8);g.fillRect(x+2,y-23,12,2);}
-function player(g){const set=SPR[P.dir],f=P.moving?[0,1,0,2][Math.floor(P.anim*8)%4]:0;
- g.fillStyle='rgba(0,0,0,.25)';g.beginPath();g.ellipse(P.x,P.y+1,6,2.5,0,0,7);g.fill();
- g.drawImage(set[f],Math.round(P.x-PW/2),Math.round(P.y-PH));}
-function exitArrow(g,e,t){const a=.35+Math.sin(t*3.2)*.28,r=e.r,cx=r[0]+r[2]/2,cy=r[1]+r[3]/2,s=6;
- g.save();g.globalAlpha=cl(a,0,1);g.fillStyle='#ffe9a8';g.beginPath();
+function exitArrow(g,e,t){const a=.38+Math.sin(t*3.2)*.3,r=e.r,cx=r[0]+r[2]/2,cy=r[1]+r[3]/2,s=7;
+ g.save();g.globalAlpha=cl(a,0,1);g.fillStyle='#fff3c4';g.beginPath();
  if(e.d==='left'){g.moveTo(cx-s,cy);g.lineTo(cx+s,cy-s);g.lineTo(cx+s,cy+s);}
  else if(e.d==='right'){g.moveTo(cx+s,cy);g.lineTo(cx-s,cy-s);g.lineTo(cx-s,cy+s);}
  else if(e.d==='up'){g.moveTo(cx,cy-s);g.lineTo(cx-s,cy+s);g.lineTo(cx+s,cy+s);}
@@ -476,22 +575,22 @@ if('ontouchstart'in window){document.getElementById('touch').classList.add('on')
  lay();addEventListener('resize',()=>setTimeout(lay,60));}
 document.getElementById('mMap').onclick=()=>openPanel('map');
 document.getElementById('mHelp').onclick=()=>openPanel('help');
-document.getElementById('mNew').onclick=()=>{if(confirm('เริ่มเกมใหม่ทั้งหมด?')){localStorage.removeItem('bnf16v4');location.reload();}};
+document.getElementById('mNew').onclick=()=>{if(confirm('เริ่มเกมใหม่ทั้งหมด?')){localStorage.removeItem('bnf16v5');location.reload();}};
 document.getElementById('px').onclick=closePanel;
 function toast(t,bad){const d=document.createElement('div');d.className='toast'+(bad?' bad':'');d.textContent=t;
  toastBox.appendChild(d);setTimeout(()=>{d.style.transition='opacity .3s';d.style.opacity=0;},1500);setTimeout(()=>d.remove(),1880);}
 
 /*========================= QUESTS =========================*/
 const QUEST=[
- {t:'🌱 เดินผ่านประตูรั้ว เข้าแปลง กด E ปลูกกล้วย',ok:()=>S.stats.plant>0},
+ {t:'🌱 เข้าประตูรั้ว เดินไปแปลง กด E ปลูกกล้วย',ok:()=>S.stats.plant>0},
  {t:'🌿 รดน้ำ รอโต แล้วเก็บ "กล้วยดิบ"',ok:()=>S.stats.hg>0},
- {t:'🍌 ปล่อยเครือไว้ให้สุก (แถบส้มเต็ม) แล้วเก็บ',ok:()=>S.stats.hr>0},
- {t:'🏪 ออกถนนทางขวา → ตลาด ขายกล้วยสุก',ok:()=>S.stats.earn>0},
- {t:'🔪 ถนนทางซ้าย → หลังบ้าน ปอกกล้วยดิบ',ok:()=>S.inv.slice>0||S.inv.dried>0||S.inv.flour>0},
+ {t:'🍌 ปล่อยให้สุก (แถบส้มเต็ม) แล้วเก็บ',ok:()=>S.stats.hr>0},
+ {t:'🏪 เดินถนนไปขวาสุด → ตลาด ขายกล้วยสุก',ok:()=>S.stats.earn>0},
+ {t:'🔪 ถนนซ้ายสุด → หลังบ้าน ปอกกล้วยดิบ',ok:()=>S.inv.slice>0||S.inv.dried>0||S.inv.flour>0},
  {t:'☀️ เอากล้วยหั่นขึ้นราวตากให้แห้ง',ok:()=>S.inv.dried>0||S.inv.flour>0},
  {t:'⚙️ บดกล้วยแห้ง 3 ชิ้น → แป้ง 1 ถุง',ok:()=>S.inv.flour>0},
  {t:'🥠 ประตูหลัง → ครัว ทำทองม้วน',ok:()=>S.stats.roll>0},
- {t:'🏬 ถนนแนวตั้งขึ้นเหนือ → สหกรณ์ ขาย & อัปเกรด',ok:()=>S.up.fert+S.up.sprink+S.up.boots+S.up.vehicle>0},
+ {t:'🏬 ถนนขึ้นเหนือ → สหกรณ์ ขาย & อัปเกรด',ok:()=>S.up.fert+S.up.sprink+S.up.boots+S.up.vehicle>0},
  {t:'🎯 อิสระ! ขยายโรงงานทองม้วนให้ใหญ่ที่สุด',ok:()=>false}];
 function qTick(){while(S.q<QUEST.length-1&&QUEST[S.q].ok())S.q++;questEl.textContent='ภารกิจ: '+QUEST[S.q].t;}
 
@@ -499,7 +598,7 @@ function qTick(){while(S.q<QUEST.length-1&&QUEST[S.q].ok())S.q++;questEl.textCon
 function acts(){const L=[];
  if(scene==='farm'){S.plots.forEach((pl,i)=>{const p=PLOTS[i];let txt;
   if(pl.stage===0)txt='ปลูกหน่อกล้วย';
-  else if(pl.stage===5)txt='เก็บกล้วยดิบ (+8)  |  สุกอีก '+Math.ceil(RIPEN-pl.rp)+' วิ';
+  else if(pl.stage===5)txt='เก็บกล้วยดิบ (+8) | สุกอีก '+Math.ceil(RIPEN-pl.rp)+' วิ';
   else if(pl.stage===6)txt='🍌 เก็บกล้วยสุก (+8)';
   else txt=pl.water<=.15?'รดน้ำต้นกล้วย':'กำลังโต '+Math.round((pl.stage-1+pl.prog)/5*100)+'%';
   L.push({x:p[0],y:p[1],r:26,txt:txt,act:()=>plot(i)});});
@@ -511,45 +610,43 @@ function acts(){const L=[];
   L.push({x:419,y:206,r:30,txt:'บดเป็นแป้ง (แห้ง '+S.inv.dried+'/3)',act:grind});}
  else if(scene==='kitchen'){
   L.push({x:182,y:134,r:30,txt:'ทำทองม้วน (ใช้แป้ง 2 | มี '+S.inv.flour+')',act:mgStart});
-  L.push({x:276,y:134,r:28,txt:'ดูสต๊อกทองม้วน',act:()=>toast('📦 ทองม้วน '+S.inv.roll+' กล่อง — ไปขายที่สหกรณ์')});}
- else if(scene==='market')L.push({x:244,y:152,r:36,txt:'คุยกับแม่ค้ารับซื้อกล้วย',act:()=>openPanel('market')});
- else if(scene==='coop'){L.push({x:166,y:136,r:32,txt:'ขายทองม้วน',act:()=>openPanel('sell')});
-  L.push({x:332,y:138,r:36,txt:'ซื้อของ / อัปเกรด',act:()=>openPanel('shop')});}
+  L.push({x:276,y:134,r:28,txt:'ดูสต๊อกทองม้วน',act:()=>toast('📦 ทองม้วน '+S.inv.roll+' กล่อง')});}
+ else if(scene==='market')L.push({x:244,y:158,r:42,txt:'คุยกับแม่ค้ารับซื้อกล้วย',act:()=>openPanel('market')});
+ else if(scene==='coop'){L.push({x:166,y:136,r:34,txt:'ขายทองม้วน',act:()=>openPanel('sell')});
+  L.push({x:332,y:140,r:38,txt:'ซื้อของ / อัปเกรด',act:()=>openPanel('shop')});}
  return L;}
 function near(){let b=null,bd=1e9;for(const a of acts()){const d=Math.hypot(a.x-P.x,a.y-P.y);if(d<a.r&&d<bd){bd=d;b=a;}}return b;}
 function plot(i){const pl=S.plots[i];
  if(pl.stage===0){pl.stage=1;pl.prog=0;pl.water=1;pl.rp=0;S.stats.plant++;sfx.plant();toast('🌱 ปลูกหน่อกล้วยแล้ว');}
- else if(pl.stage===5){S.inv.green+=8;pl.stage=4;pl.prog=0;pl.rp=0;S.stats.hg+=8;sfx.pick();
-  toast('🌿 ได้กล้วยดิบ +8 (ถ้ารอจะได้กล้วยสุกราคาดีกว่า)');}
+ else if(pl.stage===5){S.inv.green+=8;pl.stage=4;pl.prog=0;pl.rp=0;S.stats.hg+=8;sfx.pick();toast('🌿 ได้กล้วยดิบ +8');}
  else if(pl.stage===6){S.inv.ripe+=8;pl.stage=4;pl.prog=0;pl.rp=0;S.stats.hr+=8;sfx.pick();toast('🍌 ได้กล้วยสุก +8');}
  else if(pl.water<=.15){pl.water=1;sfx.water();
   for(let k=0;k<8;k++)drops.push({x:PLOTS[i][0]+(Math.random()*30-15),y:PLOTS[i][1]-34,l:.5});toast('💧 รดน้ำแล้ว');}}
-function peel(){if(S.inv.green<1){toast('ไม่มีกล้วยดิบ ไปเก็บจากแปลงก่อน',1);sfx.bad();return;}
+function peel(){if(S.inv.green<1){toast('ไม่มีกล้วยดิบ',1);sfx.bad();return;}
  busy={t:0,d:1.2,l:'กำลังปอกและหั่น...',f:()=>{const n=Math.min(6,S.inv.green);S.inv.green-=n;S.inv.slice+=n;
   sfx.pick();toast('🔪 หั่นกล้วยได้ '+n+' ชิ้น');}};}
 function rackAct(){const n=3+(S.up.racks?3:0);let got=0;
  for(let i=0;i<n;i++){const r=S.racks[i];if(r.item===1&&r.prog>=1){r.item=0;r.prog=0;S.inv.dried++;got++;}}
  if(got){sfx.pick();toast('☀️ เก็บกล้วยตากแห้ง +'+got);return;}
  let put=0;for(let i=0;i<n;i++){const r=S.racks[i];if(r.item===0&&S.inv.slice>0){r.item=1;r.prog=0;S.inv.slice--;put++;}}
- if(put){sfx.ok();toast('🌤 นำกล้วยขึ้นตาก '+put+' ราว (≈18 วิ)');}
- else{toast('ไม่มีกล้วยหั่น หรือราวตากเต็ม',1);sfx.bad();}}
-function grind(){if(S.inv.dried<3){toast('ต้องใช้กล้วยตากแห้ง 3 ชิ้น = แป้ง 1 ถุง',1);sfx.bad();return;}
+ if(put){sfx.ok();toast('🌤 นำกล้วยขึ้นตาก '+put+' ราว');}else{toast('ไม่มีกล้วยหั่น หรือราวเต็ม',1);sfx.bad();}}
+function grind(){if(S.inv.dried<3){toast('ต้องใช้กล้วยแห้ง 3 ชิ้น',1);sfx.bad();return;}
  busy={t:0,d:S.up.grinder?.5:1.8,l:'กำลังบดเป็นผงแป้ง...',f:()=>{
   const n=S.up.grinder?Math.floor(S.inv.dried/3):1;S.inv.dried-=n*3;S.inv.flour+=n;
   sfx.pick();toast('⚙️ ได้แป้งกล้วย +'+n+' ถุง');}};}
 
 /*========================= SHOP / PANELS =========================*/
 const SHOP=[
- {id:'fert',n:'ปุ๋ยชีวภาพสูตรสวนกล้วย',max:3,c:[150,400,900],d:l=>'กล้วยโตเร็วขึ้นถาวร +'+(25*(l+1))+'% และสุกไวขึ้น'},
+ {id:'fert',n:'ปุ๋ยชีวภาพสูตรสวนกล้วย',max:3,c:[150,400,900],d:l=>'โตเร็วขึ้น +'+(25*(l+1))+'% และสุกไวขึ้น'},
  {id:'sprink',n:'สปริงเกลอร์รดน้ำ',max:2,c:[260,720],d:l=>l===0?'รดน้ำอัตโนมัติ แปลง A':'รดน้ำอัตโนมัติทุกแปลง'},
  {id:'boots',n:'รองเท้าบูทยาง',max:1,c:[180],d:()=>'เดินเร็วขึ้น 25%'},
- {id:'racks',n:'ราวตากเพิ่ม 3 ราว',max:1,c:[380],d:()=>'ตากกล้วยพร้อมกันได้ 6 ราว'},
- {id:'grinder',n:'เครื่องบดไฟฟ้า',max:1,c:[520],d:()=>'บดแป้งทีเดียวหมด + เร็วมาก'},
- {id:'pan',n:'เตาทองม้วนคู่',max:1,c:[840],d:()=>'ได้ทองม้วนต่อรอบ +50%'},
- {id:'vehicle',n:'รถซาเล้งพ่วงข้าง',max:1,c:[950],d:()=>'เดินเร็ว +35% และวาร์ปข้ามฉากจากแผนที่'}];
+ {id:'racks',n:'ราวตากเพิ่ม 3 ราว',max:1,c:[380],d:()=>'ตากพร้อมกันได้ 6 ราว'},
+ {id:'grinder',n:'เครื่องบดไฟฟ้า',max:1,c:[520],d:()=>'บดแป้งทีเดียวหมด'},
+ {id:'pan',n:'เตาทองม้วนคู่',max:1,c:[840],d:()=>'ทองม้วนต่อรอบ +50%'},
+ {id:'vehicle',n:'รถซาเล้งพ่วงข้าง',max:1,c:[950],d:()=>'เดินเร็ว +35% และวาร์ปข้ามฉาก'}];
 const ROUTES={farm:['kitchen','backyard','market','coop'],backyard:['farm','kitchen'],
  kitchen:['farm','backyard'],market:['farm','coop'],coop:['farm','market']};
-const SPAWN={farm:[150,154],backyard:[300,160],kitchen:[240,180],market:[240,225],coop:[240,200]};
+const SPAWN={farm:[150,154],backyard:[300,160],kitchen:[240,180],market:[240,192],coop:[240,200]};
 function openPanel(k){pk=k;panelEl.classList.add('on');rp();}
 function closePanel(){pk=null;panelEl.classList.remove('on');}
 function rp(){if(!pk)return;pbEl.innerHTML='';
@@ -560,48 +657,48 @@ function rp(){if(!pk)return;pbEl.innerHTML='';
    e.className='btn'+(b.dis?' dis':'')+(b.blue?' blue':'');e.textContent=b.t;if(!b.dis)e.onclick=b.f;r.appendChild(e);});
   pbEl.appendChild(r);};
  if(pk==='market'){ptEl.textContent='🍌 แผงรับซื้อกล้วย — '+S.money+'฿';
+  add('👩 ป้าสมศรี แม่ค้าผลไม้','"เอากล้วยมาเท่าไหร่ป้ารับหมดจ้ะ~"');
   const s=(k,l,p)=>add(l,'ราคา '+p+'฿/ลูก • มีอยู่ '+S.inv[k],[
    {t:'ขาย 1',dis:S.inv[k]<1,f:()=>sell(k,1,p)},{t:'ขายหมด',blue:1,dis:S.inv[k]<1,f:()=>sell(k,S.inv[k],p)}]);
-  s('ripe','🍌 กล้วยสุก',PRICE.ripe);s('green','🌿 กล้วยดิบ',PRICE.green);s('dried','☀️ กล้วยตากแห้ง',PRICE.dried);
-  add('💡 เคล็ดลับ','กล้วยสุกแพงกว่าดิบ 2.4 เท่า — แต่กล้วยดิบเอาไปทำทองม้วนได้กำไรสูงสุด');}
+  s('ripe','🍌 กล้วยสุก',PRICE.ripe);s('green','🌿 กล้วยดิบ',PRICE.green);s('dried','☀️ กล้วยตากแห้ง',PRICE.dried);}
  else if(pk==='sell'){ptEl.textContent='💰 รับซื้อสินค้าชุมชน — '+S.money+'฿';
+  add('👨 พี่วิทย์ พนักงานสหกรณ์','"ทองม้วนกล้วยขายดีมากครับ!"');
   add('🥠 ทองม้วนกล้วย (กล่อง)','ราคา '+PRICE.roll+'฿/กล่อง • มีอยู่ '+S.inv.roll,[
    {t:'ขาย 1',dis:S.inv.roll<1,f:()=>sell('roll',1,PRICE.roll)},
    {t:'ขายหมด',blue:1,dis:S.inv.roll<1,f:()=>sell('roll',S.inv.roll,PRICE.roll)}]);
-  add('📊 สถิติฟาร์ม','ปลูก '+S.stats.plant+' ต้น • ดิบ '+S.stats.hg+' • สุก '+S.stats.hr+
-   ' • ทองม้วน '+S.stats.roll+' กล่อง • เดินทาง '+S.stats.trips+' เที่ยว • รายได้ '+S.stats.earn+'฿');}
+  add('📊 สถิติฟาร์ม','ปลูก '+S.stats.plant+' • ดิบ '+S.stats.hg+' • สุก '+S.stats.hr+
+   ' • ทองม้วน '+S.stats.roll+' • เดินทาง '+S.stats.trips+' • รายได้ '+S.stats.earn+'฿');}
  else if(pk==='shop'){ptEl.textContent='🛒 ร้านค้าสหกรณ์ — '+S.money+'฿';
   SHOP.forEach(it=>{const lv=S.up[it.id];
    if(lv>=it.max){add(it.n+' ✅',it.d(lv-1),[{t:'สูงสุด',dis:1}]);return;}
    const c=it.c[lv];
    add(it.n+(it.max>1?' (Lv.'+lv+'→'+(lv+1)+')':''),it.d(lv),[{t:c+'฿',dis:S.money<c,f:()=>buy(it,c)}]);});}
  else if(pk==='map'){ptEl.textContent='🗺 แผนที่ — อยู่ที่ '+SCNAME[scene];
-  add('🧭 ทางออกจากจุดนี้',SC[scene].exits.map(e=>({left:'◀ ซ้าย',right:'▶ ขวา',up:'▲ บน',down:'▼ ล่าง'}[e.d])+' = '+e.n).join('  •  '));
+  add('🧭 ทางออกจากจุดนี้',SC[scene].exits.map(e=>({left:'◀ ซ้าย',right:'▶ ขวา',up:'▲ บน',down:'▼ ล่าง'}[e.d])+' = '+e.n).join(' • '));
   Object.keys(SCNAME).forEach(k=>{const here=k===scene,lk=ROUTES[scene].indexOf(k)>=0;
    add((here?'📍 ':'')+SCNAME[k],here?'คุณอยู่ที่นี่':(lk?'เดินถึงได้โดยตรง':'ต้องผ่านฉากอื่นก่อน'),
     [{t:S.up.vehicle?'🛺 วาร์ป':'🔒 ต้องมีซาเล้ง',blue:1,dis:here||!S.up.vehicle,
       f:()=>{closePanel();go(k,SPAWN[k][0],SPAWN[k][1]);}}]);});}
- else if(pk==='help'){ptEl.textContent='? วิธีเล่น / สเกล / ผังถนน';
+ else if(pk==='help'){ptEl.textContent='? วิธีเล่น';
+  add('👩‍🌾 ตัวละคร','"น้องกล้วย" ชาวสวนสาว — หมวกสานปีกกว้าง ผมถักเปีย ผ้ากันเปื้อน ถุงมือสวน');
   add('🎮 การควบคุม','WASD / ลูกศร = เดิน • E หรือ Space = โต้ตอบ • M = แผนที่ • H = หน้านี้');
-  add('🛣 ถนน vs สวน','ถนนดินเป็นเส้นตรงแยกจากแปลงกล้วยชัดเจน มีรั้วไม้กั้น — เดินผ่าน "ประตูรั้ว" เพื่อเข้าแปลง');
-  add('🚪 เดินไป–กลับ','ทุกฉากมีทางกลับ! สวน⇄ครัว⇄หลังบ้าน⇄สวน⇄ตลาด⇄สหกรณ์⇄สวน');
-  add('📏 มาตราส่วน','14 px = 1 ม. • คน 1.45 ม. • ประตู 2 ม. • บ้าน 10.9×6.9 ม. • ต้นกล้วย 4.4 ม.');
-  add('🌿 ดิบ vs 🍌 สุก','พอเครือออก = เก็บ "ดิบ" ได้ทันที • ปล่อยไว้ '+RIPEN+' วิ (แถบส้ม) จะกลายเป็น "สุก"');
-  add('🔄 สายการผลิต','ดิบ → ปอก/หั่น → ตาก 18 วิ → บด 3 ชิ้น = แป้ง 1 → แป้ง 2 = ทองม้วน 3–6 กล่อง');
-  add('💵 ราคา','กล้วยดิบ 5฿ • สุก 12฿ • แห้ง 9฿ • ทองม้วน 60฿/กล่อง');}}
+  add('🚪 เดินไป–กลับ','สวน⇄ครัว⇄หลังบ้าน⇄สวน⇄ตลาด⇄สหกรณ์⇄สวน — เดินชนลูกศรเรืองแสง');
+  add('🌿 ดิบ vs 🍌 สุก','เครือออก = เก็บดิบได้ทันที • รอ '+RIPEN+' วิ (แถบส้ม) จะสุกขายแพงกว่า');
+  add('🔄 สายการผลิต','ดิบ → หั่น → ตาก 18 วิ → บด 3 = แป้ง 1 → แป้ง 2 = ทองม้วน 3–6 กล่อง');
+  add('💵 ราคา','ดิบ 5฿ • สุก 12฿ • แห้ง 9฿ • ทองม้วน 60฿/กล่อง');}}
 function sell(k,n,p){if(n<1)return;S.inv[k]-=n;const m=n*p;S.money+=m;S.stats.earn+=m;
  sfx.coin();toast('💰 ขายได้ '+m+'฿');rp();hud();save();}
 function buy(it,c){if(S.money<c)return;S.money-=c;S.up[it.id]++;sfx.coin();
  toast('🛍 ซื้อ '+it.n+' แล้ว!');rp();hud();relabel();save();}
 function go(sc,x,y){trans={t:0,to:sc,x:x,y:y};S.stats.trips++;sfx.door();}
 
-/*========================= MINIGAME ทองม้วน =========================*/
+/*========================= MINIGAME =========================*/
 function mgStart(){if(S.inv.flour<2){toast('ต้องใช้แป้งกล้วย 2 ถุง',1);sfx.bad();return;}
  S.inv.flour-=2;mg={s:'pour',pour:0,pq:0,roll:0,rt:4,rq:0,cuts:[],cp:0,cd:1,t:0};
  mguiEl.classList.add('on');mgTxt();}
 function mgTxt(){if(!mg||mg.s==='res')return;
  const T={pour:['① เทแป้งเป็นวงกลม','กด [Space/A] ตอนแป้งแผ่พอดีเส้นประ'],
-  roll:['② ม้วนทองม้วน','รัวปุ่ม [Space/A] เร็ว ๆ ให้เต็มก่อนหมดเวลา!'],
+  roll:['② ม้วนทองม้วน','รัวปุ่ม [Space/A] เร็ว ๆ!'],
   cut:['③ ตัดให้พอดี','กด [Space/A] ตอนมีดอยู่โซนเขียว ('+mg.cuts.length+'/3)'],
   pack:['④ ใส่บรรจุภัณฑ์','กด [Space/A] เพื่อแพ็คใส่กล่อง']}[mg.s];
  mgtEl.textContent=T[0];mgdEl.textContent=T[1];}
@@ -650,7 +747,7 @@ function mgDraw(g){g.fillStyle='rgba(5,8,13,.74)';g.fillRect(0,0,VW,VH);const cx
   g.fillStyle='rgba(0,0,0,.6)';g.fillRect(cx-80,204,160,16);
   g.fillStyle='#2e7d4f';g.fillRect(cx-80+160*.26,204,160*.48,16);
   g.fillStyle='#6ee27a';g.fillRect(cx-80+160*.38,204,160*.24,16);
-  const mx=cx-80+160*mg.cp;g.fillStyle='#e8eef5';g.fillRect(mx-2,196,4,30);g.fillStyle='#b7c3cf';g.fillRect(mx-1,196,1,30);}
+  const mx=cx-80+160*mg.cp;g.fillStyle='#e8eef5';g.fillRect(mx-2,196,4,30);}
  else{g.fillStyle='#c9762f';g.fillRect(cx-48,cy-18,96,46);g.fillStyle='#e08b3c';g.fillRect(cx-48,cy-18,96,10);
   g.fillStyle='#fff6dd';g.fillRect(cx-34,cy-4,68,20);
   for(let i=0;i<4;i++){g.fillStyle='#e0b95f';g.fillRect(cx-30+i*17,cy-2,13,16);
@@ -673,20 +770,19 @@ function hud(){hudEl.innerHTML='';
 /*========================= MOVEMENT =========================*/
 function blocked(nx,ny){const s=SC[scene],b=s.bounds;
  if(nx<b[0]||nx>b[2]||ny<b[1]||ny>b[3])return true;
- const fx=nx-5,fy=ny-4,fw=10,fh=5;
+ const fx=nx-6,fy=ny-5,fw=12,fh=6;
  for(const o of s.solids)if(ov(fx,fy,fw,fh,o))return true;
  return false;}
-const spd=()=>52*(1+(S.up.boots?.25:0)+(S.up.vehicle?.35:0));
+const spd=()=>54*(1+(S.up.boots?.25:0)+(S.up.vehicle?.35:0));
 
 /*========================= UPDATE =========================*/
 function update(dt){
  S.clock=(S.clock+dt/220)%1;
  if(mg){mgUpd(dt);edge=false;return;}
  if(trans){trans.t+=dt*1.7;
-  if(trans.t>=.5&&trans.to){scene=trans.to;P.x=trans.x;P.y=trans.y;P.dir='down';trans.to=null;cool=.7;relabel();hud();save();}
+  if(trans.t>=.5&&trans.to){scene=trans.to;P.x=trans.x;P.y=trans.y;P.dir='down';trans.to=null;cool=.85;relabel();hud();save();}
   if(trans.t>=1)trans=null;edge=false;return;}
  if(cool>0)cool-=dt;
- /* การเติบโต + การสุก */
  S.plots.forEach((pl,i)=>{const auto=S.up.sprink>=2||(S.up.sprink===1&&i<4);
   if(auto)pl.water=1;else if(pl.water>0)pl.water=Math.max(0,pl.water-dt/26);
   if(pl.stage>=1&&pl.stage<=4){const m=(pl.water>.15?1.7:1)*(1+.25*S.up.fert);
@@ -710,7 +806,7 @@ function update(dt){
   if(S.up.vehicle&&Math.random()<.25)dust.push({x:P.x,y:P.y,l:.4});}
  else P.anim=0;
  if(cool<=0)for(const e of SC[scene].exits){
-  if(ov(P.x-5,P.y-5,10,7,e.r)){go(e.to,e.sx,e.sy);toast('🚪 ไป '+SCNAME[e.to]);break;}}
+  if(ov(P.x-6,P.y-6,12,8,e.r)){go(e.to,e.sx,e.sy);toast('🚪 ไป '+SCNAME[e.to]);break;}}
  const a=near();
  if(a){promptEl.classList.add('on');promptEl.innerHTML='<kbd>E</kbd> '+a.txt;if(edge&&a.act)a.act();}
  else promptEl.classList.remove('on');
@@ -734,21 +830,27 @@ function render(t){
   for(let i=0;i<n;i++){const r=RACKS[i];L.push({y:r[1]+22,f:()=>rack(ctx,r[0],r[1],S.racks[i],t)});}
   L.push({y:186,f:()=>{ctx.fillStyle='#9a7440';ctx.fillRect(24,170,26,14);ctx.fillStyle='#b78d55';ctx.fillRect(24,170,26,4);
    for(let i=0;i<Math.min(6,S.inv.slice);i++){ctx.fillStyle='#e8d98a';ctx.beginPath();ctx.ellipse(29+i*4,168,3,2,0,0,7);ctx.fill();}}});}
- else if(scene==='market'){L.push({y:104,f:()=>npc(ctx,212,102,'#e24a4a',t)});L.push({y:104,f:()=>npc(ctx,278,102,'#4a90d9',t)});
-  L.push({y:236,f:()=>npc(ctx,330,234,'#ffd86b',t)});}
- else if(scene==='coop'){L.push({y:92,f:()=>npc(ctx,146,90,'#6ee27a',t)});}
+ else if(scene==='market'){
+  L.push({y:102,f:()=>drawNPC(ctx,214,102,NPCDEF.vendorF,t,1)});
+  L.push({y:102,f:()=>drawNPC(ctx,278,102,NPCDEF.vendorM,t,2)});
+  const cx1=120+Math.sin(t*.45)*46;
+  L.push({y:232,f:()=>drawNPC(ctx,cx1,232,NPCDEF.customer,t,3)});
+  L.push({y:238,f:()=>drawNPC(ctx,392,238,NPCDEF.kid,t,4,1)});}
+ else if(scene==='coop'){
+  L.push({y:90,f:()=>drawNPC(ctx,152,90,NPCDEF.clerk,t,5)});
+  L.push({y:214,f:()=>drawNPC(ctx,320,214,NPCDEF.customer,t,6)});}
  else if(scene==='kitchen'){
   ctx.fillStyle='rgba(255,140,60,'+(.26+Math.sin(t*9)*.1)+')';ctx.beginPath();ctx.ellipse(182,122,15+Math.sin(t*7)*2,5,0,0,7);ctx.fill();
   L.push({y:130,f:()=>{for(let i=0;i<Math.min(4,S.inv.roll);i++){ctx.fillStyle='#e0b95f';ctx.fillRect(256+i*11,104,9,13);
    ctx.fillStyle='#caa044';ctx.fillRect(256+i*11,104,9,4);}}});}
  dust.forEach(d=>{ctx.fillStyle='rgba(212,192,152,'+d.l+')';ctx.fillRect(d.x-2,d.y-1,3,2);});
  drops.forEach(d=>{ctx.fillStyle='rgba(127,208,255,'+cl(d.l*2,0,.9)+')';ctx.fillRect(d.x,d.y,1,3);});
- L.push({y:P.y,f:player});
+ L.push({y:P.y,f:()=>player(ctx,t)});
  L.sort((a,b)=>a.y-b.y).forEach(o=>o.f(ctx));
  SC[scene].exits.forEach(e=>exitArrow(ctx,e,t));
  const tn=SC[scene].out?tint():'rgba(255,198,116,.08)';
  if(tn){ctx.fillStyle=tn;ctx.fillRect(0,0,VW,VH);}
- if(SC[scene].dim){const v2=ctx.createRadialGradient(P.x,P.y-10,20,P.x,P.y-10,180);
+ if(SC[scene].dim){const v2=ctx.createRadialGradient(P.x,P.y-12,20,P.x,P.y-12,180);
   v2.addColorStop(0,'rgba(255,220,150,.10)');v2.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=v2;ctx.fillRect(0,0,VW,VH);}
  const vg=ctx.createRadialGradient(VW/2,VH/2,VH*.34,VW/2,VH/2,VH*.96);
  vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.36)');ctx.fillStyle=vg;ctx.fillRect(0,0,VW,VH);
@@ -762,8 +864,8 @@ function render(t){
 let last=performance.now(),T=0;
 function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;T+=dt;update(dt);render(T);requestAnimationFrame(loop);}
 relabel();hud();qTick();requestAnimationFrame(loop);
-setTimeout(()=>toast('🌴 ยินดีต้อนรับ! เดินตามถนนดิน เข้าประตูรั้วไปแปลงกล้วย'),600);
-setTimeout(()=>toast('🌿→🍌 เก็บดิบได้เลย หรือรอ '+RIPEN+' วิ ให้สุกขายแพงกว่า'),2600);
+setTimeout(()=>toast('👩‍🌾 สวัสดีค่ะ! ฉันน้องกล้วย ชาวสวนคนใหม่'),600);
+setTimeout(()=>toast('🏪 ตลาดเดินเข้า-ออกได้แล้ว ลองเดินขวาสุดดูนะ'),2600);
 </script>
 </body>
 </html>
