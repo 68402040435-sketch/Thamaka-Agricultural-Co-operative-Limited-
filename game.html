@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>สวนกล้วยทองม้วน v5 | Banana Farm 16-bit</title>
+<title>สวนกล้วยทองม้วน v6 | Banana Farm 16-bit</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&display=swap" rel="stylesheet">
@@ -58,6 +58,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated;image-rend
  border-radius:calc(var(--s)*2px);padding:calc(var(--s)*2px) calc(var(--s)*4px);white-space:nowrap}
 .btn:active{transform:translateY(calc(var(--s)*1px));border-bottom-width:calc(var(--s)*1px)}
 .btn.blue{background:linear-gradient(#a6e3ff,#3fa8dd);border-bottom-color:#1d6f96;color:#062031}
+.btn.red{background:linear-gradient(#ff9c9c,#e05353);border-bottom-color:#8f2b2b;color:#2b0606}
 .btn.dis{background:#3f4c5a;color:#93a1b2;border-bottom-color:#28313b;cursor:not-allowed}
 .x{cursor:pointer;pointer-events:auto;font-weight:800;font-size:calc(var(--s)*8px);line-height:1}
 #mgui{left:50%;top:calc(var(--s)*14px);transform:translateX(-50%);text-align:center;display:none;width:100%}
@@ -74,6 +75,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated;image-rend
 #menu{right:calc(var(--s)*5px);bottom:calc(var(--s)*5px);pointer-events:auto;display:flex;gap:calc(var(--s)*2px)}
 .mb{cursor:pointer;font-size:calc(var(--s)*5.3px);background:rgba(9,13,20,.86);border:calc(var(--s)*.8px) solid #35527d;
  border-radius:calc(var(--s)*2px);padding:calc(var(--s)*1.3px) calc(var(--s)*2.8px);color:#cfe3ff;font-weight:600}
+.mb.home{border-color:#9ef0a8;color:#dbffe1}
 </style>
 </head>
 <body>
@@ -86,16 +88,14 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated;image-rend
     <div class="pad" id="pU">▲</div><div class="pad" id="pD">▼</div>
     <div class="pad" id="pL">◀</div><div class="pad" id="pR">▶</div><div id="abtn">A</div>
   </div>
-  <div id="menu"><div class="mb" id="mHelp">? วิธีเล่น</div><div class="mb" id="mMap">🗺 แผนที่</div><div class="mb" id="mNew">↺ ใหม่</div></div>
+  <div id="menu"><div class="mb" id="mHelp">? วิธีเล่น</div><div class="mb" id="mMap">🗺 แผนที่</div><div class="mb home" id="mHome">🏠 กลับบ้าน</div></div>
   <div id="panel"><div class="pbox"><div class="ptitle"><span id="pt"></span><span class="x" id="px">✕</span></div><div class="pbody" id="pb"></div></div></div>
 </div></div>
 <script>
 "use strict";
-/*==========================================================================
-  มาตราส่วน : 14 px = 1 เมตร
-  ผู้เล่น "น้องกล้วย" 18x26 px (≈1.85 ม. รวมหมวก / ตัวจริง 1.6 ม.)
-  NPC 16x24 px | ประตู 28x28 | บ้าน 152x96 | ต้นกล้วยโต 62
-==========================================================================*/
+/*=====================================================================
+  มาตราส่วน 14px = 1 เมตร | ผู้เล่น "น้องกล้วย" 18x26 | NPC 16x24
+=====================================================================*/
 const VW=480,VH=270;
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;
 const stage=document.getElementById('stage'),labelsEl=document.getElementById('labels');
@@ -109,7 +109,7 @@ addEventListener('resize',resize);resize();
 const cl=(v,a,b)=>v<a?a:v>b?b:v;
 function hash(x,y){let n=(x*7919+y*104729)|0;n=(n<<13)^n;return((n*(n*n*15731+789221)+1376312589)&0x7fffffff)/0x7fffffff;}
 function ov(ax,ay,aw,ah,r){return ax<r[0]+r[2]&&ax+aw>r[0]&&ay<r[1]+r[3]&&ay+ah>r[1];}
-function mixc(a,b,t){return'rgb('+Math.round(a[0]+(b[0]-a[0])*t)+','+Math.round(a[1]+(b[1]-a[1])*t)+','+Math.round(a[2]+(b[2]-a[2])*t)+')';}
+function mixc(a,b,t){t=cl(t,0,1);return'rgb('+Math.round(a[0]+(b[0]-a[0])*t)+','+Math.round(a[1]+(b[1]-a[1])*t)+','+Math.round(a[2]+(b[2]-a[2])*t)+')';}
 
 /*========================= AUDIO =========================*/
 let AC=null;
@@ -122,242 +122,136 @@ const sfx={ok:()=>snd(640,.09),door:()=>{snd(320,.07,'square',.04);setTimeout(()
  bad:()=>snd(150,.19,'sawtooth',.05),plant:()=>snd(400,.11,'triangle',.06),water:()=>snd(760,.08,'sine',.05),
  ripe:()=>{snd(784,.09,'triangle',.05);setTimeout(()=>snd(1175,.14,'triangle',.05),90);}};
 
-/*========================= 👩‍🌾 ตัวละคร "น้องกล้วย" 18x26 =========================
-  โทนสี: ผมน้ำตาลเข้มถักเปีย · หมวกสานฟาง ริบบิ้นแดง · เสื้อฟ้าลายดอก
-  ผ้ากันเปื้อนครีม · กระโปรงเขียวมิ้นต์ · ถุงมือสวนเหลือง · รองเท้าบูทน้ำตาล
-===============================================================================*/
-const PAL={'.':null,
- o:'#1b1208',            /* outline เข้ม */
- k:'#2a1c0d',            /* เส้นรอง */
- s:'#ffdcb2', S:'#e8b184', c:'#ffeed4',   /* ผิว / เงา / ไฮไลต์ */
- r:'#e05a7a', R:'#ff8fa8',                /* แก้ม/ริบบิ้น */
- h:'#f6d98a', H:'#d4a94e', y:'#fff0bd',   /* หมวกสาน */
- n:'#4a2c17', N:'#6b4223', m:'#8a5a2f',   /* ผมน้ำตาล */
- b:'#6fc3f0', B:'#3f96c9', w:'#fdfdfd',   /* เสื้อฟ้า */
- f:'#fff3b0',                              /* ลายดอกบนเสื้อ */
- a:'#fff6e2', A:'#e2d3b4',                /* ผ้ากันเปื้อน */
- g:'#6fd9a8', G:'#3fa87c',                /* กระโปรงมิ้นต์ */
- t:'#ffd86b', T:'#d9a72f',                /* ถุงมือ */
- p:'#7a4f2a', P:'#553venue'};
-PAL.P='#55341a';
-function mk(rows){const w=rows[0].length,h=rows.length,c=document.createElement('canvas');c.width=w;c.height=h;
- const x=c.getContext('2d');for(let j=0;j<h;j++)for(let i=0;i<w;i++){const q=PAL[rows[j][i]];if(q){x.fillStyle=q;x.fillRect(i,j,1,1);}}return c;}
+/*================= 👩‍🌾 ตัวละครผู้เล่น "น้องกล้วย" =================*/
+const PAL={'.':null,o:'#1b1208',k:'#2a1c0d',
+ s:'#ffdcb2',S:'#e8b184',c:'#ffeed4',r:'#e05a7a',
+ h:'#f6d98a',H:'#d4a94e',y:'#fff0bd',
+ n:'#4a2c17',N:'#6b4223',m:'#8a5a2f',
+ b:'#6fc3f0',B:'#3f96c9',w:'#fdfdfd',f:'#fff3b0',
+ a:'#fff6e2',A:'#e2d3b4',g:'#6fd9a8',G:'#3fa87c',
+ t:'#ffd86b',T:'#d9a72f',p:'#7a4f2a',P:'#55341a'};
+function mk(rows){const w=Math.max.apply(null,rows.map(r=>r.length)),h=rows.length;
+ const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+ for(let j=0;j<h;j++)for(let i=0;i<w;i++){const q=PAL[rows[j][i]||'.'];if(q){x.fillStyle=q;x.fillRect(i,j,1,1);}}return c;}
 function mir(c0){const c=document.createElement('canvas');c.width=c0.width;c.height=c0.height;
  const x=c.getContext('2d');x.translate(c0.width,0);x.scale(-1,1);x.drawImage(c0,0,0);return c;}
-
-/* ---- หมวกสานปีกกว้าง (กว้าง 18) ---- */
-const HAT_D=[
-'......oooooo......',
-'....oohhhhhhoo....',
-'...ohyyhhhhyyho...',
-'..ohhhhhhhhhhhho..',
-'.oHHHHHHHHHHHHHHo.',
-'ooHHHHHHHHHHHHHHoo',
-'.oooooooooooooooo.'];
-const HAT_U=[
-'......oooooo......',
-'....oohhhhhhoo....',
-'...ohhhhhhhhhho...',
-'..ohhhhhhhhhhhho..',
-'.oHHHHHHHHHHHHHHo.',
-'ooHHHHHHHHHHHHHHoo',
-'.oooooooooooooooo.'];
-/* ---- ใบหน้าหันหน้า (มีตาโต ขนตา แก้มชมพู) ---- */
-const FACE_D=[
-'...onnnnnnnnnno...',
-'..onsssssssssno...',
-'..onscsssssscno...',
-'..onsoosssoosno...',
-'..onsooswwoosno...',   /* ตา */
-'..onssrsssrssno...',   /* แก้มชมพู */
-'..onsssrrrsssno...',   /* ปากยิ้ม */
-'..onnsSSSSSsnno...',
-'...onnNNNNnno.....'];
-/* ---- ใบหน้าหันหลัง (เห็นผมถักเปีย) ---- */
-const FACE_U=[
-'...onnnnnnnnnno...',
-'..onnnnnnnnnnnno..',
-'..onnNNNNNNNNnno..',
-'..onnNNmmmmNNnno..',
-'..onnNNmmmmNNnno..',
-'..onnNNNNNNNNnno..',
-'...onnnNNNNnnno...',
-'....onnNNNNnno....',
-'.....oonnnnoo.....'];
-/* ---- ลำตัว: เสื้อฟ้าลายดอก + ผ้ากันเปื้อน ---- */
-const BODY_D=[
-'..tooBBBBBBBBoot..',
-'.toosbfbbbbfbsoot.',
-'.tosbbfbbbbfbbsot.',
-'.tosbbbaaaabbbsot.',
-'..oosbaaaaaabsoo..',
-'..oosbaaffaabsoo..',
-'...osbaaaaaabso...',
-'...oosaaaaaasoo...'];
-const BODY_U=[
-'..tooBBBBBBBBoot..',
-'.toosbbbbbbbbsoot.',
-'.tosbbbbbbbbbbsot.',
-'.tosbbbbBBbbbbsot.',
-'..oosbbbBBbbbsoo..',
-'..oosbbbbbbbbsoo..',
-'...osbbbbbbbbso...',
-'...oosbbbbbbsoo...'];
-/* ---- กระโปรง + ขา 4 เฟรมเดิน ---- */
+const HAT_D=['......oooooo......','....oohhhhhhoo....','...ohyyhhhhyyho...','..ohhhhhhhhhhhho..',
+ '.oHHHHHHHHHHHHHHo.','ooHHHHHHHHHHHHHHoo','.oooooooooooooooo.'];
+const HAT_U=['......oooooo......','....oohhhhhhoo....','...ohhhhhhhhhho...','..ohhhhhhhhhhhho..',
+ '.oHHHHHHHHHHHHHHo.','ooHHHHHHHHHHHHHHoo','.oooooooooooooooo.'];
+const FACE_D=['...onnnnnnnnnno...','..onsssssssssno...','..onscsssssscno...','..onsoosssoosno...',
+ '..onsooswwoosno...','..onssrsssrssno...','..onsssrrrsssno...','..onnsSSSSSsnno...','...onnNNNNnno.....'];
+const FACE_U=['...onnnnnnnnnno...','..onnnnnnnnnnnno..','..onnNNNNNNNNnno..','..onnNNmmmmNNnno..',
+ '..onnNNmmmmNNnno..','..onnNNNNNNNNnno..','...onnnNNNNnnno...','....onnNNNNnno....','.....oonnnnoo.....'];
+const BODY_D=['..tooBBBBBBBBoot..','.toosbfbbbbfbsoot.','.tosbbfbbbbfbbsot.','.tosbbbaaaabbbsot.',
+ '..oosbaaaaaabsoo..','..oosbaaffaabsoo..','...osbaaaaaabso...','...oosaaaaaasoo...'];
+const BODY_U=['..tooBBBBBBBBoot..','.toosbbbbbbbbsoot.','.tosbbbbbbbbbbsot.','.tosbbbbBBbbbbsot.',
+ '..oosbbbBBbbbsoo..','..oosbbbbbbbbsoo..','...osbbbbbbbbso...','...oosbbbbbbsoo...'];
 const LEG=[
- ['..ogggggggggggo..','.oGGGGGGGGGGGGGo.','.oooGGGGGGGGooo..','...osssossso.....','...opppoppp o....'.replace(' ',''),'...oPPPoPPPo.....'],
- ['..ogggggggggggo..','.oGGGGGGGGGGGGGo.','.ooGGGGGGGGGoo...','..osss.ossso.....','..opppo.opppo....','..oPPPo..oPPo....'],
- ['..ogggggggggggo..','.oGGGGGGGGGGGGGo.','.oooGGGGGGGGooo..','...osssossso.....','...opppopppo.....','...oPPPoPPPo.....'],
- ['..ogggggggggggo..','.oGGGGGGGGGGGGGo.','...ooGGGGGGGGoo..','.....osssossso...','....opppo.opppo..','....oPPo..oPPPo..']];
-/* ---- ท่าด้านข้าง ---- */
-const SIDE_HEAD=[
-'.....oooooo.......',
-'...oohhhhhhoo.....',
-'..ohhhhhhhhhho....',
-'.oHHHHHHHHHHHHo...',
-'ooHHHHHHHHHHHHoo..',
-'.oooooooooooooo...',
-'...onnnnnnnno.....',
-'..onsssssssno.....',
-'..onscssssono.....',
-'..onsooswsono.....',   /* ตาข้าง */
-'..onssrssnnno.....',
-'..onsssrsnnnno....',   /* เปียสะบัดหลัง */
-'...onnSSSnnnnno...',
-'....onnnnnnnnno...'];
-const SIDE_BODY=[
-'..tooBBBBBBoot....',
-'.toosbfbbfbsoot...',
-'.tosbbbaaabbsot...',
-'..oosbaaaaabsoo...',
-'..oosbaaffabsoo...',
-'...osbaaaaabso....',
-'...oosaaaaasoo....'];
+ ['..ogggggggggggo...','.oGGGGGGGGGGGGGo..','.oooGGGGGGGGooo...','...osssossso......','...opppopppo......','...oPPPoPPPo......'],
+ ['..ogggggggggggo...','.oGGGGGGGGGGGGGo..','.ooGGGGGGGGGoo....','..osss..ossso.....','..opppo..opppo....','..oPPPo...oPPo....'],
+ ['..ogggggggggggo...','.oGGGGGGGGGGGGGo..','.oooGGGGGGGGooo...','...osssossso......','...opppopppo......','...oPPPoPPPo......'],
+ ['..ogggggggggggo...','.oGGGGGGGGGGGGGo..','...ooGGGGGGGGoo...','.....osssossso....','....opppo.opppo...','....oPPo...oPPPo..']];
+const SIDE_HEAD=['.....oooooo.......','...oohhhhhhoo.....','..ohhhhhhhhhho....','.oHHHHHHHHHHHHo...',
+ 'ooHHHHHHHHHHHHoo..','.oooooooooooooo...','...onnnnnnnno.....','..onsssssssno.....','..onscssssono.....',
+ '..onsooswsono.....','..onssrssnnno.....','..onsssrsnnnno....','...onnSSSnnnnno...','....onnnnnnnnno...'];
+const SIDE_BODY=['..tooBBBBBBoot....','.toosbfbbfbsoot...','.tosbbbaaabbsot...','..oosbaaaaabsoo...',
+ '..oosbaaffabsoo...','...osbaaaaabso....','...oosaaaaasoo....'];
 const SIDE_LEG=[
- ['..oggggggggo.....','.oGGGGGGGGGGo....','.oooGGGGGGooo....','...osssosso......','...opppoppo......','...oPPPoPPo......'],
- ['..oggggggggo.....','.oGGGGGGGGGGo....','..ooGGGGGGoo.....','..osss.osso......','..opppo.oppo.....','.oPPPo...oPPo....'],
- ['..oggggggggo.....','.oGGGGGGGGGGo....','.oooGGGGGGooo....','...osssosso......','...opppoppo......','...oPPPoPPo......'],
- ['..oggggggggo.....','.oGGGGGGGGGGo....','...ooGGGGGGoo....','.....osssosso....','....opppo.oppo...','...oPPo...oPPo...']];
-const SPR={
- down:LEG.map(l=>mk(HAT_D.concat(FACE_D,BODY_D,l))),
- up:  LEG.map(l=>mk(HAT_U.concat(FACE_U,BODY_U,l))),
+ ['..oggggggggo......','.oGGGGGGGGGGo.....','.oooGGGGGGooo.....','...osssosso.......','...opppoppo.......','...oPPPoPPo.......'],
+ ['..oggggggggo......','.oGGGGGGGGGGo.....','..ooGGGGGGoo......','..osss.osso.......','..opppo.oppo......','.oPPPo...oPPo.....'],
+ ['..oggggggggo......','.oGGGGGGGGGGo.....','.oooGGGGGGooo.....','...osssosso.......','...opppoppo.......','...oPPPoPPo.......'],
+ ['..oggggggggo......','.oGGGGGGGGGGo.....','...ooGGGGGGoo.....','.....osssosso.....','....opppo.oppo....','...oPPo...oPPo....']];
+const SPR={down:LEG.map(l=>mk(HAT_D.concat(FACE_D,BODY_D,l))),
+ up:LEG.map(l=>mk(HAT_U.concat(FACE_U,BODY_U,l))),
  right:SIDE_LEG.map(l=>mk(SIDE_HEAD.concat(SIDE_BODY,l)))};
 SPR.left=SPR.right.map(mir);
-const PW=18,PH=SPR.down[0].height;
-
-/*========================= 👥 NPC ระบบใหม่ =========================*/
-const NPCDEF={
- vendorF:{skin:'#ffd9ae',skinS:'#dfa97e',hair:'#2e1c0f',hair2:'#4a2c18',style:'bun',
-   top:'#e8556f',top2:'#b83a52',apron:'#fff3d8',bottom:'#8a4a5e',hat:null,name:'แม่ค้าผลไม้'},
- vendorM:{skin:'#e8b98c',skinS:'#c1925f',hair:'#1f1710',hair2:'#3a2a1a',style:'short',
-   top:'#4a90d9',top2:'#2f6db0',apron:null,bottom:'#3a4149',hat:'#dcc089',name:'พ่อค้าหาบเร่'},
- customer:{skin:'#fbe0c2',skinS:'#dcb894',hair:'#5a3a1e',hair2:'#7a5228',style:'long',
-   top:'#9b6fd4',top2:'#7148ad',apron:null,bottom:'#e8e2d2',hat:null,name:'ลูกค้า'},
- clerk:{skin:'#ffd9ae',skinS:'#dfa97e',hair:'#241a10',hair2:'#3d2a18',style:'pony',
-   top:'#2f9c68',top2:'#1f6f4a',apron:'#f2f7f4',bottom:'#37424d',hat:null,name:'พนักงานสหกรณ์'},
- kid:{skin:'#ffe3c4',skinS:'#e0bb98',hair:'#3a2210',hair2:'#5a3a1c',style:'short',
-   top:'#ffd86b',top2:'#d9a72f',apron:null,bottom:'#5f8fd4',hat:null,name:'เด็กน้อย'}};
-/* วาด NPC แบบละเอียด (16x24 / เด็ก 13x19) */
-function drawNPC(g,x,y,def,t,seed,small){
- const sc=small?0.78:1, bob=Math.sin(t*1.9+seed)*0.9, sw=Math.sin(t*2.6+seed)*1.1;
- const H=24*sc, W=16*sc, ox=Math.round(x-W/2), oy=Math.round(y-H+bob);
- const px=(a,b,w,h,c)=>{g.fillStyle=c;g.fillRect(Math.round(ox+a*sc),Math.round(oy+b*sc),Math.max(1,Math.round(w*sc)),Math.max(1,Math.round(h*sc)));};
- /* เงา */
- g.fillStyle='rgba(0,0,0,.26)';g.beginPath();g.ellipse(x,y+1,W*.42,W*.16,0,0,7);g.fill();
- /* ขา */
- px(4,20,3,4,'#3d2a18');px(9,20,3,4,'#3d2a18');
- px(3,19+(sw>0?0:1),4,2,'#241a10');px(9,19+(sw>0?1:0),4,2,'#241a10');
- /* ท่อนล่าง */
- px(3,15,10,6,def.bottom);px(3,15,10,1,'rgba(255,255,255,.25)');
- /* ลำตัว */
- px(3,8,10,8,def.top);px(3,8,10,2,def.top2);
- px(2,9,1,6,def.top2);px(13,9,1,6,def.top2);
- if(def.apron){px(5,11,6,6,def.apron);px(5,11,6,1,'rgba(0,0,0,.12)');px(6,13,1,1,'rgba(0,0,0,.15)');}
- /* แขนแกว่ง */
- px(1,9+(sw>0?0:1),2,6,def.top2);px(13,9+(sw>0?1:0),2,6,def.top2);
- px(1,15+(sw>0?0:1),2,2,def.skin);px(13,15+(sw>0?1:0),2,2,def.skin);
- /* คอ+หัว */
- px(6,7,4,2,def.skinS);
- px(3,1,10,7,def.skin);
- px(3,1,10,1,def.skinS);px(3,7,10,1,def.skinS);
- /* ทรงผม */
- if(def.style==='bun'){px(3,0,10,3,def.hair);px(4,-2,8,3,def.hair2);px(6,-4,4,3,def.hair);
-  px(2,2,2,4,def.hair);px(12,2,2,4,def.hair);}
- else if(def.style==='long'){px(3,0,10,3,def.hair);px(2,1,2,9,def.hair);px(12,1,2,9,def.hair);
-  px(2,9,2,2,def.hair2);px(12,9,2,2,def.hair2);}
- else if(def.style==='pony'){px(3,0,10,3,def.hair);px(2,2,2,3,def.hair);px(12,2,2,3,def.hair);
-  px(13,4,2,7,def.hair2);px(13,10,2,2,def.hair);}
- else{px(3,0,10,3,def.hair);px(2,1,2,3,def.hair);px(12,1,2,3,def.hair);}
- if(def.hat){px(2,-1,12,2,def.hat);px(0,1,16,2,def.hat);px(0,1,16,1,'rgba(255,255,255,.3)');}
- /* ใบหน้า */
- px(5,4,2,2,'#241a10');px(9,4,2,2,'#241a10');
- px(5,4,1,1,'#ffffff');px(9,4,1,1,'#ffffff');
- px(4,6,1,1,'rgba(230,110,130,.55)');px(11,6,1,1,'rgba(230,110,130,.55)');
- px(7,6,2,1,'#c25a6a');
-}
-/* ผู้เล่น */
-function player(g,t){
- const set=SPR[P.dir],f=P.moving?[0,1,2,3][Math.floor(P.anim*7.5)%4]:0;
- const img=set[f],bob=P.moving?Math.round(Math.sin(P.anim*15)*0.5):0;
+const PW=18;
+function player(g){const set=SPR[P.dir],f=P.moving?Math.floor(P.anim*7.5)%4:0,img=set[f];
+ const bob=P.moving?Math.round(Math.sin(P.anim*15)*.5):0;
  g.fillStyle='rgba(0,0,0,.28)';g.beginPath();g.ellipse(P.x,P.y+1,8,3,0,0,7);g.fill();
  g.drawImage(img,Math.round(P.x-PW/2),Math.round(P.y-img.height+bob));}
+
+/*========================= 👥 NPC =========================*/
+const NPCDEF={
+ vendorF:{skin:'#ffd9ae',skinS:'#dfa97e',hair:'#2e1c0f',hair2:'#4a2c18',style:'bun',top:'#e8556f',top2:'#b83a52',apron:'#fff3d8',bottom:'#8a4a5e',hat:null},
+ vendorM:{skin:'#e8b98c',skinS:'#c1925f',hair:'#1f1710',hair2:'#3a2a1a',style:'short',top:'#4a90d9',top2:'#2f6db0',apron:null,bottom:'#3a4149',hat:'#dcc089'},
+ customer:{skin:'#fbe0c2',skinS:'#dcb894',hair:'#5a3a1e',hair2:'#7a5228',style:'long',top:'#9b6fd4',top2:'#7148ad',apron:null,bottom:'#e8e2d2',hat:null},
+ clerk:{skin:'#ffd9ae',skinS:'#dfa97e',hair:'#241a10',hair2:'#3d2a18',style:'pony',top:'#2f9c68',top2:'#1f6f4a',apron:'#f2f7f4',bottom:'#37424d',hat:null},
+ kid:{skin:'#ffe3c4',skinS:'#e0bb98',hair:'#3a2210',hair2:'#5a3a1c',style:'short',top:'#ffd86b',top2:'#d9a72f',apron:null,bottom:'#5f8fd4',hat:null}};
+function drawNPC(g,x,y,def,t,seed,small){
+ const sc=small?.78:1,bob=Math.sin(t*1.9+seed)*.9,sw=Math.sin(t*2.6+seed)*1.1;
+ const H=24*sc,W=16*sc,ox=Math.round(x-W/2),oy=Math.round(y-H+bob);
+ const px=(a,b,w,h,c)=>{g.fillStyle=c;g.fillRect(Math.round(ox+a*sc),Math.round(oy+b*sc),Math.max(1,Math.round(w*sc)),Math.max(1,Math.round(h*sc)));};
+ g.fillStyle='rgba(0,0,0,.26)';g.beginPath();g.ellipse(x,y+1,W*.42,W*.16,0,0,7);g.fill();
+ px(4,20,3,4,'#3d2a18');px(9,20,3,4,'#3d2a18');
+ px(3,19+(sw>0?0:1),4,2,'#241a10');px(9,19+(sw>0?1:0),4,2,'#241a10');
+ px(3,15,10,6,def.bottom);px(3,15,10,1,'rgba(255,255,255,.25)');
+ px(3,8,10,8,def.top);px(3,8,10,2,def.top2);px(2,9,1,6,def.top2);px(13,9,1,6,def.top2);
+ if(def.apron){px(5,11,6,6,def.apron);px(5,11,6,1,'rgba(0,0,0,.12)');}
+ px(1,9+(sw>0?0:1),2,6,def.top2);px(13,9+(sw>0?1:0),2,6,def.top2);
+ px(1,15+(sw>0?0:1),2,2,def.skin);px(13,15+(sw>0?1:0),2,2,def.skin);
+ px(6,7,4,2,def.skinS);px(3,1,10,7,def.skin);px(3,1,10,1,def.skinS);px(3,7,10,1,def.skinS);
+ if(def.style==='bun'){px(3,0,10,3,def.hair);px(4,-2,8,3,def.hair2);px(6,-4,4,3,def.hair);px(2,2,2,4,def.hair);px(12,2,2,4,def.hair);}
+ else if(def.style==='long'){px(3,0,10,3,def.hair);px(2,1,2,9,def.hair);px(12,1,2,9,def.hair);px(2,9,2,2,def.hair2);px(12,9,2,2,def.hair2);}
+ else if(def.style==='pony'){px(3,0,10,3,def.hair);px(2,2,2,3,def.hair);px(12,2,2,3,def.hair);px(13,4,2,7,def.hair2);}
+ else{px(3,0,10,3,def.hair);px(2,1,2,3,def.hair);px(12,1,2,3,def.hair);}
+ if(def.hat){px(2,-1,12,2,def.hat);px(0,1,16,2,def.hat);px(0,1,16,1,'rgba(255,255,255,.3)');}
+ px(5,4,2,2,'#241a10');px(9,4,2,2,'#241a10');px(5,4,1,1,'#fff');px(9,4,1,1,'#fff');
+ px(4,6,1,1,'rgba(230,110,130,.55)');px(11,6,1,1,'rgba(230,110,130,.55)');px(7,6,2,1,'#c25a6a');}
 
 /*========================= STATE =========================*/
 const PLOTS=[[248,116],[306,116],[364,116],[422,116],[248,240],[306,240],[364,240],[422,240]];
 const RACKS=[[170,152],[240,152],[310,152],[170,206],[240,206],[310,206]];
-const ST=[0,7,9,11,13,16],TH=[0,12,22,36,50,62,62],RIPEN=16;
+const ST=[0,7,9,11,13,16],TH=[0,14,26,40,54,68,68],RIPEN=16;
 const PRICE={ripe:12,green:5,dried:9,roll:60};
 const SCNAME={farm:'สวนกล้วย & บ้าน',backyard:'หลังบ้าน (ลานตาก)',kitchen:'ครัวแปรรูป',market:'ตลาดสด',coop:'ร้านค้าสหกรณ์'};
 function fresh(){return{money:60,inv:{green:0,ripe:0,slice:0,dried:0,flour:0,roll:0},
  up:{fert:0,sprink:0,boots:0,racks:0,grinder:0,pan:0,vehicle:0},
  plots:PLOTS.map(()=>({stage:0,prog:0,water:0,rp:0})),racks:RACKS.map(()=>({item:0,prog:0})),
- stats:{plant:0,hg:0,hr:0,earn:0,roll:0,trips:0},q:0,scene:'farm',px:150,py:154,clock:.3};}
+ stats:{plant:0,hg:0,hr:0,earn:0,roll:0,trips:0},q:0,scene:'farm',px:150,py:180,clock:.3};}
 let S=fresh();
-try{const v=localStorage.getItem('bnf16v5');if(v){const o=JSON.parse(v);if(o&&o.inv)S=Object.assign(fresh(),o);}}catch(e){}
-function save(){try{S.px=P.x;S.py=P.y;S.scene=scene;localStorage.setItem('bnf16v5',JSON.stringify(S));}catch(e){}}
+try{const v=localStorage.getItem('bnf16v6');if(v){const o=JSON.parse(v);if(o&&o.inv)S=Object.assign(fresh(),o);}}catch(e){}
+function save(){try{S.px=P.x;S.py=P.y;S.scene=scene;localStorage.setItem('bnf16v6',JSON.stringify(S));}catch(e){}}
 setInterval(save,5000);addEventListener('visibilitychange',save);
 const P={x:S.px,y:S.py,dir:'down',anim:0,moving:false};
-let scene=S.scene,busy=null,trans=null,mg=null,pk=null,dust=[],drops=[],cool=.8;
+let scene=S.scene,busy=null,trans=null,mg=null,pk=null,dust=[],drops=[],exitLock=true;
 
-/*========================= SCENES (แก้ตลาดแล้ว) =========================*/
+/*=================== SCENES (ตรวจพิกัดประตูใหม่ทั้งหมด) ===================*/
 const SC={
  farm:{out:1,bounds:[12,26,468,252],
   solids:[[26,18,152,96],[32,186,34,22],[222,130,84,5],[330,130,132,5],[222,174,84,5],[330,174,132,5]],
-  exits:[{r:[88,110,28,12],d:'up',to:'kitchen',sx:240,sy:200,n:'ครัว'},
-         {r:[0,142,14,22],d:'left',to:'backyard',sx:440,sy:112,n:'หลังบ้าน'},
-         {r:[466,142,14,22],d:'right',to:'market',sx:60,sy:192,n:'ตลาด'},
-         {r:[190,26,22,10],d:'up',to:'coop',sx:240,sy:206,n:'สหกรณ์'}],
-  labels:[{x:102,y:102,t:'🚪 ประตูบ้าน → ครัว',c:'door'},{x:46,y:130,t:'← หลังบ้าน'},
-   {x:434,y:130,t:'ตลาด →'},{x:201,y:50,t:'↑ สหกรณ์'},
+  exits:[{r:[88,110,28,14],d:'up',to:'kitchen',sx:240,sy:200,n:'ครัว'},
+         {r:[0,140,18,26],d:'left',to:'backyard',sx:436,sy:112,n:'หลังบ้าน'},
+         {r:[462,140,18,26],d:'right',to:'market',sx:70,sy:196,n:'ตลาด'},
+         {r:[188,22,26,14],d:'up',to:'coop',sx:240,sy:200,n:'สหกรณ์'}],
+  labels:[{x:102,y:100,t:'🚪 ประตูบ้าน → ครัว',c:'door'},{x:46,y:130,t:'← หลังบ้าน'},
+   {x:434,y:130,t:'ตลาด →'},{x:201,y:52,t:'↑ สหกรณ์'},
    {x:318,y:122,t:'🚧 ประตูรั้ว A',c:'field'},{x:318,y:186,t:'🚧 ประตูรั้ว B',c:'field'}]},
-
  backyard:{out:1,bounds:[14,100,466,248],
   solids:[[46,150,64,30],[386,146,66,52]],
-  exits:[{r:[226,96,28,10],d:'up',to:'kitchen',sx:316,sy:118,n:'ครัว (ประตูหลัง)'},
-         {r:[466,100,14,22],d:'right',to:'farm',sx:30,sy:152,n:'สวนกล้วย'}],
-  labels:[{x:240,y:88,t:'🚪 ประตูหลัง → ครัว',c:'door'},{x:78,y:142,t:'🔪 ปอก/หั่นกล้วยดิบ'},
+  exits:[{r:[224,94,32,12],d:'up',to:'kitchen',sx:316,sy:122,n:'ครัว (ประตูหลัง)'},
+         {r:[462,100,18,26],d:'right',to:'farm',sx:34,sy:152,n:'สวนกล้วย'}],
+  labels:[{x:240,y:86,t:'🚪 ประตูหลัง → ครัว',c:'door'},{x:78,y:142,t:'🔪 ปอก/หั่นกล้วยดิบ'},
    {x:240,y:134,t:'☀️ ลานตากกล้วย'},{x:419,y:138,t:'⚙️ เครื่องบดแป้ง'},{x:436,y:92,t:'สวน →'}]},
-
  kitchen:{bounds:[152,102,328,222],
   solids:[[158,98,48,26],[252,98,48,26]],
-  exits:[{r:[228,218,24,10],d:'down',to:'farm',sx:102,sy:132,n:'ออกหน้าบ้าน'},
-         {r:[306,102,24,10],d:'up',to:'backyard',sx:240,sy:114,n:'หลังบ้าน'}],
+  exits:[{r:[226,214,28,12],d:'down',to:'farm',sx:102,sy:132,n:'ออกหน้าบ้าน'},
+         {r:[304,100,28,12],d:'up',to:'backyard',sx:240,sy:120,n:'หลังบ้าน'}],
   labels:[{x:182,y:92,t:'🥠 เตาทองม้วน'},{x:276,y:92,t:'📦 โต๊ะบรรจุ'},
-   {x:318,y:80,t:'🚪 หลังบ้าน',c:'door'},{x:240,y:242,t:'🚪 ออกหน้าบ้าน',c:'door'}],dim:1},
-
- /* ★★★ แก้บั๊ก: bounds กว้างขึ้น / exit ชิดขอบ / spawn อยู่กลางถนน ★★★ */
- market:{bounds:[24,150,456,250],
+   {x:318,y:80,t:'🚪 หลังบ้าน',c:'door'},{x:240,y:240,t:'🚪 ออกหน้าบ้าน',c:'door'}],dim:1},
+ /* ★ ตลาด: bounds กว้าง 16–464 / ประตูอยู่ในระยะเดินถึงจริง ★ */
+ market:{bounds:[16,150,464,250],
   solids:[[172,104,144,44]],
-  exits:[{r:[0,180,14,26],d:'left',to:'farm',sx:452,sy:152,n:'สวนกล้วย'},
-         {r:[466,180,14,26],d:'right',to:'coop',sx:120,sy:172,n:'สหกรณ์'}],
-  labels:[{x:244,y:96,t:'🍌 แผงรับซื้อกล้วย'},{x:44,y:170,t:'← สวน'},{x:436,y:170,t:'สหกรณ์ →'}]},
-
+  exits:[{r:[10,176,24,30],d:'left',to:'farm',sx:446,sy:152,n:'สวนกล้วย'},
+         {r:[446,176,34,30],d:'right',to:'coop',sx:150,sy:186,n:'สหกรณ์'}],
+  labels:[{x:244,y:96,t:'🍌 แผงรับซื้อกล้วย'},{x:42,y:168,t:'← สวน'},{x:438,y:168,t:'สหกรณ์ →'}]},
  coop:{bounds:[98,138,384,228],
   solids:[[278,90,108,42],[112,94,108,34]],
-  exits:[{r:[228,222,24,10],d:'down',to:'farm',sx:201,sy:52,n:'ถนนกลับสวน'},
-         {r:[96,158,12,32],d:'left',to:'market',sx:440,sy:192,n:'ตลาด'}],
+  exits:[{r:[226,218,28,12],d:'down',to:'farm',sx:201,sy:56,n:'ถนนกลับสวน'},
+         {r:[92,156,22,36],d:'left',to:'market',sx:414,sy:196,n:'ตลาด'}],
   labels:[{x:166,y:86,t:'💰 ขายทองม้วน'},{x:332,y:82,t:'🛒 ซื้อของ / อัปเกรด'},
-   {x:116,y:148,t:'🚪 ตลาด',c:'door'},{x:240,y:244,t:'🚪 กลับสวน',c:'door'}],dim:1}};
+   {x:120,y:148,t:'🚪 ตลาด',c:'door'},{x:240,y:242,t:'🚪 กลับสวน',c:'door'}],dim:1}};
 
 /*========================= TEXTURES =========================*/
 function grass(g,x,y,w,h){g.fillStyle='#58a340';g.fillRect(x,y,w,h);
@@ -433,7 +327,7 @@ const DBG={
   g.fillStyle='#7c4f2a';g.fillRect(164,86,152,6);g.fillStyle='#6d2418';g.fillRect(156,0,168,12);
   [[178,26],[276,26]].forEach(p=>{g.fillStyle='#5b3b1f';g.fillRect(p[0]-2,p[1]-2,26,24);
    g.fillStyle='#8fd3f0';g.fillRect(p[0],p[1],22,20);g.fillStyle='#c3ecff';g.fillRect(p[0],p[1],22,7);});
-  door(g,226,58);grass(g,0,0,164,92);grass(g,316,0,164,92);
+  door(g,226,56);grass(g,0,0,164,92);grass(g,316,0,164,92);
   for(let i=0;i<6;i++){g.fillStyle='#2f6d28';g.beginPath();g.ellipse(22+i*26,62,13,15,0,0,7);g.fill();}
   for(let i=0;i<6;i++){g.fillStyle='#2f6d28';g.beginPath();g.ellipse(340+i*26,62,13,15,0,0,7);g.fill();}
   road(g,0,98,480,26,false);
@@ -455,7 +349,7 @@ const DBG={
   g.fillStyle='#1f242a';g.beginPath();g.ellipse(182,116,17,8,0,0,7);g.fill();
   g.fillStyle='#5b3b1f';g.fillRect(252,98,48,26);planks(g,254,100,44,18,'#c79a5c','#a67c47',false);
   g.fillStyle='#e0c89a';g.fillRect(258,102,16,11);g.fillRect(278,102,16,11);
-  door(g,226,216,1);g.fillStyle='#3a2a1a';g.fillRect(146,234,188,4);},
+  door(g,226,212,1);g.fillStyle='#3a2a1a';g.fillRect(146,234,188,4);},
  market(g){tiles(g,0,0,VW,VH,'#c8b69c','#b9a68c');
   for(let i=0;i<3;i++){const x=18+i*158;
    g.fillStyle='#5b3b1f';g.fillRect(x,42,140,58);planks(g,x+2,44,136,54,'#c79a5c','#a67c47',false);
@@ -466,11 +360,11 @@ const DBG={
   g.fillStyle='#6b4726';for(let i=176;i<316;i+=14)g.fillRect(i,119,2,27);
   for(let i=0;i<9;i++){const x=182+i*16;g.strokeStyle=i%3?'#f5c518':'#9fd14f';g.lineWidth=3;g.lineCap='round';
    g.beginPath();g.arc(x,98,7,Math.PI*.15,Math.PI*.85);g.stroke();}
-  road(g,0,176,480,32,false);
-  g.fillStyle='#a8957b';g.fillRect(0,150,480,3);g.fillRect(0,212,480,3);
-  [[36,232],[420,232]].forEach(p=>{g.fillStyle='#7a4a24';g.fillRect(p[0],p[1],20,18);
+  road(g,0,170,480,42,false);
+  g.fillStyle='#a8957b';g.fillRect(0,150,480,3);g.fillRect(0,216,480,3);
+  [[36,238],[420,238]].forEach(p=>{g.fillStyle='#7a4a24';g.fillRect(p[0],p[1],20,16);
    g.fillStyle='#3f9e3a';g.beginPath();g.ellipse(p[0]+10,p[1]-5,15,12,0,0,7);g.fill();});
-  signpost(g,452,226);},
+  signpost(g,452,230);},
  coop(g){g.fillStyle='#070b10';g.fillRect(0,0,VW,VH);
   g.fillStyle='#6a5c46';g.fillRect(78,48,326,200);
   planks(g,80,50,322,28,'#e8e2d2','#cfc7b2',true);
@@ -478,7 +372,7 @@ const DBG={
   g.fillStyle='#8a7f6a';g.fillRect(88,76,306,4);
   g.fillStyle='#1f6f4a';g.fillRect(172,52,136,22);g.fillStyle='#2f9c68';g.fillRect(174,54,132,18);
   g.fillStyle='#ffd86b';g.fillRect(182,59,15,8);g.fillRect(283,59,15,8);g.fillRect(206,60,68,6);
-  door(g,76,150,1);
+  door(g,80,156,1);
   g.fillStyle='#6a4526';g.fillRect(278,90,108,42);g.fillStyle='#8a6238';g.fillRect(280,92,104,38);
   for(let r=0;r<2;r++){g.fillStyle='#5b3b1f';g.fillRect(280,110+r*17,104,3);
    for(let c=0;c<6;c++){const bx=284+c*17,by=94+r*17;
@@ -486,33 +380,124 @@ const DBG={
     g.fillStyle='rgba(255,255,255,.35)';g.fillRect(bx,by,13,3);}}
   g.fillStyle='#5b3b1f';g.fillRect(112,94,108,34);planks(g,114,96,104,26,'#c79a5c','#a67c47',false);
   g.fillStyle='#3a4149';g.fillRect(156,82,32,16);g.fillStyle='#7fd0ff';g.fillRect(159,85,26,9);
-  door(g,226,220,1);g.fillStyle='#3a2a1a';g.fillRect(88,234,306,4);}};
+  door(g,226,216,1);g.fillStyle='#3a2a1a';g.fillRect(88,234,306,4);}};
 
-/*========================= OBJECTS =========================*/
-function leaf(g,x,y,len,wid,ang,c1,c2){g.save();g.translate(x,y);g.rotate(ang);
- g.fillStyle=c1;g.beginPath();g.moveTo(0,0);g.quadraticCurveTo(len*.5,-wid,len,wid*.25);
- g.quadraticCurveTo(len*.5,wid,0,0);g.fill();
- g.strokeStyle=c2;g.lineWidth=1;g.beginPath();g.moveTo(0,0);g.lineTo(len,wid*.2);g.stroke();g.restore();}
-function bunch(g,x,y,rp){const c=mixc([124,198,62],[247,203,34],rp),cs=mixc([88,154,43],[201,151,15],rp);
- g.fillStyle='#5b3b1f';g.fillRect(x-1,y-9,3,11);
- for(let r=0;r<3;r++){const yy=y+r*6;
-  for(let i=-1;i<=1;i++){const xx=x+i*7;
-   g.strokeStyle=cs;g.lineWidth=4;g.lineCap='round';g.beginPath();g.arc(xx,yy,6,Math.PI*.12,Math.PI*.9);g.stroke();
-   g.strokeStyle=c;g.lineWidth=2.4;g.beginPath();g.arc(xx,yy,6,Math.PI*.15,Math.PI*.87);g.stroke();}}
- if(rp>=1){g.fillStyle='rgba(255,255,190,.6)';g.fillRect(x-9,y-2,3,2);}}
-function tree(g,cx,by,pl,t){if(pl.stage===0)return;
+/*==================================================================
+  🌴 ต้นกล้วยแบบใหม่ — วาดตามภาพอ้างอิง
+  ใบแตกเป็นริ้ว + ก้านกลางเหลือง | ลำต้นเขียวอมเหลือง + กาบน้ำตาลไขว้
+  รากแผ่ที่โคน | เครือกล้วยหลายหวี | ปลีกล้วยม่วงแดง
+==================================================================*/
+function bLeaf(g,x,y,len,wid,ang,light,dark,rib){
+ g.save();g.translate(x,y);g.rotate(ang);
+ const N=13,droop=wid*1.5;
+ const pt=u=>({x:len*u,y:droop*u*u});
+ const hw=u=>wid*Math.sin(Math.PI*Math.pow(cl(u,0,1),.72))*(1-u*.12);
+ /* เงาใบ (silhouette ขอบเข้ม) */
+ for(let i=0;i<N;i++){const u0=i/N,u1=(i+1)/N,a=pt(u0),b=pt(u1);
+  const dx=b.x-a.x,dy=b.y-a.y,dl=Math.hypot(dx,dy)||1,nx=-dy/dl,ny=dx/dl;
+  const w0=hw(u0)*1.14,w1=hw(u1)*1.14;
+  g.fillStyle='#14521c';
+  g.beginPath();g.moveTo(a.x+nx*w0,a.y+ny*w0);g.lineTo(b.x+nx*w1,b.y+ny*w1);
+  g.lineTo(b.x-nx*w1,b.y-ny*w1);g.lineTo(a.x-nx*w0,a.y-ny*w0);g.closePath();g.fill();}
+ /* ริ้วใบ (ซี่) */
+ for(let i=0;i<N;i++){const u0=i/N,u1=(i+1)/N,a=pt(u0),b=pt(u1);
+  const dx=b.x-a.x,dy=b.y-a.y,dl=Math.hypot(dx,dy)||1,nx=-dy/dl,ny=dx/dl;
+  const cut=(i%2)?.80:.97;
+  const w0=hw(u0)*cut,w1=hw(u1)*cut;
+  g.fillStyle=light;
+  g.beginPath();g.moveTo(a.x,a.y);g.lineTo(a.x+nx*w0,a.y+ny*w0);
+  g.lineTo(b.x+nx*w1,b.y+ny*w1);g.lineTo(b.x,b.y);g.closePath();g.fill();
+  g.fillStyle=dark;
+  g.beginPath();g.moveTo(a.x,a.y);g.lineTo(a.x-nx*w0,a.y-ny*w0);
+  g.lineTo(b.x-nx*w1,b.y-ny*w1);g.lineTo(b.x,b.y);g.closePath();g.fill();}
+ /* ก้านกลาง */
+ g.strokeStyle=rib;g.lineWidth=1.6;g.lineCap='round';g.beginPath();g.moveTo(0,0);
+ for(let i=1;i<=N;i++){const p=pt(i/N);g.lineTo(p.x,p.y);}g.stroke();
+ g.strokeStyle='rgba(255,255,255,.25)';g.lineWidth=.7;g.beginPath();g.moveTo(0,-1);
+ for(let i=1;i<=N;i++){const p=pt(i/N);g.lineTo(p.x,p.y-1);}g.stroke();
+ g.restore();}
+/* เครือกล้วย + ปลี */
+function bananaBunch(g,x,y,rp,sc){
+ g.save();g.translate(x,y);g.scale(sc,sc);
+ g.strokeStyle='#7d9b36';g.lineWidth=3.4;g.lineCap='round';
+ g.beginPath();g.moveTo(-8,-20);g.quadraticCurveTo(-2,-14,0,-6);g.stroke();
+ const GRN=[150,200,60],YEL=[247,206,40];
+ for(let r=0;r<4;r++){
+  const ry=-2+r*7.5, n=r<3?5:3, rad=11.5-r*2.1, rr=cl(rp-r*.04,0,1);
+  for(let i=0;i<n;i++){
+   const a=n>1?(i/(n-1))*2-1:0, bx=a*rad, by=ry+Math.abs(a)*1.6;
+   g.strokeStyle='#3d4d12';g.lineWidth=5.4;
+   g.beginPath();g.arc(bx,by,4.8,Math.PI*.08,Math.PI*.92);g.stroke();
+   g.strokeStyle=mixc(GRN,YEL,rr);g.lineWidth=3.4;
+   g.beginPath();g.arc(bx,by,4.8,Math.PI*.12,Math.PI*.88);g.stroke();
+   g.strokeStyle='rgba(255,255,220,.35)';g.lineWidth=1;
+   g.beginPath();g.arc(bx,by,4.8,Math.PI*.2,Math.PI*.45);g.stroke();}}
+ /* ปลีกล้วย */
+ const hy=32;
+ g.fillStyle='#8e2c35';
+ g.beginPath();g.moveTo(-9,hy-3);g.lineTo(-1,hy+2);g.lineTo(-7,hy+6);g.closePath();g.fill();
+ g.beginPath();g.moveTo(9,hy-3);g.lineTo(1,hy+2);g.lineTo(7,hy+6);g.closePath();g.fill();
+ g.fillStyle='#b23c46';
+ g.beginPath();g.moveTo(-7,hy-5);g.lineTo(0,hy);g.lineTo(-4,hy+3);g.closePath();g.fill();
+ g.fillStyle='#4a1550';
+ g.beginPath();g.moveTo(-5,hy-2);g.quadraticCurveTo(-6,hy+9,0,hy+17);
+ g.quadraticCurveTo(6,hy+9,5,hy-2);g.closePath();g.fill();
+ g.fillStyle='#7d2a8e';
+ g.beginPath();g.moveTo(-4,hy-2);g.quadraticCurveTo(-5,hy+8,0,hy+15);
+ g.quadraticCurveTo(5,hy+8,4,hy-2);g.closePath();g.fill();
+ g.fillStyle='#a247b5';g.beginPath();g.ellipse(-1,hy+4,1.6,4,0,0,7);g.fill();
+ g.fillStyle='#4a1550';g.fillRect(-1,hy+15,2,4);
+ g.restore();}
+function tree(g,cx,by,pl,t){
+ if(pl.stage===0)return;
  const h=TH[pl.stage]+(pl.stage<5?(TH[pl.stage+1]-TH[pl.stage])*pl.prog:0);
- const sw=Math.sin(t*1.35+cx*.11)*(h*.035),tw=Math.max(3,h*.12);
- g.fillStyle='rgba(0,0,0,.18)';g.beginPath();g.ellipse(cx,by,h*.28+6,h*.09+3,0,0,7);g.fill();
+ const gr=cl(h/TH[5],0,1);
+ const sway=Math.sin(t*1.15+cx*.13)*(h*.028);
+ const tw=Math.max(2.6,h*.105);
+ /* เงาพื้น */
+ g.fillStyle='rgba(0,0,0,.2)';g.beginPath();g.ellipse(cx,by,h*.3+7,h*.09+3,0,0,7);g.fill();
+ /* ราก */
+ if(gr>.35){g.fillStyle='#7a4a24';
+  for(let i=-3;i<=3;i++){const rx=cx+i*(tw*.72);
+   g.beginPath();g.moveTo(rx,by-5);g.lineTo(rx+i*2.2,by+3);g.lineTo(rx+i*2.2+2.4,by+3);g.closePath();g.fill();}
+  g.fillStyle='#9a6435';g.beginPath();g.ellipse(cx,by-3,tw*1.5,4,0,0,7);g.fill();}
+ /* ลำต้น */
  const gd=g.createLinearGradient(cx-tw,0,cx+tw,0);
- gd.addColorStop(0,'#6b8a3d');gd.addColorStop(.42,'#96b157');gd.addColorStop(1,'#5a7532');
- g.fillStyle=gd;g.beginPath();g.moveTo(cx-tw,by);g.quadraticCurveTo(cx-tw*.6+sw,by-h*.6,cx-tw*.45+sw,by-h);
- g.lineTo(cx+tw*.45+sw,by-h);g.quadraticCurveTo(cx+tw*.6+sw,by-h*.6,cx+tw,by);g.closePath();g.fill();
- const tx=cx+sw,ty=by-h,n=Math.min(7,2+(pl.stage*1.3|0)),L=h*.82+8;
- for(let i=0;i<n;i++){const sd=i%2?1:-1,k=i/n;
-  const a=sd*(.34+k*.76)+Math.sin(t*1.1+i)*.045;
-  leaf(g,tx,ty+2+i*1.2,L*(.7+.3*(1-k))*sd,h*.15+4,sd>0?a:Math.PI-a,i%2?'#3f9e3a':'#4cb244','#2c7a29');}
- if(pl.stage>=5)bunch(g,tx+6,ty+10,pl.stage===6?1:cl(pl.rp/RIPEN,0,.85));
+ gd.addColorStop(0,'#5d7a2c');gd.addColorStop(.22,'#8aa640');gd.addColorStop(.5,'#b3c95c');
+ gd.addColorStop(.78,'#84a03c');gd.addColorStop(1,'#4f6b26');
+ g.fillStyle=gd;
+ g.beginPath();g.moveTo(cx-tw*1.15,by);g.quadraticCurveTo(cx-tw*.75+sway,by-h*.55,cx-tw*.5+sway,by-h);
+ g.lineTo(cx+tw*.5+sway,by-h);g.quadraticCurveTo(cx+tw*.75+sway,by-h*.55,cx+tw*1.15,by);g.closePath();g.fill();
+ /* กาบไม้น้ำตาลไขว้ที่โคน */
+ if(gr>.5){const nb=Math.floor(2+gr*3);
+  for(let i=0;i<nb;i++){const yy=by-6-i*(h*.13),ww=tw*(1.05-i*.07);
+   g.fillStyle=i%2?'#a4682f':'#8a5526';
+   g.beginPath();g.moveTo(cx-ww,yy);g.lineTo(cx,yy-5);g.lineTo(cx+ww,yy);g.lineTo(cx,yy+2);g.closePath();g.fill();
+   g.fillStyle='rgba(255,220,150,.28)';
+   g.beginPath();g.moveTo(cx-ww,yy);g.lineTo(cx,yy-5);g.lineTo(cx-ww*.4,yy-1);g.closePath();g.fill();}}
+ /* เส้นแนวตั้งลำต้น */
+ g.fillStyle='rgba(60,90,30,.28)';
+ g.fillRect(cx-tw*.15+sway*.6,by-h,1.4,h*.9);
+ g.fillStyle='rgba(255,255,200,.18)';
+ g.fillRect(cx+tw*.28+sway*.6,by-h,1.2,h*.85);
+ /* ใบ */
+ const tx=cx+sway,ty=by-h;
+ const n=Math.min(9,2+Math.round(gr*7));
+ const L=h*.92+10;
+ for(let i=0;i<n;i++){
+  const sd=i%2?1:-1,k=i/Math.max(1,n-1);
+  const base=(i<2)?0.15:(0.25+k*0.85);
+  const a=sd*base+Math.sin(t*1.05+i*1.3)*.05;
+  const len=L*(0.62+0.38*(1-k*0.7));
+  const wid=h*.155+4;
+  bLeaf(g,tx,ty+1+i*1.5,len*sd,wid,sd>0?a:Math.PI-a,
+   i%2?'#57bd4a':'#49ae40', i%2?'#2f8a33':'#27772c', '#d9ef7d');}
+ /* ยอดอ่อน */
+ g.fillStyle='#8fd24f';g.beginPath();g.moveTo(tx-2,ty+2);g.lineTo(tx,ty-h*.22-4);g.lineTo(tx+2,ty+2);g.closePath();g.fill();
+ /* เครือ + ปลี */
+ if(pl.stage>=5){const rp=pl.stage===6?1:cl(pl.rp/RIPEN,0,.9);
+  bananaBunch(g,tx+tw*2.0+4,ty+h*.30,rp,cl(h/68,.5,1));}
+ /* แถบสถานะ */
  if(pl.stage>=1&&pl.stage<=4){g.fillStyle='rgba(0,0,0,.45)';g.fillRect(cx-12,by+3,24,5);
   g.fillStyle=pl.water>.15?'#6ee27a':'#ffd86b';g.fillRect(cx-11,by+4,22*pl.prog,3);
   if(pl.water<=.15){g.fillStyle='#7fd0ff';g.fillRect(cx-16,by+2,3,6);g.fillRect(cx-17,by+4,5,2);}}
@@ -520,6 +505,8 @@ function tree(g,cx,by,pl,t){if(pl.stage===0)return;
   g.fillStyle='#ffb03a';g.fillRect(cx-13,by+4,26*cl(pl.rp/RIPEN,0,1),3);}
  else if(pl.stage===6){const b=.6+Math.sin(t*4)*.4;
   g.fillStyle='rgba(255,216,107,'+b+')';g.fillRect(cx-4,by+3,8,5);}}
+
+/*========================= OBJECTS =========================*/
 function rack(g,x,y,r,t){g.fillStyle='rgba(0,0,0,.2)';g.beginPath();g.ellipse(x,y+20,24,5,0,0,7);g.fill();
  g.fillStyle='#5b3b1f';g.fillRect(x-22,y,44,3);g.fillRect(x-20,y+3,4,17);g.fillRect(x+16,y+3,4,17);
  g.fillStyle='#7a5330';for(let i=-20;i<22;i+=6)g.fillRect(x+i,y-5,3,5);
@@ -554,7 +541,8 @@ const keys={};let edge=false,tap=false;
 addEventListener('keydown',e=>{
  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();
  if(!keys[e.code]){if(e.code==='Space'||e.code==='KeyE'||e.code==='Enter'){edge=true;tap=true;}
-  if(e.code==='KeyM')openPanel('map');if(e.code==='Escape')closePanel();if(e.code==='KeyH')openPanel('help');}
+  if(e.code==='KeyM')openPanel('map');if(e.code==='Escape')closePanel();
+  if(e.code==='KeyH')openPanel('help');if(e.code==='KeyB')goHome();}
  keys[e.code]=true;});
 addEventListener('keyup',e=>{keys[e.code]=false;});
 const td={u:0,d:0,l:0,r:0};
@@ -575,17 +563,20 @@ if('ontouchstart'in window){document.getElementById('touch').classList.add('on')
  lay();addEventListener('resize',()=>setTimeout(lay,60));}
 document.getElementById('mMap').onclick=()=>openPanel('map');
 document.getElementById('mHelp').onclick=()=>openPanel('help');
-document.getElementById('mNew').onclick=()=>{if(confirm('เริ่มเกมใหม่ทั้งหมด?')){localStorage.removeItem('bnf16v5');location.reload();}};
+document.getElementById('mHome').onclick=()=>goHome();
 document.getElementById('px').onclick=closePanel;
 function toast(t,bad){const d=document.createElement('div');d.className='toast'+(bad?' bad':'');d.textContent=t;
  toastBox.appendChild(d);setTimeout(()=>{d.style.transition='opacity .3s';d.style.opacity=0;},1500);setTimeout(()=>d.remove(),1880);}
+function goHome(){if(pk)closePanel();
+ if(scene==='farm'&&Math.hypot(P.x-150,P.y-180)<40){toast('🏠 อยู่หน้าบ้านแล้วค่ะ');return;}
+ go('farm',150,180);toast('🏠 กลับบ้านแล้ว!');}
 
 /*========================= QUESTS =========================*/
 const QUEST=[
  {t:'🌱 เข้าประตูรั้ว เดินไปแปลง กด E ปลูกกล้วย',ok:()=>S.stats.plant>0},
  {t:'🌿 รดน้ำ รอโต แล้วเก็บ "กล้วยดิบ"',ok:()=>S.stats.hg>0},
  {t:'🍌 ปล่อยให้สุก (แถบส้มเต็ม) แล้วเก็บ',ok:()=>S.stats.hr>0},
- {t:'🏪 เดินถนนไปขวาสุด → ตลาด ขายกล้วยสุก',ok:()=>S.stats.earn>0},
+ {t:'🏪 ถนนขวาสุด → ตลาด ขายกล้วยสุก',ok:()=>S.stats.earn>0},
  {t:'🔪 ถนนซ้ายสุด → หลังบ้าน ปอกกล้วยดิบ',ok:()=>S.inv.slice>0||S.inv.dried>0||S.inv.flour>0},
  {t:'☀️ เอากล้วยหั่นขึ้นราวตากให้แห้ง',ok:()=>S.inv.dried>0||S.inv.flour>0},
  {t:'⚙️ บดกล้วยแห้ง 3 ชิ้น → แป้ง 1 ถุง',ok:()=>S.inv.flour>0},
@@ -611,7 +602,7 @@ function acts(){const L=[];
  else if(scene==='kitchen'){
   L.push({x:182,y:134,r:30,txt:'ทำทองม้วน (ใช้แป้ง 2 | มี '+S.inv.flour+')',act:mgStart});
   L.push({x:276,y:134,r:28,txt:'ดูสต๊อกทองม้วน',act:()=>toast('📦 ทองม้วน '+S.inv.roll+' กล่อง')});}
- else if(scene==='market')L.push({x:244,y:158,r:42,txt:'คุยกับแม่ค้ารับซื้อกล้วย',act:()=>openPanel('market')});
+ else if(scene==='market')L.push({x:244,y:158,r:44,txt:'คุยกับแม่ค้ารับซื้อกล้วย',act:()=>openPanel('market')});
  else if(scene==='coop'){L.push({x:166,y:136,r:34,txt:'ขายทองม้วน',act:()=>openPanel('sell')});
   L.push({x:332,y:140,r:38,txt:'ซื้อของ / อัปเกรด',act:()=>openPanel('shop')});}
  return L;}
@@ -621,7 +612,7 @@ function plot(i){const pl=S.plots[i];
  else if(pl.stage===5){S.inv.green+=8;pl.stage=4;pl.prog=0;pl.rp=0;S.stats.hg+=8;sfx.pick();toast('🌿 ได้กล้วยดิบ +8');}
  else if(pl.stage===6){S.inv.ripe+=8;pl.stage=4;pl.prog=0;pl.rp=0;S.stats.hr+=8;sfx.pick();toast('🍌 ได้กล้วยสุก +8');}
  else if(pl.water<=.15){pl.water=1;sfx.water();
-  for(let k=0;k<8;k++)drops.push({x:PLOTS[i][0]+(Math.random()*30-15),y:PLOTS[i][1]-34,l:.5});toast('💧 รดน้ำแล้ว');}}
+  for(let k=0;k<8;k++)drops.push({x:PLOTS[i][0]+(Math.random()*30-15),y:PLOTS[i][1]-36,l:.5});toast('💧 รดน้ำแล้ว');}}
 function peel(){if(S.inv.green<1){toast('ไม่มีกล้วยดิบ',1);sfx.bad();return;}
  busy={t:0,d:1.2,l:'กำลังปอกและหั่น...',f:()=>{const n=Math.min(6,S.inv.green);S.inv.green-=n;S.inv.slice+=n;
   sfx.pick();toast('🔪 หั่นกล้วยได้ '+n+' ชิ้น');}};}
@@ -643,10 +634,10 @@ const SHOP=[
  {id:'racks',n:'ราวตากเพิ่ม 3 ราว',max:1,c:[380],d:()=>'ตากพร้อมกันได้ 6 ราว'},
  {id:'grinder',n:'เครื่องบดไฟฟ้า',max:1,c:[520],d:()=>'บดแป้งทีเดียวหมด'},
  {id:'pan',n:'เตาทองม้วนคู่',max:1,c:[840],d:()=>'ทองม้วนต่อรอบ +50%'},
- {id:'vehicle',n:'รถซาเล้งพ่วงข้าง',max:1,c:[950],d:()=>'เดินเร็ว +35% และวาร์ปข้ามฉาก'}];
+ {id:'vehicle',n:'รถซาเล้งพ่วงข้าง',max:1,c:[950],d:()=>'เดินเร็ว +35% และวาร์ปข้ามฉากจากแผนที่'}];
 const ROUTES={farm:['kitchen','backyard','market','coop'],backyard:['farm','kitchen'],
  kitchen:['farm','backyard'],market:['farm','coop'],coop:['farm','market']};
-const SPAWN={farm:[150,154],backyard:[300,160],kitchen:[240,180],market:[240,192],coop:[240,200]};
+const SPAWN={farm:[150,180],backyard:[300,160],kitchen:[240,180],market:[240,196],coop:[240,200]};
 function openPanel(k){pk=k;panelEl.classList.add('on');rp();}
 function closePanel(){pk=null;panelEl.classList.remove('on');}
 function rp(){if(!pk)return;pbEl.innerHTML='';
@@ -654,7 +645,8 @@ function rp(){if(!pk)return;pbEl.innerHTML='';
   const i=document.createElement('div');i.className='info';
   i.innerHTML='<div class="nm">'+nm+'</div>'+(ds?'<div class="ds">'+ds+'</div>':'');r.appendChild(i);
   (bs||[]).forEach(b=>{const e=document.createElement('button');
-   e.className='btn'+(b.dis?' dis':'')+(b.blue?' blue':'');e.textContent=b.t;if(!b.dis)e.onclick=b.f;r.appendChild(e);});
+   e.className='btn'+(b.dis?' dis':'')+(b.blue?' blue':'')+(b.red?' red':'');
+   e.textContent=b.t;if(!b.dis)e.onclick=b.f;r.appendChild(e);});
   pbEl.appendChild(r);};
  if(pk==='market'){ptEl.textContent='🍌 แผงรับซื้อกล้วย — '+S.money+'฿';
   add('👩 ป้าสมศรี แม่ค้าผลไม้','"เอากล้วยมาเท่าไหร่ป้ารับหมดจ้ะ~"');
@@ -675,22 +667,26 @@ function rp(){if(!pk)return;pbEl.innerHTML='';
    add(it.n+(it.max>1?' (Lv.'+lv+'→'+(lv+1)+')':''),it.d(lv),[{t:c+'฿',dis:S.money<c,f:()=>buy(it,c)}]);});}
  else if(pk==='map'){ptEl.textContent='🗺 แผนที่ — อยู่ที่ '+SCNAME[scene];
   add('🧭 ทางออกจากจุดนี้',SC[scene].exits.map(e=>({left:'◀ ซ้าย',right:'▶ ขวา',up:'▲ บน',down:'▼ ล่าง'}[e.d])+' = '+e.n).join(' • '));
+  add('🏠 กลับบ้านทันที','ใช้ได้ฟรีทุกเวลา (ปุ่ม 🏠 หรือกด B)',[{t:'กลับบ้าน',blue:1,f:()=>{closePanel();goHome();}}]);
   Object.keys(SCNAME).forEach(k=>{const here=k===scene,lk=ROUTES[scene].indexOf(k)>=0;
    add((here?'📍 ':'')+SCNAME[k],here?'คุณอยู่ที่นี่':(lk?'เดินถึงได้โดยตรง':'ต้องผ่านฉากอื่นก่อน'),
     [{t:S.up.vehicle?'🛺 วาร์ป':'🔒 ต้องมีซาเล้ง',blue:1,dis:here||!S.up.vehicle,
       f:()=>{closePanel();go(k,SPAWN[k][0],SPAWN[k][1]);}}]);});}
  else if(pk==='help'){ptEl.textContent='? วิธีเล่น';
-  add('👩‍🌾 ตัวละคร','"น้องกล้วย" ชาวสวนสาว — หมวกสานปีกกว้าง ผมถักเปีย ผ้ากันเปื้อน ถุงมือสวน');
-  add('🎮 การควบคุม','WASD / ลูกศร = เดิน • E หรือ Space = โต้ตอบ • M = แผนที่ • H = หน้านี้');
-  add('🚪 เดินไป–กลับ','สวน⇄ครัว⇄หลังบ้าน⇄สวน⇄ตลาด⇄สหกรณ์⇄สวน — เดินชนลูกศรเรืองแสง');
+  add('🎮 การควบคุม','WASD / ลูกศร = เดิน • E หรือ Space = โต้ตอบ • M = แผนที่ • B = กลับบ้าน • H = หน้านี้');
+  add('🚪 เดินไป–กลับ','สวน⇄ครัว⇄หลังบ้าน⇄สวน⇄ตลาด⇄สหกรณ์⇄สวน — เดินชนลูกศรเรืองแสงที่ขอบ');
+  add('🌴 ต้นกล้วย','ใบแตกริ้วสวยงาม • มีเครือกล้วยและปลีสีม่วงห้อยเมื่อโตเต็มที่');
   add('🌿 ดิบ vs 🍌 สุก','เครือออก = เก็บดิบได้ทันที • รอ '+RIPEN+' วิ (แถบส้ม) จะสุกขายแพงกว่า');
   add('🔄 สายการผลิต','ดิบ → หั่น → ตาก 18 วิ → บด 3 = แป้ง 1 → แป้ง 2 = ทองม้วน 3–6 กล่อง');
-  add('💵 ราคา','ดิบ 5฿ • สุก 12฿ • แห้ง 9฿ • ทองม้วน 60฿/กล่อง');}}
+  add('💵 ราคา','ดิบ 5฿ • สุก 12฿ • แห้ง 9฿ • ทองม้วน 60฿/กล่อง');
+  add('⚠️ ล้างข้อมูลเกม','ลบเซฟทั้งหมดแล้วเริ่มใหม่',[{t:'เริ่มใหม่',red:1,
+   f:()=>{if(confirm('ลบเซฟและเริ่มเกมใหม่ทั้งหมด?')){localStorage.removeItem('bnf16v6');location.reload();}}}]);}}
 function sell(k,n,p){if(n<1)return;S.inv[k]-=n;const m=n*p;S.money+=m;S.stats.earn+=m;
  sfx.coin();toast('💰 ขายได้ '+m+'฿');rp();hud();save();}
 function buy(it,c){if(S.money<c)return;S.money-=c;S.up[it.id]++;sfx.coin();
  toast('🛍 ซื้อ '+it.n+' แล้ว!');rp();hud();relabel();save();}
-function go(sc,x,y){trans={t:0,to:sc,x:x,y:y};S.stats.trips++;sfx.door();}
+function go(sc,x,y){const b=SC[sc].bounds;
+ trans={t:0,to:sc,x:cl(x,b[0]+8,b[2]-8),y:cl(y,b[1]+8,b[3]-8)};S.stats.trips++;sfx.door();}
 
 /*========================= MINIGAME =========================*/
 function mgStart(){if(S.inv.flour<2){toast('ต้องใช้แป้งกล้วย 2 ถุง',1);sfx.bad();return;}
@@ -774,15 +770,18 @@ function blocked(nx,ny){const s=SC[scene],b=s.bounds;
  for(const o of s.solids)if(ov(fx,fy,fw,fh,o))return true;
  return false;}
 const spd=()=>54*(1+(S.up.boots?.25:0)+(S.up.vehicle?.35:0));
+/* กันตำแหน่งเซฟเก่าหลุดขอบฉาก */
+(function clampStart(){const b=SC[scene].bounds;
+ P.x=cl(P.x,b[0]+8,b[2]-8);P.y=cl(P.y,b[1]+8,b[3]-8);})();
 
 /*========================= UPDATE =========================*/
 function update(dt){
  S.clock=(S.clock+dt/220)%1;
  if(mg){mgUpd(dt);edge=false;return;}
  if(trans){trans.t+=dt*1.7;
-  if(trans.t>=.5&&trans.to){scene=trans.to;P.x=trans.x;P.y=trans.y;P.dir='down';trans.to=null;cool=.85;relabel();hud();save();}
+  if(trans.t>=.5&&trans.to){scene=trans.to;P.x=trans.x;P.y=trans.y;P.dir='down';trans.to=null;
+   exitLock=true;relabel();hud();save();}
   if(trans.t>=1)trans=null;edge=false;return;}
- if(cool>0)cool-=dt;
  S.plots.forEach((pl,i)=>{const auto=S.up.sprink>=2||(S.up.sprink===1&&i<4);
   if(auto)pl.water=1;else if(pl.water>0)pl.water=Math.max(0,pl.water-dt/26);
   if(pl.stage>=1&&pl.stage<=4){const m=(pl.water>.15?1.7:1)*(1+.25*S.up.fert);
@@ -805,8 +804,10 @@ function update(dt){
   if(!blocked(nx,P.y))P.x=nx;if(!blocked(P.x,ny))P.y=ny;P.anim+=dt;
   if(S.up.vehicle&&Math.random()<.25)dust.push({x:P.x,y:P.y,l:.4});}
  else P.anim=0;
- if(cool<=0)for(const e of SC[scene].exits){
-  if(ov(P.x-6,P.y-6,12,8,e.r)){go(e.to,e.sx,e.sy);toast('🚪 ไป '+SCNAME[e.to]);break;}}
+ /* ★ ระบบประตูแบบใหม่: ปลดล็อกเมื่อเดินพ้นโซนประตูเท่านั้น = ไม่เด้งวน ★ */
+ const inEx=SC[scene].exits.find(e=>ov(P.x-7,P.y-7,14,9,e.r));
+ if(exitLock){if(!inEx)exitLock=false;}
+ else if(inEx){go(inEx.to,inEx.sx,inEx.sy);toast('🚪 ไป '+SCNAME[inEx.to]);}
  const a=near();
  if(a){promptEl.classList.add('on');promptEl.innerHTML='<kbd>E</kbd> '+a.txt;if(edge&&a.act)a.act();}
  else promptEl.classList.remove('on');
@@ -833,9 +834,9 @@ function render(t){
  else if(scene==='market'){
   L.push({y:102,f:()=>drawNPC(ctx,214,102,NPCDEF.vendorF,t,1)});
   L.push({y:102,f:()=>drawNPC(ctx,278,102,NPCDEF.vendorM,t,2)});
-  const cx1=120+Math.sin(t*.45)*46;
-  L.push({y:232,f:()=>drawNPC(ctx,cx1,232,NPCDEF.customer,t,3)});
-  L.push({y:238,f:()=>drawNPC(ctx,392,238,NPCDEF.kid,t,4,1)});}
+  const cx1=130+Math.sin(t*.45)*54;
+  L.push({y:238,f:()=>drawNPC(ctx,cx1,238,NPCDEF.customer,t,3)});
+  L.push({y:244,f:()=>drawNPC(ctx,392,244,NPCDEF.kid,t,4,1)});}
  else if(scene==='coop'){
   L.push({y:90,f:()=>drawNPC(ctx,152,90,NPCDEF.clerk,t,5)});
   L.push({y:214,f:()=>drawNPC(ctx,320,214,NPCDEF.customer,t,6)});}
@@ -845,7 +846,7 @@ function render(t){
    ctx.fillStyle='#caa044';ctx.fillRect(256+i*11,104,9,4);}}});}
  dust.forEach(d=>{ctx.fillStyle='rgba(212,192,152,'+d.l+')';ctx.fillRect(d.x-2,d.y-1,3,2);});
  drops.forEach(d=>{ctx.fillStyle='rgba(127,208,255,'+cl(d.l*2,0,.9)+')';ctx.fillRect(d.x,d.y,1,3);});
- L.push({y:P.y,f:()=>player(ctx,t)});
+ L.push({y:P.y,f:player});
  L.sort((a,b)=>a.y-b.y).forEach(o=>o.f(ctx));
  SC[scene].exits.forEach(e=>exitArrow(ctx,e,t));
  const tn=SC[scene].out?tint():'rgba(255,198,116,.08)';
@@ -864,8 +865,8 @@ function render(t){
 let last=performance.now(),T=0;
 function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;T+=dt;update(dt);render(T);requestAnimationFrame(loop);}
 relabel();hud();qTick();requestAnimationFrame(loop);
-setTimeout(()=>toast('👩‍🌾 สวัสดีค่ะ! ฉันน้องกล้วย ชาวสวนคนใหม่'),600);
-setTimeout(()=>toast('🏪 ตลาดเดินเข้า-ออกได้แล้ว ลองเดินขวาสุดดูนะ'),2600);
+setTimeout(()=>toast('🏪 ตลาดเข้า–ออกได้แล้ว! เดินถนนไปขวาสุดเลย'),700);
+setTimeout(()=>toast('🏠 ปุ่มขวาล่าง = กลับบ้านทันที (หรือกด B)'),2700);
 </script>
 </body>
 </html>
