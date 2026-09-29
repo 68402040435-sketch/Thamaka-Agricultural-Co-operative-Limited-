@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#05070a">
-<title>สวนกล้วยทองม้วน v10 | Banana Farm 16-bit</title>
+<title>สวนกล้วยทองม้วน v11 | Banana Farm 16-bit</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&display=swap" rel="stylesheet">
@@ -26,6 +26,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated;image-rend
 .lbl.soft{border-color:#7fd0ff;color:#dff2ff}
 .lbl.door{border-color:#9ef0a8;color:#dbffe1}
 .lbl.field{border-color:#b6ff8a;color:#e6ffd6}
+.lbl.shop{border-color:#ffb3d9;color:#ffe0f0}
 #hud{left:calc(var(--s)*4px);top:calc(var(--s)*4px);display:flex;flex-wrap:wrap;gap:calc(var(--s)*2.2px);
  font-size:calc(var(--s)*5.4px);font-weight:600;max-width:calc(var(--s)*322px)}
 .chip{background:rgba(9,13,20,.86);border:calc(var(--s)*.8px) solid #35527d;border-radius:calc(var(--s)*2.4px);
@@ -50,16 +51,17 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated;image-rend
 @keyframes tin{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
 #panel{inset:0;display:none;place-items:center;background:rgba(3,5,9,.76);pointer-events:auto}
 #panel.on{display:grid}
-.pbox{width:92%;max-width:calc(var(--s)*350px);max-height:92%;overflow:auto;background:#111a26;
+.pbox{width:92%;max-width:calc(var(--s)*352px);max-height:92%;overflow:auto;background:#111a26;
  border:calc(var(--s)*1.4px) solid #ffd86b;border-radius:calc(var(--s)*4px);box-shadow:0 calc(var(--s)*4px) 0 #090e15}
 .ptitle{font-size:calc(var(--s)*7px);font-weight:800;color:#2b1d06;background:linear-gradient(#ffd86b,#e9b53a);
  padding:calc(var(--s)*2.2px) calc(var(--s)*4.5px);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:2}
 .pbody{padding:calc(var(--s)*3.5px);display:flex;flex-direction:column;gap:calc(var(--s)*2.2px)}
 .row{display:flex;align-items:center;gap:calc(var(--s)*2.6px);background:#1a2534;border:calc(var(--s)*.8px) solid #2f4460;
  border-radius:calc(var(--s)*2.4px);padding:calc(var(--s)*2.2px) calc(var(--s)*3px)}
+.row.edu{background:#16281f;border-color:#2f6b4a;border-left:calc(var(--s)*2.4px) solid #6ee27a}
 .row .info{flex:1;min-width:0}
 .nm{font-size:calc(var(--s)*5.7px);font-weight:700}
-.ds{font-size:calc(var(--s)*4.6px);opacity:.82;font-weight:400}
+.ds{font-size:calc(var(--s)*4.6px);opacity:.86;font-weight:400;line-height:1.45}
 .btn{pointer-events:auto;cursor:pointer;font-family:inherit;font-weight:800;font-size:calc(var(--s)*5.3px);color:#2b1d06;
  background:linear-gradient(#ffe291,#e9b53a);border:none;border-bottom:calc(var(--s)*2px) solid #a97d18;
  border-radius:calc(var(--s)*2px);padding:calc(var(--s)*2.2px) calc(var(--s)*4px);white-space:nowrap;min-height:34px}
@@ -131,14 +133,13 @@ function hash(x,y){let n=(x*7919+y*104729)|0;n=(n<<13)^n;return((n*(n*n*15731+78
 function ov(ax,ay,aw,ah,r){return ax<r[0]+r[2]&&ax+aw>r[0]&&ay<r[1]+r[3]&&ay+ah>r[1];}
 function mixc(a,b,t){t=cl(t,0,1);return'rgb('+Math.round(a[0]+(b[0]-a[0])*t)+','+Math.round(a[1]+(b[1]-a[1])*t)+','+Math.round(a[2]+(b[2]-a[2])*t)+')';}
 
-/*======== ⏰ วงจรเวลา: กลางวัน 20 นาที + กลางคืน 20 นาที ========*/
-const DAY_SEC=1200, NIGHT_SEC=1200, CYCLE=DAY_SEC+NIGHT_SEC;
+/*==== ⏰ เวลา: กลางวัน 20 นาที + กลางคืน 20 นาที ====*/
+const DAY_SEC=1200,NIGHT_SEC=1200,CYCLE=DAY_SEC+NIGHT_SEC;
 function gameMin(){return Math.floor((S.clock/CYCLE*1440+360)%1440);}
-function timeStr(){const m=gameMin(),h=(m/60)|0,mm=m%60;
- return(h<10?'0':'')+h+':'+(mm<10?'0':'')+mm;}
+function timeStr(){const m=gameMin(),h=(m/60)|0,mm=m%60;return(h<10?'0':'')+h+':'+(mm<10?'0':'')+mm;}
 function isNight(){return S.clock>=DAY_SEC;}
 
-/*======== MOBILE LAYOUT ========*/
+/*==== MOBILE LAYOUT ====*/
 const isTouch=(matchMedia('(pointer:coarse)').matches)||('ontouchstart'in window);
 if(isTouch)document.body.classList.add('tm');
 function layout(){
@@ -175,7 +176,7 @@ addEventListener('gesturestart',e=>e.preventDefault());
 addEventListener('contextmenu',e=>e.preventDefault());
 layout();
 
-/*======== AUDIO ========*/
+/*==== AUDIO ====*/
 let AC=null;
 function snd(f,d,t,v){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();
  if(AC.state==='suspended')AC.resume();
@@ -189,9 +190,10 @@ const sfx={ok:()=>snd(640,.09),door:()=>{snd(320,.07,'square',.04);setTimeout(()
  bell:()=>{snd(1568,.05,'sine',.05);setTimeout(()=>snd(2093,.09,'sine',.04),60);},
  engine:()=>{snd(110,.18,'sawtooth',.05);setTimeout(()=>snd(150,.22,'sawtooth',.04),120);},
  night:()=>{snd(392,.3,'sine',.04);setTimeout(()=>snd(294,.4,'sine',.035),220);},
- morn:()=>{snd(659,.14,'triangle',.05);setTimeout(()=>snd(880,.2,'triangle',.045),130);}};
+ morn:()=>{snd(659,.14,'triangle',.05);setTimeout(()=>snd(880,.2,'triangle',.045),130);},
+ page:()=>snd(520,.05,'triangle',.035)};
 
-/*======== PLAYER SPRITE ========*/
+/*==== PLAYER SPRITE ====*/
 const PAL={'.':null,o:'#1b1208',k:'#2a1c0d',s:'#ffdcb2',S:'#e8b184',c:'#ffeed4',r:'#e05a7a',
  h:'#f6d98a',H:'#d4a94e',y:'#fff0bd',n:'#4a2c17',N:'#6b4223',m:'#8a5a2f',
  b:'#6fc3f0',B:'#3f96c9',w:'#fdfdfd',f:'#fff3b0',a:'#fff6e2',A:'#e2d3b4',
@@ -239,13 +241,14 @@ const SIT={down:mk(HAT_D.concat(FACE_D,BODY_D,['..ogggggggggggo...','.oGGGGGGGGG
 SIT.left=mir(SIT.right);
 const PW=18;
 
-/*======== NPC ========*/
+/*==== NPC ====*/
 const NPCDEF={
  vendorF:{skin:'#ffd9ae',skinS:'#dfa97e',hair:'#2e1c0f',hair2:'#4a2c18',style:'bun',top:'#e8556f',top2:'#b83a52',apron:'#fff3d8',bottom:'#8a4a5e',hat:null},
  vendorM:{skin:'#e8b98c',skinS:'#c1925f',hair:'#1f1710',hair2:'#3a2a1a',style:'short',top:'#4a90d9',top2:'#2f6db0',apron:null,bottom:'#3a4149',hat:'#dcc089'},
  mech:{skin:'#e8b98c',skinS:'#bd8c58',hair:'#20180f',hair2:'#3a2a1a',style:'short',top:'#4a5a66',top2:'#33414c',apron:'#d9e2ea',bottom:'#2b3038',hat:'#d94f3d'},
  customer:{skin:'#fbe0c2',skinS:'#dcb894',hair:'#5a3a1e',hair2:'#7a5228',style:'long',top:'#9b6fd4',top2:'#7148ad',apron:null,bottom:'#e8e2d2',hat:null},
  clerk:{skin:'#ffd9ae',skinS:'#dfa97e',hair:'#241a10',hair2:'#3d2a18',style:'pony',top:'#2f9c68',top2:'#1f6f4a',apron:'#f2f7f4',bottom:'#37424d',hat:null},
+ teacher:{skin:'#ffdcb8',skinS:'#dcae83',hair:'#2b2018',hair2:'#453326',style:'bun',top:'#f2f7f4',top2:'#cfd9e2',apron:null,bottom:'#3a4d6b',hat:null},
  kid:{skin:'#ffe3c4',skinS:'#e0bb98',hair:'#3a2210',hair2:'#5a3a1c',style:'short',top:'#ffd86b',top2:'#d9a72f',apron:null,bottom:'#5f8fd4',hat:null}};
 function drawNPC(g,x,y,def,t,seed,small){
  const sc=small?.78:1,bob=Math.sin(t*1.9+seed)*.9,sw=Math.sin(t*2.6+seed)*1.1;
@@ -268,45 +271,55 @@ function drawNPC(g,x,y,def,t,seed,small){
  px(5,4,2,2,'#241a10');px(9,4,2,2,'#241a10');px(5,4,1,1,'#fff');px(9,4,1,1,'#fff');
  px(4,6,1,1,'rgba(230,110,130,.55)');px(11,6,1,1,'rgba(230,110,130,.55)');px(7,6,2,1,'#c25a6a');}
 
-/*======== STATE / สมดุลใหม่ ========
-  แปลงเหลี่ยม 8 แปลง — 2 แถว × 4 คอลัมน์
-  บ่อดินแต่ละแปลง 72×48 · ต้นสูงสุด 44px
-====================================*/
+/*==== STATE ====*/
 const PLOTS=[[82,152],[172,152],[308,152],[398,152],[82,238],[172,238],[308,238],[398,238]];
 const BEDS=[[46,116],[136,116],[272,116],[362,116],[46,202],[136,202],[272,202],[362,202]];
 const BEDW=72,BEDH=48;
 const RACKS=[[170,152],[240,152],[310,152],[170,206],[240,206],[310,206]];
-const ST=[0,22,28,34,42,50];               /* โตช้าลงมาก รวม ~176 วิ */
-const TH=[0,8,14,22,32,44,44];             /* ต้นเล็กลง สูงสุด 44px */
-const RIPEN=45;                            /* รอสุก 45 วินาที */
+const ST=[0,22,28,34,42,50],TH=[0,8,14,22,32,44,44],RIPEN=45;
 const PRICE={ripe:8,green:3,dried:6,roll:120};
 const SCNAME={farm:'บ้าน & ลานบ้าน',orchard:'สวนกล้วย (แปลงปลูก)',backyard:'หลังบ้าน (ลานตาก)',
- kitchen:'ครัวแปรรูป',market:'ตลาดสด',coop:'ร้านค้าสหกรณ์'};
+ kitchen:'ครัวแปรรูป',market:'ตลาดสด',coopfront:'ถนนหน้าสหกรณ์ (ตึกแถว)',coop:'ในร้านสหกรณ์'};
 const VNAME={bike:'จักรยาน',saleng:'รถซาเล้ง'};
 function fresh(){return{money:60,inv:{green:0,ripe:0,slice:0,dried:0,flour:0,roll:0},
  up:{fert:0,sprink:0,boots:0,racks:0,grinder:0,pan:0,bike:0,saleng:0},
- park:{bike:{sc:'farm',x:112,y:200},saleng:{sc:'farm',x:150,y:212}},ride:'',
+ park:{bike:{sc:'farm',x:112,y:200},saleng:{sc:'farm',x:150,y:212}},ride:'',read:0,
  plots:PLOTS.map(()=>({stage:0,prog:0,water:0,rp:0})),racks:RACKS.map(()=>({item:0,prog:0})),
  stats:{plant:0,hg:0,hr:0,earn:0,roll:0,trips:0},q:0,scene:'farm',px:150,py:186,clock:60};}
 let S=fresh();
-try{const v=localStorage.getItem('bnf16v10');if(v){const o=JSON.parse(v);if(o&&o.inv)S=Object.assign(fresh(),o);}}catch(e){}
+try{const v=localStorage.getItem('bnf16v11');if(v){const o=JSON.parse(v);if(o&&o.inv)S=Object.assign(fresh(),o);}}catch(e){}
 if(!(S.clock>=0&&S.clock<CYCLE))S.clock=60;
-function save(){try{S.px=P.x;S.py=P.y;S.scene=scene;localStorage.setItem('bnf16v10',JSON.stringify(S));}catch(e){}}
+function save(){try{S.px=P.x;S.py=P.y;S.scene=scene;localStorage.setItem('bnf16v11',JSON.stringify(S));}catch(e){}}
 setInterval(save,5000);addEventListener('visibilitychange',save);
 const P={x:S.px,y:S.py,dir:'down',anim:0,moving:false};
 let scene=S.scene,busy=null,trans=null,mg=null,pk=null,dust=[],drops=[],exitLock=true,wheel=0,lastNight=isNight();
 
-/*======== SCENES ========*/
+/*==== 📚 ความรู้เรื่องกล้วย ====*/
+const EDU=[
+ ['🍌 กล้วยคืออะไร','กล้วยเป็นพืชล้มลุกตระกูล Musa ไม่ใช่ "ต้นไม้" จริง ๆ เพราะลำต้นที่เห็นเกิดจากกาบใบซ้อนกันแน่น เรียกว่า "ลำต้นเทียม" ส่วนลำต้นจริงอยู่ใต้ดิน เรียกว่าเหง้าหรือหัว'],
+ ['🌱 พันธุ์ที่นิยมในไทย','กล้วยน้ำว้า (ทำขนม/ตาก) · กล้วยหอมทอง (กินสด ส่งออก) · กล้วยไข่ (ลูกเล็ก หวาน) · กล้วยหักมุก (นึ่ง ปิ้ง) · กล้วยเล็บมือนาง (ลูกจิ๋ว หอม)'],
+ ['🌿 การขยายพันธุ์','ใช้ "หน่อ" แยกจากต้นแม่ หน่อที่ดีคือหน่อใบแคบ (หน่อดาบ) อายุ 3-5 เดือน สูงราว 70-100 ซม. เพราะมีอาหารสะสมในเหง้ามาก โตเร็วกว่าหน่อใบกว้าง'],
+ ['📏 ระยะปลูก','กล้วยน้ำว้าใช้ระยะ 2×2 ถึง 2.5×2.5 เมตร ได้ประมาณ 250-400 ต้นต่อไร่ ปลูกถี่เกินไปต้นจะแย่งแสง ลำต้นสูงชะลูด เครือเล็ก'],
+ ['💧 การให้น้ำ','กล้วยต้องการน้ำมากและสม่ำเสมอ ใบกล้วยคายน้ำสูง ถ้าขาดน้ำช่วงออกเครือ ผลจะเล็กและไม่สมบูรณ์ แต่ห้ามให้น้ำขังเพราะรากเน่าง่าย'],
+ ['🌾 การใส่ปุ๋ย','กล้วยชอบโพแทสเซียม (K) สูง ช่วยให้เครือใหญ่ รสหวาน นิยมใส่ปุ๋ยคอก/ปุ๋ยหมักรองก้นหลุม แล้วเสริมปุ๋ยเคมีสูตรเสมอช่วงแตกกอ'],
+ ['✂️ การดูแลกอ','ควรไว้หน่อ 1-2 หน่อต่อกอ แล้วตัดหน่อส่วนเกินทิ้ง เพื่อไม่ให้แย่งอาหาร · ตัดใบแห้งใบเป็นโรคออกเสมอ · ใช้ไม้ค้ำเครือกันต้นล้มเมื่อเครือหนัก'],
+ ['🌸 ปลีและเครือ','หลังปลูก 8-10 เดือนจะ "แทงปลี" ปลีคือช่อดอก ดอกตัวเมียจะกลายเป็นผล เมื่อติดผลครบหวีแล้วควรตัดปลีทิ้งเพื่อให้อาหารไปเลี้ยงผล · ปลีกินได้ ทำยำ/แกง'],
+ ['⏳ เก็บเกี่ยว','เก็บได้หลังตัดปลีประมาณ 90-120 วัน สังเกตจากผลเต็ม เหลี่ยมผลลบ สีเขียวอ่อนลง · ตัดเครือตอนเช้าที่อากาศเย็นจะช้ำน้อยกว่า'],
+ ['🌿 ดิบ vs 🍌 สุก','กล้วยดิบมี "แป้งทนย่อย" สูงมาก เหมาะทำแป้งกล้วยและช่วยเคลือบกระเพาะ · เมื่อสุก แป้งจะเปลี่ยนเป็นน้ำตาล รสหวานขึ้น ย่อยง่ายขึ้น ให้พลังงานเร็ว'],
+ ['💪 คุณค่าอาหาร','กล้วยอุดมด้วยโพแทสเซียม ช่วยสมดุลน้ำและการทำงานของกล้ามเนื้อ · มีวิตามินบี 6 · ใยอาหาร · น้ำตาลธรรมชาติที่ให้พลังงานเร็ว จึงนิยมกินก่อน/หลังออกกำลังกาย'],
+ ['🏭 การแปรรูป','กล้วยตาก · กล้วยฉาบ · กล้วยกวน · แป้งกล้วย · ทองม้วนกล้วย · น้ำส้มสายชูหมัก · ส่วนอื่นใช้ได้หมด เช่น ใบตองห่ออาหาร กาบทำเชือก หยวกทำอาหารสัตว์']];
+
+/*==== SCENES ====*/
 const SC={
  farm:{out:1,bounds:[12,26,468,250],
   solids:[[26,18,152,96],[32,186,34,22]],
   exits:[{r:[88,110,28,14],d:'up',to:'kitchen',sx:240,sy:200,n:'ครัว'},
          {r:[0,140,18,26],d:'left',to:'backyard',sx:436,sy:112,n:'หลังบ้าน'},
          {r:[462,140,18,26],d:'right',to:'market',sx:70,sy:196,n:'ตลาด'},
-         {r:[188,22,26,14],d:'up',to:'coop',sx:240,sy:200,n:'สหกรณ์'},
+         {r:[188,22,26,14],d:'up',to:'coopfront',sx:228,sy:232,n:'ถนนสหกรณ์'},
          {r:[228,238,26,12],d:'down',to:'orchard',sx:240,sy:112,n:'สวนกล้วย'}],
   labels:[{x:102,y:100,t:'🚪 ประตูบ้าน → ครัว',c:'door'},{x:46,y:130,t:'← หลังบ้าน'},
-   {x:434,y:130,t:'ตลาด →'},{x:201,y:52,t:'↑ สหกรณ์'},{x:268,y:228,t:'↓ สวนกล้วย',c:'field'}]},
+   {x:434,y:130,t:'ตลาด →'},{x:201,y:52,t:'↑ ถนนสหกรณ์'},{x:268,y:228,t:'↓ สวนกล้วย',c:'field'}]},
 
  orchard:{out:1,bounds:[30,100,450,254],solids:[],
   exits:[{r:[226,92,28,14],d:'up',to:'farm',sx:240,sy:224,n:'ลานบ้าน'}],
@@ -332,17 +345,28 @@ const SC={
 
  market:{bounds:[16,152,464,250],solids:[],
   exits:[{r:[10,178,24,30],d:'left',to:'farm',sx:446,sy:152,n:'ลานบ้าน'},
-         {r:[446,178,34,30],d:'right',to:'coop',sx:150,sy:186,n:'สหกรณ์'}],
+         {r:[446,178,34,30],d:'right',to:'coopfront',sx:48,sy:196,n:'ถนนสหกรณ์'}],
   labels:[{x:126,y:98,t:'🍌 แผงรับซื้อกล้วย'},{x:372,y:36,t:'🚲 ร้านรถ "ช่างโต้ง"',c:'soft'},
    {x:40,y:170,t:'← บ้าน'},{x:438,y:170,t:'สหกรณ์ →'}]},
 
- coop:{bounds:[98,138,384,228],solids:[[278,90,108,42],[112,94,108,34]],
-  exits:[{r:[226,218,28,12],d:'down',to:'farm',sx:201,sy:56,n:'ถนนกลับบ้าน'},
-         {r:[92,156,22,36],d:'left',to:'market',sx:414,sy:196,n:'ตลาด'}],
-  labels:[{x:166,y:86,t:'💰 ขายทองม้วน'},{x:332,y:82,t:'🛒 อุปกรณ์เกษตร'},
-   {x:120,y:148,t:'🚪 ตลาด',c:'door'},{x:240,y:242,t:'🚪 กลับบ้าน',c:'door'}],dim:1,indoor:1}};
+ /* 🏢 ถนนหน้าตึกแถว */
+ coopfront:{out:1,bounds:[20,152,460,252],solids:[],
+  exits:[{r:[170,142,28,14],d:'up',to:'coop',sx:240,sy:216,n:'เข้าร้านสหกรณ์'},
+         {r:[10,180,22,30],d:'left',to:'market',sx:434,sy:196,n:'ตลาด'},
+         {r:[212,240,32,12],d:'down',to:'farm',sx:201,sy:56,n:'กลับบ้าน'}],
+  labels:[{x:72,y:102,t:'ร้านของชำ',c:'shop'},{x:184,y:100,t:'🏬 ร้านค้าสหกรณ์',c:'door'},
+   {x:298,y:102,t:'ร้านกาแฟ',c:'shop'},{x:412,y:102,t:'ร้านซ่อมของ',c:'shop'},
+   {x:184,y:140,t:'🚪 เดินเข้าประตู',c:'door'},{x:266,y:152,t:'📋 บอร์ดความรู้',c:'soft'},
+   {x:44,y:172,t:'← ตลาด'},{x:228,y:250,t:'↓ กลับบ้าน',c:'door'}]},
 
-/*======== TEXTURES ========*/
+ /* 🏬 ในร้านสหกรณ์ (ห้องแถวลึก) */
+ coop:{bounds:[150,112,330,240],
+  solids:[[140,126,80,30],[262,118,80,40]],
+  exits:[{r:[226,230,28,12],d:'down',to:'coopfront',sx:184,sy:166,n:'ออกหน้าร้าน'}],
+  labels:[{x:180,y:118,t:'💰 เคาน์เตอร์รับซื้อ'},{x:302,y:108,t:'🛒 ชั้นอุปกรณ์เกษตร'},
+   {x:240,y:248,t:'🚪 ออกหน้าร้าน',c:'door'}],dim:1,indoor:1}};
+
+/*==== TEXTURES ====*/
 function grass(g,x,y,w,h){g.fillStyle='#58a340';g.fillRect(x,y,w,h);
  for(let j=y;j<y+h;j+=4)for(let i=x;i<x+w;i+=4){const r=hash(i,j);
   if(r<.26){g.fillStyle='#4c9238';g.fillRect(i,j,4,4);}else if(r<.37){g.fillStyle='#66b14b';g.fillRect(i,j,4,4);}
@@ -355,6 +379,11 @@ function road(g,x,y,w,h,vert){g.fillStyle='#c9a87b';g.fillRect(x,y,w,h);
  if(vert){g.fillRect(x,y,3,h);g.fillRect(x+w-3,y,3,h);}else{g.fillRect(x,y,w,3);g.fillRect(x,y+h-3,w,3);}
  g.fillStyle='rgba(150,118,78,.4)';
  if(vert){g.fillRect(x+7,y,2,h);g.fillRect(x+w-9,y,2,h);}else{g.fillRect(x,y+7,w,2);g.fillRect(x,y+h-9,w,2);}}
+function asphalt(g,x,y,w,h){g.fillStyle='#4e545c';g.fillRect(x,y,w,h);
+ for(let j=y;j<y+h;j+=3)for(let i=x;i<x+w;i+=3){const r=hash(i*7,j*5);
+  if(r<.2){g.fillStyle='rgba(30,34,40,.5)';g.fillRect(i,j,3,3);}
+  else if(r>.88){g.fillStyle='rgba(180,188,198,.16)';g.fillRect(i,j,2,2);}}
+ g.fillStyle='#e8e2c4';for(let i=x+8;i<x+w;i+=34)g.fillRect(i,y+h/2-1,18,3);}
 function dirt(g,x,y,w,h,c){g.fillStyle=c||'#b78a5c';g.fillRect(x,y,w,h);
  for(let j=y;j<y+h;j+=3)for(let i=x;i<x+w;i+=3){const r=hash(i*3,j*7);
   if(r<.24){g.fillStyle='rgba(0,0,0,.09)';g.fillRect(i,j,3,3);}else if(r>.9){g.fillStyle='rgba(255,255,255,.12)';g.fillRect(i,j,2,2);}}}
@@ -363,6 +392,11 @@ function planks(g,x,y,w,h,a,b,v){g.fillStyle=a;g.fillRect(x,y,w,h);g.fillStyle=b
 function tiles(g,x,y,w,h,a,b){for(let j=y;j<y+h;j+=12)for(let i=x;i<x+w;i+=12){
  g.fillStyle=(((i/12|0)+(j/12|0))%2)?a:b;g.fillRect(i,j,12,12);
  g.fillStyle='rgba(0,0,0,.08)';g.fillRect(i,j+11,12,1);g.fillRect(i+11,j,1,12);}}
+function pavement(g,x,y,w,h){g.fillStyle='#b9b2a4';g.fillRect(x,y,w,h);
+ for(let j=y;j<y+h;j+=9)for(let i=x;i<x+w;i+=14){
+  g.fillStyle=((i/14|0)+(j/9|0))%2?'#c3bcae':'#aca596';g.fillRect(i,j,13,8);
+  g.fillStyle='rgba(255,255,255,.14)';g.fillRect(i,j,13,1);}
+ g.fillStyle='#8f897c';g.fillRect(x,y,w,2);g.fillStyle='#9a9488';g.fillRect(x,y+h-3,w,3);}
 function fenceRun(g,x,y,w){g.fillStyle='#7d5a33';g.fillRect(x,y,w,4);g.fillStyle='#9c7442';g.fillRect(x,y,w,1);
  g.fillStyle='#6a4a29';g.fillRect(x,y+6,w,3);
  for(let i=x;i<x+w;i+=15){g.fillStyle='#5d4023';g.fillRect(i,y-7,4,17);g.fillStyle='#8a6335';g.fillRect(i,y-7,1,17);}}
@@ -390,7 +424,6 @@ function house(g,x,y){const w=152,rh=40;
 function well(g,x,y){g.fillStyle='#6c6f78';g.fillRect(x,y+8,34,16);g.fillStyle='#8b8f99';g.fillRect(x,y+8,34,4);
  g.fillStyle='#2f5d86';g.fillRect(x+3,y+11,28,4);g.fillStyle='#5b3b1f';g.fillRect(x+2,y-10,3,20);g.fillRect(x+29,y-10,3,20);
  g.fillStyle='#9c3a2a';g.beginPath();g.moveTo(x-3,y-6);g.lineTo(x+17,y-17);g.lineTo(x+37,y-6);g.closePath();g.fill();}
-/* ⬜ แปลงเหลี่ยม — กรอบไม้ + เสามุม */
 function squareBed(g,x,y,w,h){
  g.fillStyle='#5d4023';g.fillRect(x-5,y-5,w+10,h+10);
  g.fillStyle='#8a6335';g.fillRect(x-5,y-5,w+10,3);
@@ -403,8 +436,7 @@ function squareBed(g,x,y,w,h){
  [[x-6,y-6],[x+w-2,y-6],[x-6,y+h-2],[x+w-2,y+h-2]].forEach(p=>{
   g.fillStyle='#4a3119';g.fillRect(p[0],p[1],8,8);
   g.fillStyle='#96703c';g.fillRect(p[0],p[1],8,2);g.fillRect(p[0],p[1],2,8);});}
-function ditch(g,x,y,w){
- g.fillStyle='#6f5330';g.fillRect(x,y,w,6);
+function ditch(g,x,y,w){g.fillStyle='#6f5330';g.fillRect(x,y,w,6);
  g.fillStyle='#3f7fb0';g.fillRect(x+1,y+1,w-2,4);
  g.fillStyle='rgba(180,228,255,.5)';for(let i=x+3;i<x+w-4;i+=12)g.fillRect(i,y+1,5,1);}
 function soilRing(g,x,y){g.fillStyle='#48301a';g.beginPath();g.ellipse(x,y,15,6,0,0,7);g.fill();
@@ -438,7 +470,152 @@ function vehShop(g,x,y){
  g.fillStyle='#20252b';g.beginPath();g.arc(x-14,y+86,9,0,7);g.fill();
  g.fillStyle='#39424c';g.beginPath();g.arc(x-14,y+86,5,0,7);g.fill();}
 
-/*======== BACKGROUNDS ========*/
+/*==== 🏢 ตึกแถว 1 คูหา ====*/
+function shophouse(g,x,w,c,kind){
+ const yT=12,yG=150;
+ /* ผนังหลัก */
+ g.fillStyle=c.wall;g.fillRect(x,yT+14,w,yG-yT-14);
+ for(let j=yT+14;j<yG;j+=6)for(let i=x;i<x+w;i+=6){
+  if(hash(i*3,j*5)>.88){g.fillStyle='rgba(255,255,255,.06)';g.fillRect(i,j,6,3);}}
+ g.fillStyle='rgba(0,0,0,.14)';g.fillRect(x,yT+14,5,yG-yT-14);
+ g.fillStyle='rgba(255,255,255,.10)';g.fillRect(x+w-5,yT+14,5,yG-yT-14);
+ /* เสากั้นคูหา */
+ g.fillStyle='rgba(0,0,0,.22)';g.fillRect(x-2,yT+14,3,yG-yT-14);
+ /* ดาดฟ้า/บัวหัวเสา */
+ g.fillStyle=c.trim;g.fillRect(x-4,yT,w+8,16);
+ g.fillStyle='rgba(255,255,255,.26)';g.fillRect(x-4,yT,w+8,4);
+ g.fillStyle='rgba(0,0,0,.32)';g.fillRect(x-4,yT+16,w+8,4);
+ g.fillStyle=c.trim;g.fillRect(x+w/2-10,yT-6,20,7);
+ g.fillStyle='rgba(255,255,255,.2)';g.fillRect(x+w/2-10,yT-6,20,2);
+ /* หน้าต่างชั้นบน 2 บาน */
+ [[x+16,34],[x+w-46,34]].forEach(p=>{
+  g.fillStyle='#4a3a2a';g.fillRect(p[0]-3,p[1]-3,36,30);
+  g.fillStyle=c.glass;g.fillRect(p[0],p[1],30,24);
+  g.fillStyle='rgba(255,255,255,.42)';g.fillRect(p[0],p[1],30,7);
+  g.fillStyle='rgba(60,90,120,.4)';for(let k=0;k<4;k++)g.fillRect(p[0],p[1]+7+k*4,30,2);
+  g.fillStyle='#4a3a2a';g.fillRect(p[0]+14,p[1],2,24);
+  g.fillStyle='#8f6a3d';g.fillRect(p[0]-4,p[1]+27,38,3);});
+ /* ระเบียง ราวกันตก */
+ g.fillStyle=c.trim;g.fillRect(x+5,64,w-10,4);
+ for(let i=x+9;i<x+w-9;i+=7){g.fillStyle=c.trim;g.fillRect(i,56,2,9);}
+ g.fillStyle='rgba(255,255,255,.2)';g.fillRect(x+5,64,w-10,1);
+ g.fillStyle='rgba(0,0,0,.24)';g.fillRect(x+5,68,w-10,3);
+ /* กันสาดลายทาง + ชายหยัก */
+ g.fillStyle='#4b5560';g.fillRect(x-3,71,w+6,3);
+ const nS=Math.ceil((w+6)/11);
+ for(let i=0;i<nS;i++){g.fillStyle=i%2?c.awn1:c.awn2;
+  g.fillRect(x-3+i*11,74,11,13);}
+ for(let i=0;i<nS;i++){g.fillStyle=i%2?c.awn1:c.awn2;
+  g.beginPath();g.arc(x-3+i*11+5.5,87,5.5,0,Math.PI);g.fill();}
+ g.fillStyle='rgba(255,255,255,.18)';g.fillRect(x-3,74,w+6,2);
+ g.fillStyle='rgba(0,0,0,.3)';g.fillRect(x-3,93,w+6,6);
+ /* ป้ายร้าน */
+ g.fillStyle='#2b2f36';g.fillRect(x+8,96,w-16,18);
+ g.fillStyle=c.sign;g.fillRect(x+10,98,w-20,14);
+ g.fillStyle='rgba(255,255,255,.28)';g.fillRect(x+10,98,w-20,4);
+ g.fillStyle=c.signInk;
+ const bw=(w-34)/5;
+ for(let i=0;i<5;i++)g.fillRect(x+17+i*bw,103,bw-4,6);
+ /* หน้าร้านชั้นล่าง */
+ g.fillStyle='#3c444d';g.fillRect(x+4,114,w-8,36);
+ if(kind==='coop'){
+  /* กระจกซ้าย-ขวา + ประตูกลาง */
+  [[x+8],[x+w-46]].forEach(p=>{
+   g.fillStyle='#5a6672';g.fillRect(p[0],117,38,33);
+   g.fillStyle='#9fd6f2';g.fillRect(p[0]+2,119,34,29);
+   g.fillStyle='#d6efff';g.fillRect(p[0]+2,119,34,9);
+   g.fillStyle='rgba(255,255,255,.4)';g.fillRect(p[0]+6,122,8,24);
+   /* สินค้าในกระจก */
+   for(let k=0;k<3;k++){g.fillStyle=['#e24a4a','#6ee27a','#ffd86b'][k];
+    g.fillRect(p[0]+6+k*10,134,7,11);g.fillStyle='rgba(255,255,255,.4)';g.fillRect(p[0]+6+k*10,134,7,3);}});
+  /* ประตูกระจกบานเลื่อน */
+  const dx=x+w/2-14;
+  g.fillStyle='#46505a';g.fillRect(dx-2,112,32,38);
+  g.fillStyle='#b9e6ff';g.fillRect(dx,114,28,36);
+  g.fillStyle='#e2f6ff';g.fillRect(dx,114,28,10);
+  g.fillStyle='#46505a';g.fillRect(dx+13,114,2,36);
+  g.fillStyle='#ffd86b';g.fillRect(dx+9,132,3,7);g.fillRect(dx+17,132,3,7);
+  g.fillStyle='rgba(255,255,255,.35)';g.fillRect(dx+3,117,5,30);
+  /* พรมเช็ดเท้า */
+  g.fillStyle='#8a5a2f';g.fillRect(dx-3,150,34,7);
+  g.fillStyle='#a5713c';g.fillRect(dx-3,150,34,2);
+ }else if(kind==='shut'){
+  g.fillStyle='#6d757e';g.fillRect(x+8,117,w-16,33);
+  for(let j=118;j<150;j+=4){g.fillStyle=(j/4|0)%2?'#7e868f':'#5d656d';g.fillRect(x+8,j,w-16,3);}
+  g.fillStyle='#3c444d';g.fillRect(x+8,146,w-16,4);
+ }else{
+  g.fillStyle='#5a6672';g.fillRect(x+8,117,w-16,33);
+  g.fillStyle=c.glass2||'#9fd6f2';g.fillRect(x+10,119,w-20,29);
+  g.fillStyle='#d6efff';g.fillRect(x+10,119,w-20,9);
+  g.fillStyle='rgba(255,255,255,.35)';g.fillRect(x+15,122,7,24);
+  const dx=x+w-34;
+  g.fillStyle='#46505a';g.fillRect(dx,114,26,36);
+  g.fillStyle='#7a4a24';g.fillRect(dx+2,116,22,34);
+  g.fillStyle='#8f5a2c';g.fillRect(dx+4,119,18,12);
+  g.fillStyle='#ffd86b';g.fillRect(dx+19,134,2,3);}
+ /* ขอบพื้นอาคาร */
+ g.fillStyle='#7d7568';g.fillRect(x-2,150,w+4,4);}
+
+/*==== 📋 บอร์ดความรู้ ====*/
+function eduBoard(g,x,y,t){
+ g.fillStyle='rgba(0,0,0,.25)';g.beginPath();g.ellipse(x,y+1,26,5,0,0,7);g.fill();
+ g.fillStyle='#5d4023';g.fillRect(x-24,y-10,5,11);g.fillRect(x+19,y-10,5,11);
+ g.fillStyle='#8a6335';g.fillRect(x-24,y-10,1,11);g.fillRect(x+19,y-10,1,11);
+ g.fillStyle='#4a3119';g.fillRect(x-30,y-48,60,40);
+ g.fillStyle='#7d5a33';g.fillRect(x-28,y-46,56,36);
+ g.fillStyle='#2f7d55';g.fillRect(x-25,y-43,50,30);
+ g.fillStyle='rgba(255,255,255,.08)';g.fillRect(x-25,y-43,50,6);
+ /* กระดาษความรู้ */
+ const pap=[[-21,-39,14,11],[-4,-39,11,8],[10,-39,12,13],[-21,-25,12,10],[-6,-28,13,15],[10,-23,12,9]];
+ pap.forEach((p,i)=>{g.fillStyle=['#fdfbf0','#fff6d8','#eef7ff'][i%3];
+  g.fillRect(x+p[0],y+p[1],p[2],p[3]);
+  g.fillStyle='rgba(0,0,0,.18)';g.fillRect(x+p[0],y+p[1]+p[3]-1,p[2],1);
+  g.fillStyle='#7a8b99';for(let k=2;k<p[3]-1;k+=3)g.fillRect(x+p[0]+2,y+p[1]+k,p[2]-4,1);
+  g.fillStyle='#d94f3d';g.fillRect(x+p[0]+p[2]/2-1,y+p[1]-1,2,2);});
+ /* รูปกล้วยบนบอร์ด */
+ g.strokeStyle='#c9970f';g.lineWidth=3;g.lineCap='round';
+ g.beginPath();g.arc(x+16,y-18,5,Math.PI*.1,Math.PI*.9);g.stroke();
+ g.strokeStyle='#f7cb22';g.lineWidth=2;
+ g.beginPath();g.arc(x+16,y-18,5,Math.PI*.14,Math.PI*.86);g.stroke();
+ /* หลังคากันฝน */
+ g.fillStyle='#9c3a2a';g.beginPath();g.moveTo(x-34,y-46);g.lineTo(x,y-56);g.lineTo(x+34,y-46);g.closePath();g.fill();
+ g.fillStyle='#bb4831';g.beginPath();g.moveTo(x-34,y-46);g.lineTo(x,y-56);g.lineTo(x-2,y-51);g.closePath();g.fill();
+ g.fillStyle='#6d2418';g.fillRect(x-34,y-46,68,3);
+ /* ไฟกะพริบชวนอ่าน */
+ const b=.5+Math.sin(t*3)*.5;
+ g.fillStyle='rgba(110,226,122,'+(.35+b*.5)+')';g.fillRect(x-3,y-53,6,3);}
+function bench(g,x,y){g.fillStyle='rgba(0,0,0,.22)';g.beginPath();g.ellipse(x,y+1,20,4,0,0,7);g.fill();
+ g.fillStyle='#4b5560';g.fillRect(x-16,y-6,4,7);g.fillRect(x+12,y-6,4,7);
+ g.fillStyle='#a5733c';g.fillRect(x-18,y-10,36,5);g.fillStyle='#c79357';g.fillRect(x-18,y-10,36,2);
+ g.fillStyle='#4b5560';g.fillRect(x-17,y-20,3,11);g.fillRect(x+14,y-20,3,11);
+ g.fillStyle='#a5733c';g.fillRect(x-18,y-21,36,4);g.fillStyle='#c79357';g.fillRect(x-18,y-21,36,2);}
+function potPlant(g,x,y){g.fillStyle='rgba(0,0,0,.22)';g.beginPath();g.ellipse(x,y+1,11,4,0,0,7);g.fill();
+ g.fillStyle='#a45a3a';g.fillRect(x-9,y-12,18,12);g.fillStyle='#c4714c';g.fillRect(x-10,y-14,20,4);
+ g.fillStyle='#5c3323';g.fillRect(x-9,y-2,18,2);
+ g.fillStyle='#2f7d34';for(let i=0;i<5;i++){const a=-1.2+i*.6;
+  g.beginPath();g.ellipse(x+Math.cos(a)*7,y-19+Math.sin(a)*3,6,9,a*.4,0,7);g.fill();}
+ g.fillStyle='#48a83f';g.beginPath();g.ellipse(x-2,y-22,6,8,-.2,0,7);g.fill();}
+function streetLamp(g,x,y,t){
+ g.fillStyle='rgba(0,0,0,.2)';g.beginPath();g.ellipse(x,y+1,7,3,0,0,7);g.fill();
+ g.fillStyle='#39424c';g.fillRect(x-3,y-46,6,46);g.fillStyle='#525d68';g.fillRect(x-3,y-46,2,46);
+ g.fillStyle='#2b3038';g.fillRect(x-5,y-4,10,4);
+ g.fillStyle='#39424c';g.fillRect(x-1,y-52,14,4);
+ g.fillStyle='#2b3038';g.fillRect(x+8,y-50,12,8);
+ const fl=.8+Math.sin(t*4.6+x)*.14;
+ g.fillStyle='rgba(255,226,140,'+fl+')';g.fillRect(x+10,y-48,8,5);
+ if(isNight()){const gr=g.createRadialGradient(x+14,y-44,3,x+14,y-44,54);
+  gr.addColorStop(0,'rgba(255,226,140,.32)');gr.addColorStop(1,'rgba(255,226,140,0)');
+  g.fillStyle=gr;g.beginPath();g.arc(x+14,y-44,54,0,7);g.fill();}}
+function lamp(g,x,y,t){
+ g.fillStyle='#3a4149';g.fillRect(x-2,y-30,4,30);g.fillStyle='#525d68';g.fillRect(x-2,y-30,1,30);
+ g.fillStyle='#2b3038';g.fillRect(x-7,y-38,14,9);
+ const fl=.82+Math.sin(t*5+x)*.12;
+ g.fillStyle='rgba(255,226,140,'+fl+')';g.fillRect(x-5,y-36,10,6);
+ if(isNight()){const gr=g.createRadialGradient(x,y-32,2,x,y-32,46);
+  gr.addColorStop(0,'rgba(255,226,140,.34)');gr.addColorStop(1,'rgba(255,226,140,0)');
+  g.fillStyle=gr;g.beginPath();g.arc(x,y-32,46,0,7);g.fill();}}
+
+/*==== BACKGROUNDS ====*/
 const bgc={};
 function BG(n){if(bgc[n])return bgc[n];const c=document.createElement('canvas');c.width=VW;c.height=VH;
  const g=c.getContext('2d');g.imageSmoothingEnabled=false;DBG[n](g);bgc[n]=c;return c;}
@@ -460,29 +637,17 @@ const DBG={
   signpost(g,268,216);
   for(let i=0;i<480;i+=11){g.fillStyle='#41852f';g.fillRect(i+hash(i,1)*5,136,2,4);g.fillRect(i+hash(i,2)*5,166,2,4);}},
 
- /* 🌿 สวนกล้วย — แปลงเหลี่ยม 8 แปลง */
  orchard(g){grass(g,0,0,VW,VH);
-  /* ทางเดินหลักรูปกางเขน */
-  road(g,218,92,44,162,true);
-  road(g,30,168,420,28,false);
-  /* ทางเดินเลียบขอบ */
+  road(g,218,92,44,162,true);road(g,30,168,420,28,false);
   road(g,30,92,16,162,true);road(g,434,92,16,162,true);
-  /* แปลงเหลี่ยม */
   BEDS.forEach(b=>squareBed(g,b[0],b[1],BEDW,BEDH));
-  /* ร่องน้ำหัวแปลงแต่ละแถว */
-  ditch(g,46,106,162);ditch(g,272,106,162);
-  ditch(g,46,192,162);ditch(g,272,192,162);
-  /* รั้ว + ประตูกลางบน */
+  ditch(g,46,106,162);ditch(g,272,106,162);ditch(g,46,192,162);ditch(g,272,192,162);
   fenceRun(g,24,94,194);fenceRun(g,262,94,194);
   gatePost(g,220,98);gatePost(g,260,98);
-  fenceRun(g,24,256,432);
-  fenceCol(g,24,98,158);fenceCol(g,452,98,158);
-  /* วงดินรอบต้น */
+  fenceRun(g,24,256,432);fenceCol(g,24,98,158);fenceCol(g,452,98,158);
   PLOTS.forEach(p=>soilRing(g,p[0],p[1]));
-  /* หญ้าริมทาง */
   for(let i=34;i<448;i+=13){g.fillStyle='#41852f';g.fillRect(i+hash(i,4)*4,164,2,4);g.fillRect(i+hash(i,6)*4,196,2,4);}
   for(let j=98;j<252;j+=13){g.fillStyle='#41852f';g.fillRect(214,j+hash(j,2)*4,2,4);g.fillRect(262,j+hash(j,8)*4,2,4);}
-  /* กองปุ๋ย + เครื่องมือ */
   g.fillStyle='#6b4e2c';g.fillRect(190,240,24,8);g.fillStyle='#8a6335';g.fillRect(190,240,24,2);
   g.fillStyle='#4a5560';g.fillRect(268,236,4,12);g.fillStyle='#8a99a6';g.fillRect(264,232,12,5);},
 
@@ -531,29 +696,95 @@ const DBG={
   g.fillStyle='#a8957b';g.fillRect(0,152,480,3);g.fillRect(0,218,480,3);
   dirt(g,352,224,96,26,'#b08a5c');
   g.fillStyle='rgba(255,255,255,.2)';g.fillRect(356,228,88,1);g.fillRect(356,246,88,1);
-  g.fillStyle='#2f4a5e';g.fillRect(364,222,3,6);g.fillRect(432,222,3,6);
   [[22,236],[250,240]].forEach(p=>{g.fillStyle='#7a4a24';g.fillRect(p[0],p[1],20,14);
    g.fillStyle='#3f9e3a';g.beginPath();g.ellipse(p[0]+10,p[1]-5,15,12,0,0,7);g.fill();});
   signpost(g,300,238);},
 
- coop(g){g.fillStyle='#070b10';g.fillRect(0,0,VW,VH);
-  g.fillStyle='#6a5c46';g.fillRect(78,48,326,200);
-  planks(g,80,50,322,28,'#e8e2d2','#cfc7b2',true);
-  tiles(g,88,78,306,158,'#d0c5ae','#bdb198');
-  g.fillStyle='#8a7f6a';g.fillRect(88,76,306,4);
-  g.fillStyle='#1f6f4a';g.fillRect(172,52,136,22);g.fillStyle='#2f9c68';g.fillRect(174,54,132,18);
-  g.fillStyle='#ffd86b';g.fillRect(182,59,15,8);g.fillRect(283,59,15,8);g.fillRect(206,60,68,6);
-  door(g,80,156,1);
-  g.fillStyle='#6a4526';g.fillRect(278,90,108,42);g.fillStyle='#8a6238';g.fillRect(280,92,104,38);
-  for(let r=0;r<2;r++){g.fillStyle='#5b3b1f';g.fillRect(280,110+r*17,104,3);
-   for(let c=0;c<6;c++){const bx=284+c*17,by=94+r*17;
-    g.fillStyle=['#e24a4a','#4a90d9','#6ee27a','#ffd86b'][(c+r)%4];g.fillRect(bx,by,13,14);
-    g.fillStyle='rgba(255,255,255,.35)';g.fillRect(bx,by,13,3);}}
-  g.fillStyle='#5b3b1f';g.fillRect(112,94,108,34);planks(g,114,96,104,26,'#c79a5c','#a67c47',false);
-  g.fillStyle='#3a4149';g.fillRect(156,82,32,16);g.fillStyle='#7fd0ff';g.fillRect(159,85,26,9);
-  door(g,226,216,1);g.fillStyle='#3a2a1a';g.fillRect(88,234,306,4);}};
+ /* 🏢 ถนนหน้าตึกแถว */
+ coopfront(g){
+  /* ท้องฟ้าเหนืออาคาร */
+  const sk=g.createLinearGradient(0,0,0,14);
+  sk.addColorStop(0,'#7fc6ea');sk.addColorStop(1,'#bde3f5');
+  g.fillStyle=sk;g.fillRect(0,0,VW,14);
+  /* ตึกแถว 4 คูหา */
+  shophouse(g,14,108,{wall:'#e8d9bd',trim:'#c9a86a',glass:'#9fd6f2',sign:'#e2643f',signInk:'#fff3d8',awn1:'#e2643f',awn2:'#f4e6d0'},'shop');
+  shophouse(g,128,108,{wall:'#dff0e4',trim:'#2f9c68',glass:'#a9e0c6',sign:'#1f6f4a',signInk:'#ffe9a8',awn1:'#1f6f4a',awn2:'#f2f9f4'},'coop');
+  shophouse(g,242,108,{wall:'#efe0d2',trim:'#a5733c',glass:'#c9b79f',sign:'#6b4226',signInk:'#f6e3c0',awn1:'#6b4226',awn2:'#e6cfae'},'shop');
+  shophouse(g,356,108,{wall:'#dde3ee',trim:'#4a5a8c',glass:'#a8b9d8',sign:'#33477f',signInk:'#dfe8ff',awn1:'#33477f',awn2:'#e5eaf7'},'shut');
+  /* ทางเท้า */
+  pavement(g,0,152,VW,26);
+  /* ขอบทาง */
+  g.fillStyle='#d8d2c4';g.fillRect(0,176,VW,4);
+  g.fillStyle='#b23c30';for(let i=0;i<VW;i+=34)g.fillRect(i,176,17,4);
+  /* ถนนยางมะตอย */
+  asphalt(g,0,180,VW,42);
+  /* ทางเท้าฝั่งล่าง */
+  pavement(g,0,222,VW,34);
+  /* ทางม้าลายลงใต้ (กลับบ้าน) */
+  g.fillStyle='#eae6d6';for(let i=0;i<5;i++)g.fillRect(210+i*7,180,4,42);
+  /* ฝาท่อ + รอยแตก */
+  g.fillStyle='#3a4149';g.beginPath();g.ellipse(92,200,9,5,0,0,7);g.fill();
+  g.fillStyle='#4e545c';g.beginPath();g.ellipse(92,199,7,4,0,0,7);g.fill();
+  g.fillStyle='rgba(30,34,40,.4)';g.fillRect(320,186,44,2);g.fillRect(348,188,26,2);
+  /* ป้ายจอดรถ */
+  g.fillStyle='#39424c';g.fillRect(430,226,4,18);
+  g.fillStyle='#2f6bb0';g.fillRect(422,212,20,16);
+  g.fillStyle='#ffffff';g.fillRect(428,216,8,8);},
 
-/*======== 🌴 ต้นกล้วย (ย่อขนาด) ========*/
+ /* 🏬 ในร้านสหกรณ์ */
+ coop(g){g.fillStyle='#05080d';g.fillRect(0,0,VW,VH);
+  /* โครงห้องแถว */
+  g.fillStyle='#6a5c46';g.fillRect(128,46,224,214);
+  /* ผนังหลัง */
+  planks(g,132,50,216,52,'#eae4d2','#d2cab5',true);
+  g.fillStyle='#8a7f6a';g.fillRect(132,100,216,5);
+  /* พื้นกระเบื้อง */
+  tiles(g,132,105,216,150,'#d8cdb6','#c2b79e');
+  /* ป้ายร้านด้านใน */
+  g.fillStyle='#1f6f4a';g.fillRect(186,54,108,22);
+  g.fillStyle='#2f9c68';g.fillRect(188,56,104,18);
+  g.fillStyle='#ffe9a8';g.fillRect(196,61,18,8);g.fillRect(220,62,40,6);g.fillRect(266,61,18,8);
+  /* ชั้นวางผนังหลัง */
+  for(let r=0;r<2;r++){const yy=80+r*0;
+   g.fillStyle='#6a4526';g.fillRect(140,78,40,24);g.fillRect(300,78,44,24);
+   g.fillStyle='#8a6238';g.fillRect(142,80,36,20);g.fillRect(302,80,40,20);}
+  for(let c=0;c<3;c++){g.fillStyle=['#e24a4a','#4a90d9','#6ee27a'][c];
+   g.fillRect(145+c*11,82,9,16);g.fillStyle='rgba(255,255,255,.35)';g.fillRect(145+c*11,82,9,4);}
+  for(let c=0;c<3;c++){g.fillStyle=['#ffd86b','#e24a4a','#9b6fd4'][c];
+   g.fillRect(306+c*12,82,10,16);g.fillStyle='rgba(255,255,255,.35)';g.fillRect(306+c*12,82,10,4);}
+  /* โปสเตอร์กล้วย */
+  g.fillStyle='#3a2a18';g.fillRect(212,80,56,20);
+  g.fillStyle='#fff6d8';g.fillRect(214,82,52,16);
+  g.strokeStyle='#c9970f';g.lineWidth=3;g.lineCap='round';
+  g.beginPath();g.arc(228,90,5,Math.PI*.1,Math.PI*.9);g.stroke();
+  g.strokeStyle='#f7cb22';g.lineWidth=2;g.beginPath();g.arc(228,90,5,Math.PI*.14,Math.PI*.86);g.stroke();
+  g.fillStyle='#6b7d8c';g.fillRect(238,86,24,2);g.fillRect(238,90,20,2);g.fillRect(238,94,22,2);
+  /* เคาน์เตอร์รับซื้อ (ซ้าย) */
+  g.fillStyle='#5b3b1f';g.fillRect(140,126,80,30);
+  planks(g,142,128,76,22,'#c79a5c','#a67c47',false);
+  g.fillStyle='#3a2a18';g.fillRect(144,150,6,10);g.fillRect(210,150,6,10);
+  g.fillStyle='#3a4149';g.fillRect(180,114,32,16);g.fillStyle='#7fd0ff';g.fillRect(183,117,26,10);
+  g.fillStyle='#e0b95f';g.fillRect(148,120,10,7);g.fillRect(160,120,10,7);
+  g.fillStyle='#caa044';g.fillRect(148,120,10,2);g.fillRect(160,120,10,2);
+  /* ชั้นอุปกรณ์ (ขวา) */
+  g.fillStyle='#6a4526';g.fillRect(262,118,80,40);
+  g.fillStyle='#8a6238';g.fillRect(264,120,76,36);
+  for(let r=0;r<2;r++){g.fillStyle='#5b3b1f';g.fillRect(264,136+r*16,76,3);
+   for(let c=0;c<5;c++){const bx=268+c*15,by=122+r*16;
+    g.fillStyle=['#e24a4a','#4a90d9','#6ee27a','#ffd86b','#9b6fd4'][(c+r)%5];g.fillRect(bx,by,12,13);
+    g.fillStyle='rgba(255,255,255,.35)';g.fillRect(bx,by,12,3);}}
+  /* กระถางต้นไม้ */
+  g.fillStyle='#a45a3a';g.fillRect(236,168,16,12);
+  g.fillStyle='#2f7d34';g.beginPath();g.ellipse(244,162,10,9,0,0,7);g.fill();
+  /* ประตูออก */
+  g.fillStyle='#46505a';g.fillRect(222,226,36,30);
+  g.fillStyle='#b9e6ff';g.fillRect(226,228,28,28);
+  g.fillStyle='#e2f6ff';g.fillRect(226,228,28,8);
+  g.fillStyle='#46505a';g.fillRect(239,228,2,28);
+  g.fillStyle='#8a5a2f';g.fillRect(220,256,40,5);
+  g.fillStyle='#3a2a1a';g.fillRect(132,252,216,4);}};
+
+/*==== 🌴 ต้นกล้วย ====*/
 const LF_OUT='#125c1c',LF_D='#2b8f2e',LF_M='#46ad36',LF_L='#67c94a',RIBC='#dff07a';
 function bananaLeaf(g,x,y,len,wid,ang,tone){
  g.save();g.translate(x,y);g.rotate(ang);
@@ -682,7 +913,7 @@ function tree(g,cx,by,pl,t){
  else if(pl.stage===6){const b=.6+Math.sin(t*4)*.4;
   g.fillStyle='rgba(255,216,107,'+b+')';g.fillRect(cx-4,by+3,8,4);}}
 
-/*======== VEHICLES ========*/
+/*==== VEHICLES ====*/
 function wheelSide(g,x,y,r,spin,rim,tyre){
  g.fillStyle=tyre;g.beginPath();g.arc(x,y,r,0,7);g.fill();
  g.fillStyle='#161a20';g.beginPath();g.arc(x,y,r-1.4,0,7);g.fill();
@@ -757,7 +988,7 @@ function player(g){
  g.fillStyle='rgba(0,0,0,.28)';g.beginPath();g.ellipse(P.x,P.y+1,8,3,0,0,7);g.fill();
  g.drawImage(img,Math.round(P.x-PW/2),Math.round(P.y-img.height+bob));}
 
-/*======== OBJECTS ========*/
+/*==== OBJECTS ====*/
 function rack(g,x,y,r){g.fillStyle='rgba(0,0,0,.2)';g.beginPath();g.ellipse(x,y+20,24,5,0,0,7);g.fill();
  g.fillStyle='#5b3b1f';g.fillRect(x-22,y,44,3);g.fillRect(x-20,y+3,4,17);g.fillRect(x+16,y+3,4,17);
  g.fillStyle='#7a5330';for(let i=-20;i<22;i+=6)g.fillRect(x+i,y-5,3,5);
@@ -773,17 +1004,8 @@ function exitArrow(g,e,t){const a=.38+Math.sin(t*3.2)*.3,r=e.r,cx=r[0]+r[2]/2,cy
  else if(e.d==='up'){g.moveTo(cx,cy-s);g.lineTo(cx-s,cy+s);g.lineTo(cx+s,cy+s);}
  else{g.moveTo(cx,cy+s);g.lineTo(cx-s,cy-s);g.lineTo(cx+s,cy-s);}
  g.closePath();g.fill();g.restore();}
-/* โคมไฟกลางคืน */
-function lamp(g,x,y,t){
- g.fillStyle='#3a4149';g.fillRect(x-2,y-30,4,30);g.fillStyle='#525d68';g.fillRect(x-2,y-30,1,30);
- g.fillStyle='#2b3038';g.fillRect(x-7,y-38,14,9);
- const fl=.82+Math.sin(t*5+x)*.12;
- g.fillStyle='rgba(255,226,140,'+fl+')';g.fillRect(x-5,y-36,10,6);
- if(isNight()){const gr=g.createRadialGradient(x,y-32,2,x,y-32,46);
-  gr.addColorStop(0,'rgba(255,226,140,.34)');gr.addColorStop(1,'rgba(255,226,140,0)');
-  g.fillStyle=gr;g.beginPath();g.arc(x,y-32,46,0,7);g.fill();}}
 
-/*======== LABELS ========*/
+/*==== LABELS ====*/
 function relabel(){const L=SC[scene].labels.slice();
  ['bike','saleng'].forEach(v=>{if(S.up[v]&&S.ride!==v&&S.park[v].sc===scene)
   L.push({x:S.park[v].x,y:S.park[v].y-30,t:(v==='bike'?'🚲 ':'🛺 ')+VNAME[v],c:'soft'});});
@@ -791,7 +1013,7 @@ function relabel(){const L=SC[scene].labels.slice();
  L.forEach(l=>{const d=document.createElement('div');d.className='lbl'+(l.c?' '+l.c:'');d.textContent=l.t;
   d.style.left=(l.x/VW*100)+'%';d.style.top=(l.y/VH*100)+'%';labelsEl.appendChild(d);});}
 
-/*======== INPUT ========*/
+/*==== INPUT ====*/
 const keys={};let edge=false,tap=false;
 const dirStack=[];
 function pushDir(d){const i=dirStack.indexOf(d);if(i>=0)dirStack.splice(i,1);dirStack.push(d);}
@@ -830,7 +1052,7 @@ function goHome(){if(pk)closePanel();
  if(scene==='farm'&&Math.hypot(P.x-150,P.y-186)<40){toast('🏠 อยู่หน้าบ้านแล้วค่ะ');return;}
  go('farm',150,186);toast('🏠 กลับบ้านแล้ว!');}
 
-/*======== RIDE ========*/
+/*==== RIDE ====*/
 function mount(v){if(SC[scene].indoor){toast('ในอาคารขี่รถไม่ได้ค่ะ',1);sfx.bad();return;}
  S.ride=v;P.x=S.park[v].x;P.y=S.park[v].y;
  if(v==='bike')sfx.bell();else sfx.engine();
@@ -843,22 +1065,22 @@ function toggleRide(){if(S.ride){dismount();return;}
   const d=Math.hypot(S.park[v].x-P.x,S.park[v].y-P.y);if(d<bd){bd=d;best=v;}}});
  if(best)mount(best);else toast('ไม่มีรถอยู่ใกล้ ๆ',1);}
 
-/*======== QUESTS ========*/
+/*==== QUESTS ====*/
 const QUEST=[
  {t:'🌿 เดินลงใต้ตามถนน → เข้าสวนกล้วย',ok:()=>S.stats.plant>0||scene==='orchard'},
  {t:'🌱 กด E ที่แปลงเหลี่ยม เพื่อปลูกหน่อกล้วย',ok:()=>S.stats.plant>0},
  {t:'💧 รดน้ำเร่งโต (ต้นกล้วยใช้เวลา ~3 นาที)',ok:()=>S.stats.hg>0},
- {t:'🍌 ปล่อยให้สุก 45 วิ (แถบส้มเต็ม) แล้วเก็บ',ok:()=>S.stats.hr>0},
+ {t:'📋 ไปถนนสหกรณ์ อ่านบอร์ดความรู้เรื่องกล้วย',ok:()=>S.read>0},
+ {t:'🍌 ปล่อยให้สุก 45 วิ แล้วเก็บกล้วยสุก',ok:()=>S.stats.hr>0},
  {t:'🏪 ถนนขวาสุด → ตลาด ขายกล้วย',ok:()=>S.stats.earn>0},
- {t:'🔪 ถนนซ้ายสุด → หลังบ้าน ปอกกล้วยดิบ',ok:()=>S.inv.slice>0||S.inv.dried>0||S.inv.flour>0},
- {t:'☀️ เอากล้วยหั่นขึ้นราวตากให้แห้ง',ok:()=>S.inv.dried>0||S.inv.flour>0},
- {t:'⚙️ บดกล้วยแห้ง 3 ชิ้น → แป้ง 1 ถุง',ok:()=>S.inv.flour>0},
- {t:'🥠 เข้าครัว ทำทองม้วน (ขายได้ 120฿/กล่อง!)',ok:()=>S.stats.roll>0},
+ {t:'🔪 หลังบ้าน ปอก/หั่น → ตาก → บดเป็นแป้ง',ok:()=>S.inv.flour>0},
+ {t:'🥠 เข้าครัว ทำทองม้วน (120฿/กล่อง!)',ok:()=>S.stats.roll>0},
+ {t:'🏬 เดินเข้าร้านสหกรณ์ ขายทองม้วน',ok:()=>S.money>=400},
  {t:'🚲 ไปตลาด ซื้อจักรยานที่ร้านช่างโต้ง',ok:()=>S.up.bike>0||S.up.saleng>0},
  {t:'🎯 อิสระ! สร้างธุรกิจทองม้วนให้ใหญ่ที่สุด',ok:()=>false}];
 function qTick(){while(S.q<QUEST.length-1&&QUEST[S.q].ok())S.q++;questEl.textContent='ภารกิจ: '+QUEST[S.q].t;}
 
-/*======== ACTIONS ========*/
+/*==== ACTIONS ====*/
 function acts(){const L=[];
  ['bike','saleng'].forEach(v=>{if(S.up[v]&&S.ride!==v&&S.park[v].sc===scene&&!SC[scene].indoor)
   L.push({x:S.park[v].x,y:S.park[v].y,r:30,txt:(v==='bike'?'🚲 ขี่':'🛺 ขับ')+VNAME[v],act:()=>mount(v)});});
@@ -883,8 +1105,12 @@ function acts(){const L=[];
  else if(scene==='market'){
   L.push({x:124,y:158,r:44,txt:'🍌 คุยกับแม่ค้ารับซื้อกล้วย',act:()=>openPanel('market')});
   L.push({x:392,y:160,r:42,txt:'🚲 ร้านขายจักรยาน & ซาเล้ง',act:()=>openPanel('vshop')});}
- else if(scene==='coop'){L.push({x:166,y:136,r:34,txt:'ขายทองม้วน',act:()=>openPanel('sell')});
-  L.push({x:332,y:140,r:38,txt:'ซื้ออุปกรณ์เกษตร',act:()=>openPanel('shop')});}
+ else if(scene==='coopfront'){
+  L.push({x:266,y:168,r:30,txt:'📋 อ่านบอร์ดความรู้เรื่องกล้วย',act:()=>openPanel('board')});
+  L.push({x:184,y:162,r:26,txt:'🚪 เดินขึ้นเข้าประตูร้านสหกรณ์',act:()=>go('coop',240,216)});}
+ else if(scene==='coop'){
+  L.push({x:180,y:162,r:32,txt:'💰 ขายทองม้วน',act:()=>openPanel('sell')});
+  L.push({x:302,y:168,r:34,txt:'🛒 ซื้ออุปกรณ์เกษตร',act:()=>openPanel('shop')});}
  return L;}
 function near(){let b=null,bd=1e9;for(const a of acts()){const d=Math.hypot(a.x-P.x,a.y-P.y);if(d<a.r&&d<bd){bd=d;b=a;}}return b;}
 function plot(i){const pl=S.plots[i];
@@ -906,7 +1132,7 @@ function grind(){if(S.inv.dried<3){toast('ต้องใช้กล้วย�
   const n=S.up.grinder?Math.floor(S.inv.dried/3):1;S.inv.dried-=n*3;S.inv.flour+=n;
   sfx.pick();toast('⚙️ ได้แป้งกล้วย +'+n+' ถุง');}};}
 
-/*======== SHOP ========*/
+/*==== SHOP / PANELS ====*/
 const SHOP_COOP=[
  {id:'fert',n:'ปุ๋ยชีวภาพสูตรสวนกล้วย',max:3,c:[150,400,900],d:l=>'โตเร็วขึ้น +'+(25*(l+1))+'% และสุกไวขึ้น'},
  {id:'sprink',n:'สปริงเกลอร์รดน้ำ',max:2,c:[280,760],d:l=>l===0?'รดน้ำอัตโนมัติ แถว A (4 แปลง)':'รดน้ำอัตโนมัติทั้งสวน 8 แปลง'},
@@ -917,20 +1143,28 @@ const SHOP_COOP=[
 const SHOP_VEH=[
  {id:'bike',n:'🚲 จักรยานคันเก่ง',max:1,c:[340],d:()=>'ขี่ได้จริง เร็วขึ้น 67%'},
  {id:'saleng',n:'🛺 รถซาเล้งพ่วงข้าง',max:1,c:[980],d:()=>'ขับได้จริง เร็วขึ้น 112% + วาร์ปข้ามฉาก'}];
-const ROUTES={farm:['kitchen','backyard','market','coop','orchard'],orchard:['farm'],
- backyard:['farm','kitchen'],kitchen:['farm','backyard'],market:['farm','coop'],coop:['farm','market']};
-const SPAWN={farm:[150,186],orchard:[240,112],backyard:[300,160],kitchen:[240,180],market:[240,198],coop:[240,200]};
+const ROUTES={farm:['kitchen','backyard','market','coopfront','orchard'],orchard:['farm'],
+ backyard:['farm','kitchen'],kitchen:['farm','backyard'],market:['farm','coopfront'],
+ coopfront:['farm','market','coop'],coop:['coopfront']};
+const SPAWN={farm:[150,186],orchard:[240,112],backyard:[300,160],kitchen:[240,180],
+ market:[240,198],coopfront:[228,198],coop:[240,216]};
 function openPanel(k){pk=k;panelEl.classList.add('on');rp();}
 function closePanel(){pk=null;panelEl.classList.remove('on');}
 function rp(){if(!pk)return;pbEl.innerHTML='';
- const add=(nm,ds,bs)=>{const r=document.createElement('div');r.className='row';
+ const add=(nm,ds,bs,cls)=>{const r=document.createElement('div');r.className='row'+(cls||'');
   const i=document.createElement('div');i.className='info';
   i.innerHTML='<div class="nm">'+nm+'</div>'+(ds?'<div class="ds">'+ds+'</div>':'');r.appendChild(i);
   (bs||[]).forEach(b=>{const e=document.createElement('button');
    e.className='btn'+(b.dis?' dis':'')+(b.blue?' blue':'')+(b.red?' red':'');
    e.textContent=b.t;if(!b.dis)e.onclick=b.f;r.appendChild(e);});
   pbEl.appendChild(r);};
- if(pk==='market'){ptEl.textContent='🍌 แผงรับซื้อกล้วย — '+S.money+'฿';
+ if(pk==='board'){ptEl.textContent='📋 บอร์ดความรู้ — เรื่องน่ารู้ของกล้วย';
+  add('🏫 บอร์ดให้ความรู้ชุมชน','สหกรณ์การเกษตรจัดทำขึ้นเพื่อเผยแพร่ความรู้เรื่องการปลูกและแปรรูปกล้วย');
+  EDU.forEach(e=>add(e[0],e[1],null,' edu'));
+  if(!S.read){add('🎁 โบนัสนักอ่าน','อ่านบอร์ดครบครั้งแรก รับ 80฿ — "ความรู้คือกำไร"',
+   [{t:'รับ 80฿',blue:1,f:()=>{S.read=1;S.money+=80;sfx.coin();toast('📚 ได้รับโบนัสนักอ่าน +80฿');rp();hud();save();qTick();}}]);}
+  else add('✅ อ่านครบแล้ว','กลับมาทบทวนได้ทุกเมื่อนะครับ');}
+ else if(pk==='market'){ptEl.textContent='🍌 แผงรับซื้อกล้วย — '+S.money+'฿';
   add('👩 ป้าสมศรี แม่ค้าผลไม้','"กล้วยสดราคาไม่สูงนะจ๊ะ ลองเอาไปทำทองม้วนขายดีกว่า~"');
   const s=(k,l,p)=>add(l,'ราคา '+p+'฿/ลูก • มีอยู่ '+S.inv[k],[
    {t:'ขาย 1',dis:S.inv[k]<1,f:()=>sell(k,1,p)},{t:'ขายหมด',blue:1,dis:S.inv[k]<1,f:()=>sell(k,S.inv[k],p)}]);
@@ -939,16 +1173,15 @@ function rp(){if(!pk)return;pbEl.innerHTML='';
   add('👨‍🔧 ช่างโต้ง เจ้าของร้าน','"ซื้อแล้วจอดรอหน้าร้านเลยครับ ขี่กลับบ้านได้ทันที"');
   SHOP_VEH.forEach(it=>{const lv=S.up[it.id];
    if(lv>=it.max){add(it.n+' ✅',it.d(lv-1)+' • จอดอยู่ที่ '+SCNAME[S.park[it.id].sc],[{t:'มีแล้ว',dis:1}]);return;}
-   add(it.n,it.d(lv),[{t:it.c[lv]+'฿',dis:S.money<it.c[lv],f:()=>buy(it,it.c[lv])}]);});
-  add('💡 วิธีใช้รถ','เดินเข้าใกล้รถ กด E (มือถือกดปุ่ม 🚲) เพื่อขึ้น/ลง');}
- else if(pk==='sell'){ptEl.textContent='💰 รับซื้อสินค้าชุมชน — '+S.money+'฿';
-  add('👨 พี่วิทย์ พนักงานสหกรณ์','"ทองม้วนกล้วยขึ้นราคาเป็น 120฿ แล้วครับ!"');
+   add(it.n,it.d(lv),[{t:it.c[lv]+'฿',dis:S.money<it.c[lv],f:()=>buy(it,it.c[lv])}]);});}
+ else if(pk==='sell'){ptEl.textContent='💰 สหกรณ์รับซื้อ — '+S.money+'฿';
+  add('👨 พี่วิทย์ พนักงานสหกรณ์','"ทองม้วนกล้วยขายดีมากครับ กล่องละ 120฿"');
   add('🥠 ทองม้วนกล้วย (กล่อง)','ราคา '+PRICE.roll+'฿/กล่อง • มีอยู่ '+S.inv.roll,[
    {t:'ขาย 1',dis:S.inv.roll<1,f:()=>sell('roll',1,PRICE.roll)},
    {t:'ขายหมด',blue:1,dis:S.inv.roll<1,f:()=>sell('roll',S.inv.roll,PRICE.roll)}]);
   add('📊 สถิติฟาร์ม','ปลูก '+S.stats.plant+' • ดิบ '+S.stats.hg+' • สุก '+S.stats.hr+
    ' • ทองม้วน '+S.stats.roll+' • เดินทาง '+S.stats.trips+' • รายได้ '+S.stats.earn+'฿');}
- else if(pk==='shop'){ptEl.textContent='🛒 อุปกรณ์เกษตร สหกรณ์ — '+S.money+'฿';
+ else if(pk==='shop'){ptEl.textContent='🛒 อุปกรณ์เกษตร — '+S.money+'฿';
   SHOP_COOP.forEach(it=>{const lv=S.up[it.id];
    if(lv>=it.max){add(it.n+' ✅',it.d(lv-1),[{t:'มีแล้ว',dis:1}]);return;}
    add(it.n+(it.max>1?' (Lv.'+lv+'→'+(lv+1)+')':''),it.d(lv),[{t:it.c[lv]+'฿',dis:S.money<it.c[lv],f:()=>buy(it,it.c[lv])}]);});
@@ -958,18 +1191,17 @@ function rp(){if(!pk)return;pbEl.innerHTML='';
   add('🏠 กลับบ้านทันที','ฟรีทุกเวลา (ปุ่ม 🏠 / กด B)',[{t:'กลับบ้าน',blue:1,f:()=>{closePanel();goHome();}}]);
   Object.keys(SCNAME).forEach(k=>{const here=k===scene,lk=ROUTES[scene].indexOf(k)>=0;
    add((here?'📍 ':'')+SCNAME[k],here?'คุณอยู่ที่นี่':(lk?'เดินถึงได้โดยตรง':'ต้องผ่านฉากอื่นก่อน'),
-    [{t:S.up.saleng?'🛺 วาร์ป':'🔒 ต้องมีซาเล้ง',blue:1,dis:here||!S.up.saleng,
+    [{t:S.up.saleng?'🛺 วาร์ป':'🔒 ต้องมีซาเล้ง',blue:1,dis:here||!S.up.saleng||k==='coop',
       f:()=>{closePanel();go(k,SPAWN[k][0],SPAWN[k][1]);}}]);});}
  else if(pk==='help'){ptEl.textContent='? วิธีเล่น';
-  add('🕐 เวลาในเกม','กลางวัน 20 นาทีจริง + กลางคืน 20 นาทีจริง (รอบละ 40 นาที) • ดูนาฬิกามุมบนซ้าย');
+  add('🏬 ร้านสหกรณ์','เป็นตึกแถว ต้องเดินขึ้นเข้าประตูกระจกคูหากลาง • หน้าร้านมีบอร์ดความรู้เรื่องกล้วย');
+  add('🕐 เวลาในเกม','กลางวัน 20 นาทีจริง + กลางคืน 20 นาทีจริง • ดูนาฬิกามุมบนซ้าย');
   add('📱 มือถือ','ปุ่มทิศซ้ายล่าง • A = โต้ตอบ • 🚲 = ขึ้น/ลงรถ • ⛶ = เต็มจอ');
   add('⌨️ คีย์บอร์ด','WASD/ลูกศร = เดิน • E/Space = โต้ตอบ • F = ขึ้นลงรถ • M = แผนที่ • B = กลับบ้าน');
-  add('🌿 สวนกล้วย','8 แปลงเหลี่ยม (A1-A4 แถวบน / B1-B4 แถวล่าง) ทางเดินกางเขนกลางสวน');
-  add('⏳ เวลาโต','ต้นกล้วยโตเต็มที่ ~3 นาที (รดน้ำช่วยเร่ง 70%) • รอสุกอีก '+RIPEN+' วินาที');
-  add('💵 ราคาใหม่','🌿 ดิบ '+PRICE.green+'฿ • 🍌 สุก '+PRICE.ripe+'฿ • ☀️ แห้ง '+PRICE.dried+'฿ • 🥠 ทองม้วน '+PRICE.roll+'฿');
-  add('🔄 สายการผลิต','ดิบ → หั่น → ตาก 18 วิ → บด 3 = แป้ง 1 → แป้ง 2 = ทองม้วน 3–6 กล่อง (=360-720฿)');
+  add('🌿 สวนกล้วย','8 แปลงเหลี่ยม (A1-A4 / B1-B4) • โตเต็มที่ ~3 นาที • รอสุกอีก '+RIPEN+' วินาที');
+  add('💵 ราคา','🌿 ดิบ '+PRICE.green+'฿ • 🍌 สุก '+PRICE.ripe+'฿ • ☀️ แห้ง '+PRICE.dried+'฿ • 🥠 ทองม้วน '+PRICE.roll+'฿');
   add('⚠️ ล้างข้อมูลเกม','ลบเซฟทั้งหมดแล้วเริ่มใหม่',[{t:'เริ่มใหม่',red:1,
-   f:()=>{if(confirm('ลบเซฟและเริ่มเกมใหม่ทั้งหมด?')){localStorage.removeItem('bnf16v10');location.reload();}}}]);}}
+   f:()=>{if(confirm('ลบเซฟและเริ่มเกมใหม่ทั้งหมด?')){localStorage.removeItem('bnf16v11');location.reload();}}}]);}}
 function sell(k,n,p){if(n<1)return;S.inv[k]-=n;const m=n*p;S.money+=m;S.stats.earn+=m;
  sfx.coin();toast('💰 ขายได้ '+m+'฿');rp();hud();save();}
 function buy(it,c){if(S.money<c)return;S.money-=c;S.up[it.id]++;sfx.coin();
@@ -982,7 +1214,7 @@ function go(sc,x,y){const b=SC[sc].bounds;
  if(S.ride&&SC[sc].indoor){const v=S.ride;S.park[v]={sc:scene,x:P.x,y:P.y};S.ride='';toast('🅿️ จอด'+VNAME[v]+'ไว้ข้างนอก');}
  trans={t:0,to:sc,x:cl(x,b[0]+8,b[2]-8),y:cl(y,b[1]+8,b[3]-8)};S.stats.trips++;sfx.door();}
 
-/*======== MINIGAME ========*/
+/*==== MINIGAME ====*/
 function mgStart(){if(S.inv.flour<2){toast('ต้องใช้แป้งกล้วย 2 ถุง',1);sfx.bad();return;}
  S.inv.flour-=2;mg={s:'pour',pour:0,pq:0,roll:0,rt:4,rq:0,cuts:[],cp:0,cd:1,t:0};
  mguiEl.classList.add('on');mgTxt();}
@@ -1047,7 +1279,7 @@ function mgDraw(g){g.fillStyle='rgba(5,8,13,.74)';g.fillRect(0,0,VW,VH);const cx
    g.fillStyle=['#ffd86b','#6ee27a','#7fd0ff','#ff9ec4'][i%4];
    g.fillRect(cx+Math.cos(a)*(52+i*4),cy+Math.sin(a*1.3)*(40+i*2),3,3);}}}
 
-/*======== HUD ========*/
+/*==== HUD ====*/
 function hud(){hudEl.innerHTML='';
  const c=(t,cls)=>{const d=document.createElement('div');d.className='chip'+(cls||'');d.innerHTML=t;hudEl.appendChild(d);};
  c((isNight()?'🌙':'☀️')+' <b>'+timeStr()+'</b>',isNight()?' tnight':' tday');
@@ -1060,7 +1292,7 @@ function hud(){hudEl.innerHTML='';
  if(S.inv.flour)c('🥣<b>'+S.inv.flour+'</b>');
  if(S.inv.roll)c('🥠<b>'+S.inv.roll+'</b>');}
 
-/*======== MOVEMENT (เร็วขึ้น) ========*/
+/*==== MOVEMENT ====*/
 function blocked(nx,ny){const s=SC[scene],b=s.bounds;
  if(nx<b[0]||nx>b[2]||ny<b[1]||ny>b[3])return true;
  const wi=S.ride?9:6,fx=nx-wi,fy=ny-5,fw=wi*2,fh=6;
@@ -1071,7 +1303,7 @@ const spd=()=>S.ride==='saleng'?165:S.ride==='bike'?130:78*(1+(S.up.boots?.25:0)
  P.x=cl(P.x,b[0]+8,b[2]-8);P.y=cl(P.y,b[1]+8,b[3]-8);
  if(S.ride&&SC[scene].indoor)S.ride='';})();
 
-/*======== UPDATE ========*/
+/*==== UPDATE ====*/
 function update(dt){
  S.clock=(S.clock+dt)%CYCLE;
  const nn=isNight();
@@ -1121,29 +1353,50 @@ function update(dt){
  else promptEl.classList.remove('on');
  edge=false;hud();qTick();}
 
-/*======== RENDER ========*/
+/*==== RENDER ====*/
 function tint(){const f=S.clock/CYCLE;
- if(f<.035)return'rgba(255,168,104,.20)';   /* รุ่งอรุณ */
- if(f<.44)return null;                       /* กลางวัน */
- if(f<.50)return'rgba(255,138,74,.26)';      /* เย็น */
- if(f<.56)return'rgba(92,80,158,.34)';       /* พลบค่ำ */
- if(f<.94)return'rgba(20,28,74,.52)';        /* กลางคืน */
- return'rgba(58,60,132,.34)';}               /* ก่อนรุ่งสาง */
+ if(f<.035)return'rgba(255,168,104,.20)';
+ if(f<.44)return null;
+ if(f<.50)return'rgba(255,138,74,.26)';
+ if(f<.56)return'rgba(92,80,158,.34)';
+ if(f<.94)return'rgba(20,28,74,.52)';
+ return'rgba(58,60,132,.34)';}
 function render(t){
  ctx.drawImage(BG(scene),0,0);
  const L=[];
  const night=isNight();
- if(scene==='farm'||scene==='orchard'||scene==='backyard'){
+ if(SC[scene].out){
   if(!night)for(let i=0;i<3;i++){const x=(t*10+i*190)%560-40,y=10+i*7;
    ctx.fillStyle='rgba(255,255,255,.2)';ctx.beginPath();ctx.ellipse(x,y,20,6,0,0,7);ctx.fill();
    ctx.beginPath();ctx.ellipse(x+12,y-3,12,5,0,0,7);ctx.fill();}
-  else for(let i=0;i<26;i++){const sx=(i*67)%470+5,sy=(i*43)%70+4;
+  else if(scene!=='coopfront')for(let i=0;i<26;i++){const sx=(i*67)%470+5,sy=(i*43)%70+4;
    const tw=.45+Math.sin(t*2+i)*.35;ctx.fillStyle='rgba(255,255,255,'+tw+')';ctx.fillRect(sx,sy,1,1);}}
  if(scene==='orchard'){
   S.plots.forEach((pl,i)=>{const p=PLOTS[i];L.push({y:p[1],f:()=>tree(ctx,p[0],p[1],pl,t)});});
   L.push({y:234,f:()=>tank(ctx,240,234)});
   L.push({y:170,f:()=>lamp(ctx,240,170,t)});}
  else if(scene==='farm'){L.push({y:176,f:()=>lamp(ctx,216,176,t)});}
+ else if(scene==='coopfront'){
+  /* ไฟหน้าร้านตอนกลางคืน */
+  if(night){['#ffe9a8','#a9e0c6','#ffd0b0','#7c8cc0'].forEach((c,i)=>{
+   const cx=68+i*114;const gr=ctx.createRadialGradient(cx,140,4,cx,140,42);
+   gr.addColorStop(0,'rgba(255,230,170,.16)');gr.addColorStop(1,'rgba(255,230,170,0)');
+   ctx.fillStyle=gr;ctx.beginPath();ctx.arc(cx,140,42,0,7);ctx.fill();});}
+  L.push({y:168,f:()=>eduBoard(ctx,266,168,t)});
+  L.push({y:172,f:()=>streetLamp(ctx,66,172,t)});
+  L.push({y:172,f:()=>streetLamp(ctx,404,172,t)});
+  L.push({y:170,f:()=>bench(ctx,330,170)});
+  L.push({y:170,f:()=>potPlant(ctx,128,170)});
+  L.push({y:170,f:()=>potPlant(ctx,240,170)});
+  L.push({y:246,f:()=>potPlant(ctx,60,246)});
+  L.push({y:246,f:()=>bench(ctx,148,246)});
+  L.push({y:168,f:()=>drawNPC(ctx,214,168,NPCDEF.teacher,t,9)});
+  const kx=330+Math.sin(t*.5)*26;
+  L.push({y:244,f:()=>drawNPC(ctx,kx,244,NPCDEF.kid,t,10,1)});
+  L.push({y:150,f:()=>drawBike(ctx,96,150,'right',0)});}
+ else if(scene==='coop'){
+  L.push({y:122,f:()=>drawNPC(ctx,180,122,NPCDEF.clerk,t,5)});
+  L.push({y:200,f:()=>drawNPC(ctx,300,200,NPCDEF.customer,t,6)});}
  else if(scene==='backyard'){const n=3+(S.up.racks?3:0);
   for(let i=0;i<n;i++){const r=RACKS[i];L.push({y:r[1]+22,f:()=>rack(ctx,r[0],r[1],S.racks[i])});}
   L.push({y:186,f:()=>{ctx.fillStyle='#9a7440';ctx.fillRect(24,170,26,14);ctx.fillStyle='#b78d55';ctx.fillRect(24,170,26,4);
@@ -1156,11 +1409,7 @@ function render(t){
   L.push({y:126,f:()=>drawSaleng(ctx,432,126,'left',0)});
   const cx1=110+Math.sin(t*.45)*60;
   L.push({y:242,f:()=>drawNPC(ctx,cx1,242,NPCDEF.customer,t,3)});
-  L.push({y:248,f:()=>drawNPC(ctx,230,248,NPCDEF.kid,t,4,1)});
   L.push({y:164,f:()=>lamp(ctx,286,164,t)});}
- else if(scene==='coop'){
-  L.push({y:90,f:()=>drawNPC(ctx,152,90,NPCDEF.clerk,t,5)});
-  L.push({y:214,f:()=>drawNPC(ctx,320,214,NPCDEF.customer,t,6)});}
  else if(scene==='kitchen'){
   ctx.fillStyle='rgba(255,140,60,'+(.26+Math.sin(t*9)*.1)+')';ctx.beginPath();ctx.ellipse(182,122,15+Math.sin(t*7)*2,5,0,0,7);ctx.fill();
   L.push({y:130,f:()=>{for(let i=0;i<Math.min(4,S.inv.roll);i++){ctx.fillStyle='#e0b95f';ctx.fillRect(256+i*11,104,9,13);
@@ -1174,7 +1423,6 @@ function render(t){
  SC[scene].exits.forEach(e=>exitArrow(ctx,e,t));
  const tn=SC[scene].out?tint():'rgba(255,198,116,.08)';
  if(tn){ctx.fillStyle=tn;ctx.fillRect(0,0,VW,VH);}
- /* แสงรอบตัวผู้เล่นตอนกลางคืน */
  if(SC[scene].out&&night){const pg=ctx.createRadialGradient(P.x,P.y-12,6,P.x,P.y-12,62);
   pg.addColorStop(0,'rgba(255,228,160,.22)');pg.addColorStop(1,'rgba(255,228,160,0)');
   ctx.fillStyle=pg;ctx.beginPath();ctx.arc(P.x,P.y-12,62,0,7);ctx.fill();}
@@ -1188,12 +1436,12 @@ function render(t){
  if(mg)mgDraw(ctx);
  if(trans){const a=1-Math.abs(trans.t*2-1);ctx.fillStyle='rgba(3,5,8,'+cl(a,0,1)+')';ctx.fillRect(0,0,VW,VH);}}
 
-/*======== LOOP ========*/
+/*==== LOOP ====*/
 let last=performance.now(),T=0;
 function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;T+=dt;update(dt);render(T);requestAnimationFrame(loop);}
 relabel();hud();qTick();requestAnimationFrame(loop);
-setTimeout(()=>toast('🕐 เวลาในเกม: กลางวัน 20 นาที / กลางคืน 20 นาที'),700);
-setTimeout(()=>toast('🥠 ทองม้วนขึ้นราคาเป็น 120฿ — กำไรอยู่ที่แปรรูป!'),2700);
+setTimeout(()=>toast('🏬 สหกรณ์ย้ายเป็นตึกแถวแล้ว — เดินขึ้นเหนือจากบ้าน'),700);
+setTimeout(()=>toast('📋 หน้าร้านมีบอร์ดความรู้เรื่องกล้วย อ่านครบรับ 80฿'),2700);
 </script>
 </body>
 </html>
