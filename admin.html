@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>หลังบ้าน | จัดการสินค้า</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green-900:#0f3d24;
+    --green-700:#1a5c37;
+    --green-600:#22703f;
+    --green-500:#2d8a4e;
+    --green-100:#e7f3ea;
+    --green-050:#f5faf6;
+    --cream:#fdfcf8;
+    --ink:#152016;
+    --ink-soft:#4c5c50;
+    --line:#dbe8dd;
+    --white:#ffffff;
+    --red:#b3382c;
+    --red-100:#fbeceb;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Sarabun', sans-serif; color:var(--ink); background:var(--cream); line-height:1.6;}
+  a{text-decoration:none; color:inherit;}
+  button, input, select, textarea{font-family:inherit;}
+  .wrap{max-width:1240px; margin:0 auto; padding:0 32px;}
+
+  /* ===== Header ===== */
+  header{position:sticky; top:0; z-index:100; background:var(--white); border-bottom:1px solid var(--line);}
+  .nav-row{display:flex; align-items:center; justify-content:space-between; height:78px;}
+  .brand{display:flex; align-items:center; gap:14px;}
+  .logo-slot{
+    width:52px; height:52px; border-radius:12px; border:1.5px dashed #b9d6c1; background:var(--green-050);
+    display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--green-600);
+    text-align:center; line-height:1.3; flex-shrink:0;
+  }
+  .brand-text .name{font-size:20px; font-weight:700; color:var(--green-900);}
+  .brand-text .tagline{font-size:12.5px; color:var(--ink-soft); margin-top:1px;}
+  .nav-cta{padding:11px 22px; background:var(--green-700); color:var(--white); border-radius:8px; font-weight:600; font-size:14.5px; white-space:nowrap;}
+  .nav-cta:hover{background:var(--green-900);}
+
+  /* ===== Page head ===== */
+  .page-head{background:linear-gradient(180deg, var(--green-050) 0%, var(--cream) 100%); padding:44px 0 28px;}
+  .eyebrow-tag{display:inline-block; font-size:13.5px; font-weight:600; color:var(--green-700); background:var(--green-100); padding:6px 14px; border-radius:20px; margin-bottom:14px;}
+  .page-head h1{font-size:32px; font-weight:700; color:var(--green-900); letter-spacing:-.3px;}
+  .page-head p{font-size:15px; color:var(--ink-soft); margin-top:8px; max-width:560px;}
+
+  /* ===== Layout ===== */
+  .section{padding:8px 0 76px;}
+  .admin-grid{display:grid; grid-template-columns:380px 1fr; gap:28px; align-items:start;}
+  .right-col{display:flex; flex-direction:column; gap:28px; min-width:0;}
+  .card{background:var(--white); border:1px solid var(--line); border-radius:18px; padding:26px;}
+  .form-card{position:sticky; top:98px;}
+  .card h2{font-size:18px; font-weight:700; color:var(--green-900);}
+  .card .hint{font-size:13.5px; color:var(--ink-soft); margin-top:4px;}
+
+  /* ===== Form ===== */
+  .field{margin-top:16px;}
+  .field label{display:block; font-size:13.5px; font-weight:600; color:var(--green-900); margin-bottom:6px;}
+  .field label .req{color:var(--red);}
+  .field input[type="text"], .field select, .field textarea{
+    width:100%; padding:11px 14px; border:1.5px solid var(--line); border-radius:10px;
+    font-size:14.5px; color:var(--ink); background:var(--cream); transition:border-color .15s ease;
+  }
+  .field textarea{resize:vertical; min-height:92px;}
+  .field input:focus, .field select:focus, .field textarea:focus{outline:none; border-color:var(--green-500);}
+  .field input::placeholder, .field textarea::placeholder{color:#8ea294;}
+  .field .err{display:none; color:var(--red); font-size:12.5px; margin-top:5px;}
+  .field.invalid input, .field.invalid select{border-color:var(--red);}
+  .field.invalid .err{display:block;}
+
+  .img-box{
+    aspect-ratio:4/3; border-radius:12px; overflow:hidden; border:1.5px dashed #b9d6c1; background:var(--green-050);
+    display:flex; align-items:center; justify-content:center; color:var(--green-600); font-size:13px; font-weight:500;
+  }
+  .img-box img{width:100%; height:100%; object-fit:cover; display:block;}
+  .img-actions{display:flex; gap:10px; margin-top:10px;}
+  .btn-sm{
+    padding:9px 16px; border-radius:9px; border:1.5px solid var(--line); background:var(--white);
+    font-size:13.5px; font-weight:600; color:var(--green-700); cursor:pointer; transition:background .15s ease, border-color .15s ease;
+  }
+  .btn-sm:hover{background:var(--green-050); border-color:#b9d6c1;}
+  #fileInput{display:none;}
+
+  .form-actions{display:flex; gap:12px; margin-top:24px;}
+  .btn-primary{
+    flex:1; background:var(--green-700); color:var(--white); border:none; padding:13px 24px;
+    border-radius:9px; font-weight:600; font-size:15.5px; cursor:pointer; transition:background .2s ease;
+  }
+  .btn-primary:hover{background:var(--green-900);}
+  .btn-ghost{
+    padding:13px 20px; border:1.5px solid var(--line); border-radius:9px; background:var(--white);
+    color:var(--ink-soft); font-size:14.5px; font-weight:600; cursor:pointer;
+  }
+  .btn-ghost:hover{background:var(--green-050);}
+
+  /* ===== Categories ===== */
+  .cat-list{display:flex; flex-wrap:wrap; gap:10px; margin-top:16px; min-height:38px;}
+  .cat-item{
+    display:inline-flex; align-items:center; gap:2px; padding:4px 6px 4px 14px; border-radius:20px;
+    border:1.5px solid var(--line); background:var(--green-050); font-size:14px; font-weight:500;
+  }
+  .cat-item .nm{padding-right:6px;}
+  .icon-btn{
+    width:26px; height:26px; border:none; background:transparent; border-radius:50%; cursor:pointer;
+    color:var(--ink-soft); font-size:14px; line-height:1; display:flex; align-items:center; justify-content:center;
+  }
+  .icon-btn:hover{background:var(--green-100); color:var(--green-700);}
+  .icon-btn.x:hover{background:var(--red-100); color:var(--red);}
+  .cat-add{display:flex; gap:10px; margin-top:16px;}
+  .cat-add input{
+    flex:1; padding:10px 14px; border:1.5px solid var(--line); border-radius:10px; font-size:14.5px; background:var(--cream);
+  }
+  .cat-add input:focus{outline:none; border-color:var(--green-500);}
+  .cat-empty{font-size:13.5px; color:var(--ink-soft);}
+
+  /* ===== Product list ===== */
+  .list-head{display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap;}
+  .count-pill{display:inline-block; margin-left:8px; font-size:12.5px; font-weight:600; color:var(--green-700); background:var(--green-100); padding:2px 10px; border-radius:20px; vertical-align:middle;}
+  .list-tools{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  .list-tools input{padding:9px 14px; border:1.5px solid var(--line); border-radius:9px; font-size:14px; background:var(--cream); min-width:200px;}
+  .list-tools input:focus{outline:none; border-color:var(--green-500);}
+  .link-btn{background:none; border:none; color:var(--ink-soft); font-size:13px; text-decoration:underline; cursor:pointer;}
+  .link-btn:hover{color:var(--green-700);}
+
+  #prodList{margin-top:18px; display:flex; flex-direction:column;}
+  .row{
+    display:grid; grid-template-columns:72px 1fr auto; gap:16px; align-items:center;
+    padding:14px 0; border-top:1px solid var(--line);
+  }
+  .row:first-child{border-top:none;}
+  .thumb{
+    width:72px; height:54px; border-radius:9px; overflow:hidden; border:1.5px dashed #b9d6c1; background:var(--green-050);
+    display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--green-600);
+  }
+  .thumb img{width:100%; height:100%; object-fit:cover; display:block;}
+  .info{min-width:0;}
+  .r-name{font-size:15.5px; font-weight:700; color:var(--green-900); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .r-meta{font-size:12.5px; color:var(--ink-soft); display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:2px;}
+  .pill{font-size:11.5px; font-weight:600; color:var(--green-700); background:var(--green-100); padding:2px 10px; border-radius:20px;}
+  .r-desc{font-size:13px; color:var(--ink-soft); margin-top:3px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical;}
+  .del-btn{
+    padding:9px 16px; border-radius:9px; border:1.5px solid #efc9c5; background:var(--white);
+    color:var(--red); font-size:13.5px; font-weight:600; cursor:pointer; transition:background .15s ease;
+  }
+  .del-btn:hover{background:var(--red-100);}
+  .list-empty{display:none; text-align:center; padding:46px 20px; margin-top:18px; border:1.5px dashed var(--line); border-radius:14px; background:var(--green-050); color:var(--ink-soft); font-size:14.5px;}
+  .list-empty.show{display:block;}
+
+  /* ===== Toast ===== */
+  #toast{
+    position:fixed; left:50%; bottom:28px; transform:translate(-50%, 20px); opacity:0; pointer-events:none;
+    background:var(--green-900); color:#fff; padding:12px 22px; border-radius:10px; font-size:14.5px; font-weight:500;
+    box-shadow:0 12px 30px rgba(15,61,36,.25); transition:opacity .2s ease, transform .2s ease; z-index:300; max-width:90vw;
+  }
+  #toast.show{opacity:1; transform:translate(-50%, 0);}
+  #toast.error{background:var(--red);}
+
+  footer{background:var(--green-900); color:#8fab97; padding:22px 0; font-size:12.5px;}
+
+  @media (max-width:960px){
+    .admin-grid{grid-template-columns:1fr;}
+    .form-card{position:static;}
+  }
+  @media (max-width:560px){
+    .wrap{padding:0 18px;}
+    .row{grid-template-columns:56px 1fr; }
+    .thumb{width:56px; height:44px;}
+    .del-btn{grid-column:1 / -1;}
+    .list-tools input{min-width:0; width:100%;}
+    .brand-text .tagline{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav-row">
+    <div class="brand">
+      <div class="logo-slot">ใส่โลโก้</div>
+      <div class="brand-text">
+        <div class="name">เกษตร</div>
+        <div class="tagline">ระบบหลังบ้าน</div>
+      </div>
+    </div>
+    <a href="product.html" class="nav-cta">ดูหน้าสินค้า</a>
+  </div>
+</header>
+
+<section class="page-head">
+  <div class="wrap">
+    <span class="eyebrow-tag">หลังบ้าน</span>
+    <h1>จัดการสินค้า</h1>
+    <p>เพิ่มหรือลบสินค้า แล้วกด “ดูหน้าสินค้า” เพื่อดูผลที่หน้าเว็บได้ทันที</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap admin-grid">
+
+    <!-- ===== Add product form ===== -->
+    <aside class="card form-card">
+      <h2>เพิ่มสินค้าใหม่</h2>
+      <p class="hint">ช่องที่มี * ต้องกรอก</p>
+
+      <form id="addForm" novalidate>
+        <div class="field">
+          <label>รูปสินค้า</label>
+          <div class="img-box" id="imgBox"><span>ยังไม่ได้เลือกรูป</span></div>
+          <div class="img-actions">
+            <button type="button" class="btn-sm" id="pickBtn">เลือกรูป</button>
+            <button type="button" class="btn-sm" id="removeImgBtn" style="display:none;">ลบรูป</button>
+          </div>
+          <input type="file" id="fileInput" accept="image/*">
+        </div>
+
+        <div class="field" id="fName">
+          <label for="name">ชื่อสินค้า <span class="req">*</span></label>
+          <input type="text" id="name" maxlength="120" placeholder="ชื่อสินค้า">
+          <div class="err">กรุณากรอกชื่อสินค้า</div>
+        </div>
+
+        <div class="field" id="fCat">
+          <label for="cat">หมวดหมู่ <span class="req">*</span></label>
+          <select id="cat"></select>
+          <div class="err">กรุณาเลือกหมวดหมู่ (เพิ่มหมวดหมู่ได้ที่ด้านขวา)</div>
+        </div>
+
+        <div class="field">
+          <label for="desc">รายละเอียด</label>
+          <textarea id="desc" maxlength="600" placeholder="รายละเอียดสินค้า"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="price">ราคา</label>
+          <input type="text" id="price" maxlength="60" placeholder="เช่น 120 บาท / กก. หรือ สอบถามราคา">
+        </div>
+
+        <div class="field">
+          <label for="loc">แหล่งผลิต / พื้นที่</label>
+          <input type="text" id="loc" maxlength="80" placeholder="เช่น ชื่อกลุ่มหรืออำเภอ">
+        </div>
+
+        <div class="field">
+          <label for="badge">ป้ายเด่นบนรูป (ไม่บังคับ)</label>
+          <input type="text" id="badge" maxlength="24" placeholder="เช่น สินค้าใหม่">
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">เพิ่มสินค้า</button>
+          <button type="button" class="btn-ghost" id="resetFormBtn">ล้างฟอร์ม</button>
+        </div>
+      </form>
+    </aside>
+
+    <!-- ===== Right column ===== -->
+    <div class="right-col">
+
+      <div class="card">
+        <h2>หมวดหมู่สินค้า</h2>
+        <p class="hint">หมวดหมู่เหล่านี้จะแสดงเป็นปุ่มกรองที่หน้าสินค้า กด ✎ เพื่อเปลี่ยนชื่อ หรือ × เพื่อลบ (ลบได้เมื่อไม่มีสินค้าในหมวดนั้น)</p>
+        <div class="cat-list" id="catList"></div>
+        <div class="cat-add">
+          <input type="text" id="catInput" maxlength="40" placeholder="ชื่อหมวดหมู่ใหม่">
+          <button type="button" class="btn-sm" id="catAddBtn">เพิ่มหมวดหมู่</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="list-head">
+          <h2>รายการสินค้า<span class="count-pill" id="countPill">0</span></h2>
+          <div class="list-tools">
+            <input type="text" id="listSearch" placeholder="ค้นหาในรายการ...">
+            <button type="button" class="link-btn" id="restoreBtn">คืนค่าสินค้าตัวอย่าง</button>
+          </div>
+        </div>
+        <div id="prodList"></div>
+        <div class="list-empty" id="listEmpty">ยังไม่มีสินค้า เพิ่มสินค้าได้จากฟอร์มด้านซ้าย</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">หน้านี้สำหรับผู้ดูแลระบบเท่านั้น</div>
+</footer>
+
+<div id="toast" role="status"></div>
+
+<script>
+  /* ===== Shared storage (same code + keys as product.html) ===== */
+  const KEYS = { products:'ks_products', cats:'ks_categories' };
+
+  function defaultCats(){
+    return [
+      {id:'cat1', name:'ข้อความ'}, {id:'cat2', name:'ข้อความ'},
+      {id:'cat3', name:'ข้อความ'}, {id:'cat4', name:'ข้อความ'}
+    ];
+  }
+  function defaultProducts(){
+    const catOf = ['cat1','cat2','cat3','cat4','cat1','cat2','cat3','cat4'];
+    const badged = [0,2,5];
+    return catOf.map((c,i) => ({
+      id:'p'+(i+1), cat:c, name:'ข้อความ', desc:'ข้อความ', price:'ข้อความ',
+      loc:'ข้อความ', badge: badged.includes(i) ? 'ข้อความ' : '', img:'', updated:'ข้อความ'
+    }));
+  }
+  function load(key, fallback){
+    try{
+      const raw = localStorage.getItem(key);
+      if(raw === null) return fallback();
+      const v = JSON.parse(raw);
+      return Array.isArray(v) ? v : fallback();
+    }catch(e){ return fallback(); }
+  }
+  function save(key, val){
+    try{ localStorage.setItem(key, JSON.stringify(val)); return true; }
+    catch(e){ return false; }
+  }
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, ch =>
+      ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+
+  /* ===== State ===== */
+  let products = load(KEYS.products, defaultProducts);
+  let cats     = load(KEYS.cats, defaultCats);
+  let currentImg = '';
+
+  const $ = id => document.getElementById(id);
+  const form = $('addForm'), imgBox = $('imgBox'), fileInput = $('fileInput');
+  const pickBtn = $('pickBtn'), removeImgBtn = $('removeImgBtn');
+  const catSelect = $('cat'), catList = $('catList'), catInput = $('catInput');
+  const prodList = $('prodList'), listEmpty = $('listEmpty'), countPill = $('countPill'), listSearch = $('listSearch');
+
+  const STORAGE_ERR = 'บันทึกไม่สำเร็จ: พื้นที่เก็บข้อมูลเต็มหรือเบราว์เซอร์ไม่อนุญาต ลองลบสินค้าเดิมหรือใช้รูปที่เล็กลง';
+
+  function persist(){
+    const a = save(KEYS.products, products);
+    const b = save(KEYS.cats, cats);
+    return a && b;
+  }
+
+  let toastTimer;
+  function toast(msg, isError){
+    const t = $('toast');
+    t.textContent = msg;
+    t.className = 'show' + (isError ? ' error' : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.className = ''; }, 2800);
+  }
+
+  function thaiDate(){
+    return new Date().toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'numeric'});
+  }
+  function newId(prefix){
+    return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  }
+
+  /* ===== Image: pick, shrink, preview ===== */
+  function shrinkImage(file, maxW){
+    return new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onerror = reject;
+      fr.onload = () => {
+        const img = new Image();
+        img.onerror = reject;
+        img.onload = () => {
+          const s = Math.min(1, maxW / img.width);
+          const c = document.createElement('canvas');
+          c.width = Math.round(img.width * s);
+          c.height = Math.round(img.height * s);
+          const ctx = c.getContext('2d');
+          ctx.fillStyle = '#fff';
+          ctx.fillRect(0, 0, c.width, c.height);
+          ctx.drawImage(img, 0, 0, c.width, c.height);
+          resolve(c.toDataURL('image/jpeg', 0.8));
+        };
+        img.src = fr.result;
+      };
+      fr.readAsDataURL(file);
+    });
+  }
+
+  function showPreview(){
+    imgBox.innerHTML = '';
+    if(currentImg){
+      const im = document.createElement('img');
+      im.src = currentImg; im.alt = 'ตัวอย่างรูปสินค้า';
+      imgBox.appendChild(im);
+    }else{
+      imgBox.innerHTML = '<span>ยังไม่ได้เลือกรูป</span>';
+    }
+    removeImgBtn.style.display = currentImg ? '' : 'none';
+  }
+
+  pickBtn.addEventListener('click', () => fileInput.click());
+  removeImgBtn.addEventListener('click', () => { currentImg = ''; fileInput.value = ''; showPreview(); });
+  fileInput.addEventListener('change', async () => {
+    const f = fileInput.files[0];
+    if(!f) return;
+    if(!f.type.startsWith('image/')){ toast('กรุณาเลือกไฟล์รูปภาพ', true); fileInput.value = ''; return; }
+    try{
+      currentImg = await shrinkImage(f, 640);
+      showPreview();
+    }catch(e){
+      toast('อ่านไฟล์รูปไม่ได้ ลองเลือกไฟล์อื่น', true);
+    }
+  });
+
+  /* ===== Categories ===== */
+  function renderCats(){
+    // list with edit/delete
+    catList.innerHTML = '';
+    if(cats.length === 0){
+      catList.innerHTML = '<span class="cat-empty">ยังไม่มีหมวดหมู่ กรุณาเพิ่มอย่างน้อย 1 หมวดหมู่</span>';
+    }
+    cats.forEach(c => {
+      const item = document.createElement('span');
+      item.className = 'cat-item';
+      item.innerHTML =
+        '<span class="nm">' + esc(c.name) + '</span>' +
+        '<button type="button" class="icon-btn" data-edit="' + esc(c.id) + '" title="เปลี่ยนชื่อ">✎</button>' +
+        '<button type="button" class="icon-btn x" data-delcat="' + esc(c.id) + '" title="ลบหมวดหมู่">×</button>';
+      catList.appendChild(item);
+    });
+
+    // dropdown in the form (keep the current selection if still valid)
+    const prev = catSelect.value;
+    catSelect.innerHTML = '';
+    if(cats.length === 0){
+      catSelect.innerHTML = '<option value="">— ยังไม่มีหมวดหมู่ —</option>';
+    }else{
+      const ph = document.createElement('option');
+      ph.value = ''; ph.textContent = '— เลือกหมวดหมู่ —';
+      catSelect.appendChild(ph);
+      cats.forEach(c => {
+        const o = document.createElement('option');
+        o.value = c.id; o.textContent = c.name;
+        catSelect.appendChild(o);
+      });
+      if(cats.some(c => c.id === prev)) catSelect.value = prev;
+    }
+  }
+
+  $('catAddBtn').addEventListener('click', addCategory);
+  catInput.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); addCategory(); } });
+
+  function addCategory(){
+    const name = catInput.value.trim();
+    if(!name){ toast('กรุณาพิมพ์ชื่อหมวดหมู่', true); return; }
+    if(cats.some(c => c.name === name)){ toast('มีหมวดหมู่ชื่อนี้อยู่แล้ว', true); return; }
+    const item = {id:newId('c'), name};
+    cats.push(item);
+    if(!persist()){ cats.pop(); toast(STORAGE_ERR, true); return; }
+    catInput.value = '';
+    renderCats(); renderList();
+    toast('เพิ่มหมวดหมู่แล้ว');
+  }
+
+  catList.addEventListener('click', e => {
+    const editId = e.target.getAttribute('data-edit');
+    const delId  = e.target.getAttribute('data-delcat');
+    if(editId){
+      const c = cats.find(x => x.id === editId);
+      const val = prompt('เปลี่ยนชื่อหมวดหมู่เป็น:', c.name);
+      if(val === null) return;
+      const name = val.trim();
+      if(!name){ toast('ชื่อหมวดหมู่ต้องไม่ว่าง', true); return; }
+      const old = c.name;
+      c.name = name;
+      if(!persist()){ c.name = old; toast(STORAGE_ERR, true); return; }
+      renderCats(); renderList();
+      toast('เปลี่ยนชื่อหมวดหมู่แล้ว');
+    }
+    if(delId){
+      const used = products.filter(p => p.cat === delId).length;
+      if(used > 0){ toast('ลบไม่ได้: ยังมีสินค้า ' + used + ' รายการในหมวดนี้ (ลบสินค้าก่อน)', true); return; }
+      const idx = cats.findIndex(x => x.id === delId);
+      const c = cats[idx];
+      if(!confirm('ลบหมวดหมู่ "' + c.name + '" ?')) return;
+      cats.splice(idx, 1);
+      if(!persist()){ cats.splice(idx, 0, c); toast(STORAGE_ERR, true); return; }
+      renderCats(); renderList();
+      toast('ลบหมวดหมู่แล้ว');
+    }
+  });
+
+  /* ===== Product list ===== */
+  function renderList(){
+    const q = listSearch.value.trim().toLowerCase();
+    const shown = products.filter(p => {
+      if(q === '') return true;
+      const cn = (cats.find(c => c.id === p.cat) || {}).name || '';
+      return (p.name || '').toLowerCase().includes(q) || cn.toLowerCase().includes(q);
+    });
+
+    countPill.textContent = products.length;
+    prodList.innerHTML = '';
+    shown.forEach(p => {
+      const cn = (cats.find(c => c.id === p.cat) || {}).name || '—';
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML =
+        '<div class="thumb">' + (p.img ? '<img src="' + esc(p.img) + '" alt="">' : 'ไม่มีรูป') + '</div>' +
+        '<div class="info">' +
+          '<div class="r-name">' + esc(p.name) + '</div>' +
+          '<div class="r-meta"><span class="pill">' + esc(cn) + '</span>' +
+            (p.price ? '<span>' + esc(p.price) + '</span>' : '') +
+            (p.updated ? '<span>· ' + esc(p.updated) + '</span>' : '') + '</div>' +
+          (p.desc ? '<div class="r-desc">' + esc(p.desc) + '</div>' : '') +
+        '</div>' +
+        '<button type="button" class="del-btn" data-del="' + esc(p.id) + '">ลบ</button>';
+      prodList.appendChild(row);
+    });
+
+    const none = shown.length === 0;
+    listEmpty.classList.toggle('show', none);
+    listEmpty.textContent = products.length === 0
+      ? 'ยังไม่มีสินค้า เพิ่มสินค้าได้จากฟอร์มด้านซ้าย'
+      : 'ไม่พบสินค้าที่ค้นหา';
+  }
+
+  listSearch.addEventListener('input', renderList);
+
+  prodList.addEventListener('click', e => {
+    const id = e.target.getAttribute('data-del');
+    if(!id) return;
+    const idx = products.findIndex(p => p.id === id);
+    if(idx < 0) return;
+    const p = products[idx];
+    if(!confirm('ลบสินค้า "' + p.name + '" ?\nสินค้านี้จะหายไปจากหน้าเว็บทันที')) return;
+    products.splice(idx, 1);
+    if(!persist()){ products.splice(idx, 0, p); toast(STORAGE_ERR, true); return; }
+    renderList();
+    toast('ลบสินค้าแล้ว');
+  });
+
+  /* ===== Add product ===== */
+  function setInvalid(fieldId, bad){ $(fieldId).classList.toggle('invalid', bad); }
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const name = $('name').value.trim();
+    const cat  = catSelect.value;
+    setInvalid('fName', !name);
+    setInvalid('fCat', !cat);
+    if(!name || !cat) return;
+
+    const item = {
+      id: newId('p'),
+      cat, name,
+      desc:  $('desc').value.trim(),
+      price: $('price').value.trim(),
+      loc:   $('loc').value.trim(),
+      badge: $('badge').value.trim(),
+      img:   currentImg,
+      updated: thaiDate()
+    };
+    products.unshift(item);                       // newest first
+    if(!persist()){ products.shift(); toast(STORAGE_ERR, true); return; }
+
+    clearForm();
+    renderList();
+    toast('เพิ่มสินค้าแล้ว');
+  });
+
+  function clearForm(){
+    form.reset();
+    currentImg = '';
+    fileInput.value = '';
+    showPreview();
+    setInvalid('fName', false);
+    setInvalid('fCat', false);
+  }
+  $('resetFormBtn').addEventListener('click', clearForm);
+  $('name').addEventListener('input', () => setInvalid('fName', false));
+  catSelect.addEventListener('change', () => setInvalid('fCat', false));
+
+  /* ===== Restore sample data ===== */
+  $('restoreBtn').addEventListener('click', () => {
+    if(!confirm('คืนค่าเป็นสินค้าและหมวดหมู่ตัวอย่างเริ่มต้น?\nข้อมูลที่เพิ่มไว้ทั้งหมดจะหายไป')) return;
+    const oldP = products, oldC = cats;
+    products = defaultProducts(); cats = defaultCats();
+    if(!persist()){ products = oldP; cats = oldC; toast(STORAGE_ERR, true); return; }
+    renderCats(); renderList();
+    toast('คืนค่าตัวอย่างแล้ว');
+  });
+
+  /* ===== Init ===== */
+  renderCats();
+  renderList();
+  showPreview();
+</script>
+
+</body>
+</html>

@@ -165,11 +165,11 @@
   }
   .prod-card:hover{transform:translateY(-4px); box-shadow:0 16px 34px rgba(15,61,36,.09);}
   .prod-card .ph{aspect-ratio:4/3; border-radius:0; border:none; border-bottom:1px solid var(--line);}
+  .prod-card .prod-tag img{height:auto; aspect-ratio:4/3; border-bottom:1px solid var(--line);}
   .prod-tag{
     position:relative;
   }
   .badge{
-    display:none;
     position:absolute; top:12px; left:12px; z-index:2;
     background:var(--green-700); color:#fff; font-size:11.5px; font-weight:600;
     padding:5px 11px; border-radius:20px;
@@ -177,7 +177,7 @@
   .prod-body{padding:18px 18px 20px; display:flex; flex-direction:column; gap:8px; flex:1;}
   .prod-cat{font-size:12px; font-weight:600; color:var(--green-600);}
   .prod-body h3{font-size:16.5px; font-weight:700; color:var(--green-900); line-height:1.35;}
-  .prod-body p{font-size:13.5px; color:var(--ink-soft); flex:1;}
+  .prod-body p{font-size:13.5px; color:var(--ink-soft); flex:1; white-space:pre-line;}
   .prod-price{font-size:19px; font-weight:700; color:var(--green-700);}
   .prod-updated{
     font-size:12px; color:var(--ink-soft); display:flex; align-items:center; gap:5px;
@@ -189,7 +189,7 @@
   }
   .prod-foot .loc{font-size:12.5px; color:var(--ink-soft); display:flex; align-items:center; gap:5px;}
   .prod-foot .loc svg{width:14px; height:14px; stroke:var(--green-600); fill:none; flex-shrink:0;}
-  .prod-link{font-size:13px; font-weight:600; color:var(--green-700);}
+  .prod-link{font-size:13px; font-weight:600; color:var(--green-700); margin-left:auto;}
 
   .empty-state{
     display:none; text-align:center; padding:70px 20px; border:1.5px dashed var(--line);
@@ -250,7 +250,7 @@
     </div>
     <nav class="main-nav">
       <ul>
-        <li><a href="index.html" class="active">หน้าแรก</a></li>
+        <li><a href="index.html">หน้าแรก</a></li>
         <li><a href="product.html" class="active">สินค้า</a></li>
         <li><a href="#">เกี่ยวกับเรา</a></li>
         <li><a href="#">บทความ</a></li>
@@ -278,11 +278,7 @@
       </div>
       <div class="chip-row" id="chipRow">
         <span class="chip-label">หมวดหมู่:</span>
-        <button class="chip active" data-cat="all">ทั้งหมด</button>
-        <button class="chip" data-cat="cat1">ข้อความ</button>
-        <button class="chip" data-cat="cat2">ข้อความ</button>
-        <button class="chip" data-cat="cat3">ข้อความ</button>
-        <button class="chip" data-cat="cat4">ข้อความ</button>
+        <!-- chips are generated from the categories set in the back office -->
       </div>
     </div>
   </div>
@@ -291,151 +287,15 @@
 <section class="section">
   <div class="wrap">
     <div class="results-meta">
-      <div class="results-count">พบสินค้า <b id="resultCount">8</b> รายการ</div>
+      <div class="results-count">พบสินค้า <b id="resultCount">0</b> รายการ</div>
       <select class="sort-select" id="sortSelect">
         <option value="new">เรียงตาม: ล่าสุด</option>
         <option value="name">เรียงตาม: ชื่อสินค้า</option>
       </select>
     </div>
 
-    <div class="prod-grid" id="prodGrid">
-      <!-- Card 1 -->
-      <div class="prod-card" data-cat="cat1" data-name="ข้อความ">
-        <div class="prod-tag"><span class="badge">ข้อความ</span>
-          <div class="ph"><span>รูปสินค้า</span></div>
-        </div>
-        <div class="prod-body">
-          <div class="prod-cat">ข้อความ</div>
-          <h3>ข้อความ</h3>
-          <p>ข้อความ</p>
-          <div class="prod-price">ข้อความ</div>
-          <div class="prod-updated"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>แก้ไขล่าสุด: ข้อความ</div>
-          <div class="prod-foot">
-            <span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2C7 6 5 10 5 14a7 7 0 0014 0c0-4-2-8-7-12z"/></svg>ข้อความ</span>
-            <a href="#" class="prod-link">ดูรายละเอียด</a>
-          </div>
-        </div>
-      </div>
-      <!-- Card 2 -->
-      <div class="prod-card" data-cat="cat2" data-name="ข้อความ">
-        <div class="prod-tag">
-          <div class="ph"><span>รูปสินค้า</span></div>
-        </div>
-        <div class="prod-body">
-          <div class="prod-cat">ข้อความ</div>
-          <h3>ข้อความ</h3>
-          <p>ข้อความ</p>
-          <div class="prod-price">ข้อความ</div>
-          <div class="prod-updated"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>แก้ไขล่าสุด: ข้อความ</div>
-          <div class="prod-foot">
-            <span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2C7 6 5 10 5 14a7 7 0 0014 0c0-4-2-8-7-12z"/></svg>ข้อความ</span>
-            <a href="#" class="prod-link">ดูรายละเอียด</a>
-          </div>
-        </div>
-      </div>
-      <!-- Card 3 -->
-      <div class="prod-card" data-cat="cat3" data-name="ข้อความ">
-        <div class="prod-tag"><span class="badge">ข้อความ</span>
-          <div class="ph"><span>รูปสินค้า</span></div>
-        </div>
-        <div class="prod-body">
-          <div class="prod-cat">ข้อความ</div>
-          <h3>ข้อความ</h3>
-          <p>ข้อความ</p>
-          <div class="prod-price">ข้อความ</div>
-          <div class="prod-updated"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>แก้ไขล่าสุด: ข้อความ</div>
-          <div class="prod-foot">
-            <span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2C7 6 5 10 5 14a7 7 0 0014 0c0-4-2-8-7-12z"/></svg>ข้อความ</span>
-            <a href="#" class="prod-link">ดูรายละเอียด</a>
-          </div>
-        </div>
-      </div>
-      <!-- Card 4 -->
-      <div class="prod-card" data-cat="cat4" data-name="ข้อความ">
-        <div class="prod-tag">
-          <div class="ph"><span>รูปสินค้า</span></div>
-        </div>
-        <div class="prod-body">
-          <div class="prod-cat">ข้อความ</div>
-          <h3>ข้อความ</h3>
-          <p>ข้อความ</p>
-          <div class="prod-price">ข้อความ</div>
-          <div class="prod-updated"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>แก้ไขล่าสุด: ข้อความ</div>
-          <div class="prod-foot">
-            <span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2C7 6 5 10 5 14a7 7 0 0014 0c0-4-2-8-7-12z"/></svg>ข้อความ</span>
-            <a href="#" class="prod-link">ดูรายละเอียด</a>
-          </div>
-        </div>
-      </div>
-      <!-- Card 5 -->
-      <div class="prod-card" data-cat="cat1" data-name="ข้อความ">
-        <div class="prod-tag">
-          <div class="ph"><span>รูปสินค้า</span></div>
-        </div>
-        <div class="prod-body">
-          <div class="prod-cat">ข้อความ</div>
-          <h3>ข้อความ</h3>
-          <p>ข้อความ</p>
-          <div class="prod-price">ข้อความ</div>
-          <div class="prod-updated"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>แก้ไขล่าสุด: ข้อความ</div>
-          <div class="prod-foot">
-            <span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2C7 6 5 10 5 14a7 7 0 0014 0c0-4-2-8-7-12z"/></svg>ข้อความ</span>
-            <a href="#" class="prod-link">ดูรายละเอียด</a>
-          </div>
-        </div>
-      </div>
-      <!-- Card 6 -->
-      <div class="prod-card" data-cat="cat2" data-name="ข้อความ">
-        <div class="prod-tag"><span class="badge">ข้อความ</span>
-          <div class="ph"><span>รูปสินค้า</span></div>
-        </div>
-        <div class="prod-body">
-          <div class="prod-cat">ข้อความ</div>
-          <h3>ข้อความ</h3>
-          <p>ข้อความ</p>
-          <div class="prod-price">ข้อความ</div>
-          <div class="prod-updated"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>แก้ไขล่าสุด: ข้อความ</div>
-          <div class="prod-foot">
-            <span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2C7 6 5 10 5 14a7 7 0 0014 0c0-4-2-8-7-12z"/></svg>ข้อความ</span>
-            <a href="#" class="prod-link">ดูรายละเอียด</a>
-          </div>
-        </div>
-      </div>
-      <!-- Card 7 -->
-      <div class="prod-card" data-cat="cat3" data-name="ข้อความ">
-        <div class="prod-tag">
-          <div class="ph"><span>รูปสินค้า</span></div>
-        </div>
-        <div class="prod-body">
-          <div class="prod-cat">ข้อความ</div>
-          <h3>ข้อความ</h3>
-          <p>ข้อความ</p>
-          <div class="prod-price">ข้อความ</div>
-          <div class="prod-updated"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>แก้ไขล่าสุด: ข้อความ</div>
-          <div class="prod-foot">
-            <span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2C7 6 5 10 5 14a7 7 0 0014 0c0-4-2-8-7-12z"/></svg>ข้อความ</span>
-            <a href="#" class="prod-link">ดูรายละเอียด</a>
-          </div>
-        </div>
-      </div>
-      <!-- Card 8 -->
-      <div class="prod-card" data-cat="cat4" data-name="ข้อความ">
-        <div class="prod-tag">
-          <div class="ph"><span>รูปสินค้า</span></div>
-        </div>
-        <div class="prod-body">
-          <div class="prod-cat">ข้อความ</div>
-          <h3>ข้อความ</h3>
-          <p>ข้อความ</p>
-          <div class="prod-price">ข้อความ</div>
-          <div class="prod-updated"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>แก้ไขล่าสุด: ข้อความ</div>
-          <div class="prod-foot">
-            <span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2C7 6 5 10 5 14a7 7 0 0014 0c0-4-2-8-7-12z"/></svg>ข้อความ</span>
-            <a href="#" class="prod-link">ดูรายละเอียด</a>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- cards are generated from the products set in the back office -->
+    <div class="prod-grid" id="prodGrid"></div>
 
     <div class="empty-state" id="emptyState">
       <h3>ไม่พบสินค้าที่ค้นหา</h3>
@@ -458,9 +318,9 @@
       <div>
         <h4>เมนู</h4>
         <ul>
-          <li><a href="#">หน้าแรก</a></li>
-          <li><a href="#">สินค้า</a></li>
-          <li><a href="#">เกี่ยวกับเรา</a></li>
+          <li><a href="index.html">หน้าแรก</a></li>
+          <li><a href="product.html">สินค้า</a></li>
+          <li><a href="contact.html">เกี่ยวกับเรา</a></li>
           <li><a href="#">บทความ</a></li>
         </ul>
       </div>
@@ -490,66 +350,139 @@
 </footer>
 
 <script>
-  const searchInput = document.getElementById('searchInput');
-  const clearBtn = document.getElementById('clearBtn');
-  const resetBtn = document.getElementById('resetBtn');
-  const chips = document.querySelectorAll('.chip');
-  const cards = Array.from(document.querySelectorAll('.prod-card'));
-  const resultCount = document.getElementById('resultCount');
-  const emptyState = document.getElementById('emptyState');
-  const prodGrid = document.getElementById('prodGrid');
-  const sortSelect = document.getElementById('sortSelect');
+  /* ===== Shared storage (same code + keys as admin.html) ===== */
+  const KEYS = { products:'ks_products', cats:'ks_categories' };
 
-  let activeCat = 'all';
-
-  function applyFilters(){
-    const q = searchInput.value.trim().toLowerCase();
-    let visibleCount = 0;
-
-    cards.forEach(card => {
-      const matchesCat = activeCat === 'all' || card.dataset.cat === activeCat;
-      const matchesSearch = q === '' || card.dataset.name.toLowerCase().includes(q);
-      const show = matchesCat && matchesSearch;
-      card.style.display = show ? '' : 'none';
-      if(show) visibleCount++;
-    });
-
-    resultCount.textContent = visibleCount;
-    emptyState.classList.toggle('show', visibleCount === 0);
-    prodGrid.style.display = visibleCount === 0 ? 'none' : 'grid';
+  function defaultCats(){
+    return [
+      {id:'cat1', name:'ข้อความ'}, {id:'cat2', name:'ข้อความ'},
+      {id:'cat3', name:'ข้อความ'}, {id:'cat4', name:'ข้อความ'}
+    ];
+  }
+  function defaultProducts(){
+    const catOf = ['cat1','cat2','cat3','cat4','cat1','cat2','cat3','cat4'];
+    const badged = [0,2,5];
+    return catOf.map((c,i) => ({
+      id:'p'+(i+1), cat:c, name:'ข้อความ', desc:'ข้อความ', price:'ข้อความ',
+      loc:'ข้อความ', badge: badged.includes(i) ? 'ข้อความ' : '', img:'', updated:'ข้อความ'
+    }));
+  }
+  function load(key, fallback){
+    try{
+      const raw = localStorage.getItem(key);
+      if(raw === null) return fallback();
+      const v = JSON.parse(raw);
+      return Array.isArray(v) ? v : fallback();
+    }catch(e){ return fallback(); }
+  }
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, ch =>
+      ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   }
 
-  chips.forEach(chip => {
-    chip.addEventListener('click', () => {
-      chips.forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      activeCat = chip.dataset.cat;
-      applyFilters();
-    });
-  });
+  /* ===== Page logic ===== */
+  const searchInput = document.getElementById('searchInput');
+  const clearBtn    = document.getElementById('clearBtn');
+  const resetBtn    = document.getElementById('resetBtn');
+  const chipRow     = document.getElementById('chipRow');
+  const resultCount = document.getElementById('resultCount');
+  const emptyState  = document.getElementById('emptyState');
+  const prodGrid    = document.getElementById('prodGrid');
+  const sortSelect  = document.getElementById('sortSelect');
 
-  searchInput.addEventListener('input', applyFilters);
+  let products = [], cats = [];
+  let activeCat = 'all';
+
+  const ICON_CLOCK = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>';
+  const ICON_PIN   = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2C7 6 5 10 5 14a7 7 0 0014 0c0-4-2-8-7-12z"/></svg>';
+
+  function loadData(){
+    products = load(KEYS.products, defaultProducts);
+    cats     = load(KEYS.cats, defaultCats);
+    if(activeCat !== 'all' && !cats.some(c => c.id === activeCat)) activeCat = 'all';
+  }
+
+  function renderChips(){
+    chipRow.querySelectorAll('.chip').forEach(c => c.remove());
+    const make = (id, label) => {
+      const b = document.createElement('button');
+      b.className = 'chip' + (id === activeCat ? ' active' : '');
+      b.dataset.cat = id;
+      b.textContent = label;
+      b.addEventListener('click', () => { activeCat = id; renderChips(); render(); });
+      chipRow.appendChild(b);
+    };
+    make('all', 'ทั้งหมด');
+    cats.forEach(c => make(c.id, c.name));
+  }
+
+  function cardHTML(p){
+    const cat = cats.find(c => c.id === p.cat);
+    const media = p.img
+      ? '<img src="' + esc(p.img) + '" alt="' + esc(p.name) + '">'
+      : '<div class="ph"><span>รูปสินค้า</span></div>';
+    return (
+      '<div class="prod-tag">' + (p.badge ? '<span class="badge">' + esc(p.badge) + '</span>' : '') + media + '</div>' +
+      '<div class="prod-body">' +
+        '<div class="prod-cat">' + esc(cat ? cat.name : '') + '</div>' +
+        '<h3>' + esc(p.name) + '</h3>' +
+        '<p>' + esc(p.desc) + '</p>' +
+        (p.price ? '<div class="prod-price">' + esc(p.price) + '</div>' : '') +
+        (p.updated ? '<div class="prod-updated">' + ICON_CLOCK + 'แก้ไขล่าสุด: ' + esc(p.updated) + '</div>' : '') +
+        '<div class="prod-foot">' +
+          (p.loc ? '<span class="loc">' + ICON_PIN + esc(p.loc) + '</span>' : '') +
+          '<a href="#" class="prod-link">ดูรายละเอียด</a>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function render(){
+    const q = searchInput.value.trim().toLowerCase();
+    let list = products.filter(p => {
+      const okCat = activeCat === 'all' || p.cat === activeCat;
+      const okQ = q === '' || (p.name || '').toLowerCase().includes(q) || (p.desc || '').toLowerCase().includes(q);
+      return okCat && okQ;
+    });
+    if(sortSelect.value === 'name'){
+      list = list.slice().sort((a,b) => (a.name || '').localeCompare(b.name || '', 'th'));
+    }
+
+    prodGrid.innerHTML = '';
+    list.forEach(p => {
+      const el = document.createElement('div');
+      el.className = 'prod-card';
+      el.innerHTML = cardHTML(p);
+      prodGrid.appendChild(el);
+    });
+
+    resultCount.textContent = list.length;
+    emptyState.classList.toggle('show', list.length === 0);
+    prodGrid.style.display = list.length === 0 ? 'none' : 'grid';
+  }
 
   function clearAll(){
     searchInput.value = '';
     activeCat = 'all';
-    chips.forEach(c => c.classList.remove('active'));
-    document.querySelector('.chip[data-cat="all"]').classList.add('active');
-    applyFilters();
+    renderChips();
+    render();
   }
 
+  searchInput.addEventListener('input', render);
+  sortSelect.addEventListener('change', render);
   clearBtn.addEventListener('click', clearAll);
   resetBtn.addEventListener('click', clearAll);
 
-  sortSelect.addEventListener('change', () => {
-    const cardsArr = Array.from(prodGrid.querySelectorAll('.prod-card'));
-    if(sortSelect.value === 'name'){
-      cardsArr.sort((a,b) => a.dataset.name.localeCompare(b.dataset.name, 'th'));
-    } else {
-      cardsArr.sort((a,b) => cards.indexOf(a) - cards.indexOf(b));
+  // update automatically if the back office changes data in another tab
+  window.addEventListener('storage', e => {
+    if(e.key === KEYS.products || e.key === KEYS.cats || e.key === null){
+      loadData(); renderChips(); render();
     }
-    cardsArr.forEach(c => prodGrid.appendChild(c));
   });
+
+  loadData();
+  renderChips();
+  render();
 </script>
 
 </body>
