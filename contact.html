@@ -8,18 +8,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --green-900:#0f3d24;
-    --green-700:#1a5c37;
-    --green-600:#22703f;
-    --green-500:#2d8a4e;
-    --green-100:#e7f3ea;
-    --green-050:#f5faf6;
-    --cream:#fdfcf8;
-    --ink:#152016;
-    --ink-soft:#4c5c50;
-    --line:#dbe8dd;
-    --white:#ffffff;
-    --red:#b3382c;
+    --green-900:#0f3d24; --green-700:#1a5c37; --green-600:#22703f; --green-500:#2d8a4e;
+    --green-100:#e7f3ea; --green-050:#f5faf6; --cream:#fdfcf8; --ink:#152016; --ink-soft:#4c5c50;
+    --line:#dbe8dd; --white:#ffffff; --red:#b3382c;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{scroll-behavior:smooth;}
@@ -41,7 +32,7 @@
   }
   .ph span{background:rgba(255,255,255,.85); padding:6px 14px; border-radius:20px;}
 
-  /* ===== Header (same as other pages) ===== */
+  /* ===== Header (same as index.html) ===== */
   header{position:sticky; top:0; z-index:100; background:var(--white); border-bottom:1px solid var(--line);}
   .nav-row{display:flex; align-items:center; justify-content:space-between; height:78px;}
   .brand{display:flex; align-items:center; gap:14px;}
@@ -57,6 +48,7 @@
   nav.main-nav a.active{color:var(--green-700); font-weight:600;}
   nav.main-nav a.active::after{content:""; position:absolute; left:0; right:0; bottom:-4px; height:2px; background:var(--green-600); border-radius:2px;}
   .nav-cta{padding:11px 22px; background:var(--green-700); color:var(--white); border-radius:8px; font-weight:600; font-size:14.5px; white-space:nowrap;}
+  .nav-cta:hover{background:var(--green-900);}
   .mobile-toggle{display:none; background:none; border:none; cursor:pointer; padding:6px;}
   .mobile-toggle span{display:block; width:24px; height:2px; background:var(--green-900); margin:5px 0; border-radius:2px;}
 
@@ -67,9 +59,10 @@
   .page-head p{font-size:15px; color:var(--ink-soft); margin-top:8px; max-width:520px;}
 
   /* ===== Layout ===== */
-  .section{padding:12px 0 36px;}
-  .contact-grid{display:grid; grid-template-columns:1fr 1.15fr; gap:28px; align-items:start;}
-  .info-col{display:flex; flex-direction:column; gap:16px;}
+  .section{padding:12px 0 36px; scroll-margin-top:90px;}
+  .contact-grid{display:block;}
+  .info-col{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .info-col .info-card:last-child{grid-column:1 / -1;}
   .info-card{
     display:flex; gap:16px; align-items:flex-start; background:var(--white);
     border:1px solid var(--line); border-radius:16px; padding:20px 22px;
@@ -82,41 +75,6 @@
   .info-card p{font-size:14px; color:var(--ink-soft);}
   .social-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;}
   .social-chip{font-size:13px; font-weight:600; color:var(--green-700); background:var(--green-100); padding:5px 14px; border-radius:20px;}
-
-  /* ===== Form ===== */
-  .form-card{background:var(--white); border:1px solid var(--line); border-radius:18px; padding:30px;}
-  .form-card h2{font-size:20px; font-weight:700; color:var(--green-900);}
-  .form-card .hint{font-size:13.5px; color:var(--ink-soft); margin-top:4px;}
-  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
-  .field{margin-top:16px;}
-  .field label{display:block; font-size:13.5px; font-weight:600; color:var(--green-900); margin-bottom:6px;}
-  .field label .req{color:var(--red);}
-  .field input, .field select, .field textarea{
-    width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:10px;
-    font-size:14.5px; color:var(--ink); background:var(--cream); transition:border-color .15s ease;
-  }
-  .field textarea{resize:vertical; min-height:130px;}
-  .field input:focus, .field select:focus, .field textarea:focus{outline:none; border-color:var(--green-500);}
-  .field input::placeholder, .field textarea::placeholder{color:#8ea294;}
-  .field .err{display:none; color:var(--red); font-size:12.5px; margin-top:5px;}
-  .field.invalid input, .field.invalid textarea{border-color:var(--red);}
-  .field.invalid .err{display:block;}
-  .btn-primary{
-    margin-top:22px; width:100%; background:var(--green-700); color:var(--white); border:none; padding:14px 28px;
-    border-radius:9px; font-weight:600; font-size:15.5px; cursor:pointer; transition:background .2s ease;
-  }
-  .btn-primary:hover{background:var(--green-900);}
-  .success{display:none; text-align:center; padding:36px 10px;}
-  .success.show{display:block;}
-  .success .tick{width:60px; height:60px; border-radius:50%; background:var(--green-100); margin:0 auto 16px; display:flex; align-items:center; justify-content:center;}
-  .success .tick svg{width:30px; height:30px; stroke:var(--green-700); fill:none;}
-  .success h3{font-size:19px; color:var(--green-900); margin-bottom:6px;}
-  .success p{font-size:14.5px; color:var(--ink-soft); margin-bottom:18px;}
-  .btn-outline{
-    border:1.5px solid var(--green-600); color:var(--green-700); background:var(--white); padding:11px 24px;
-    border-radius:9px; font-weight:600; font-size:14.5px; cursor:pointer;
-  }
-  .btn-outline:hover{background:var(--green-100);}
 
   /* ===== Map ===== */
   .map-section{padding:0 0 76px;}
@@ -131,22 +89,29 @@
   .foot-brand p{font-size:13.5px; color:#b9d2c0; max-width:280px; margin-top:6px;}
   footer h4{font-size:14.5px; font-weight:700; color:#fff; margin-bottom:14px;}
   footer ul li{margin-bottom:9px; font-size:13.5px; color:#b9d2c0;}
+  footer ul li a:hover{color:#fff;}
   .foot-bottom{padding-top:22px; display:flex; justify-content:space-between; font-size:12.5px; color:#8fab97; flex-wrap:wrap; gap:8px;}
 
   @media (max-width:980px){
-    .contact-grid{grid-template-columns:1fr;}
     .foot-grid{grid-template-columns:1fr 1fr;}
   }
   @media (max-width:780px){
     nav.main-nav, .nav-cta{display:none;}
     .mobile-toggle{display:block;}
+    nav.main-nav.open{
+      display:block; position:absolute; top:78px; left:0; right:0; background:var(--white);
+      border-bottom:1px solid var(--line); padding:12px 32px 18px; box-shadow:0 14px 24px rgba(15,61,36,.08);
+    }
+    nav.main-nav.open ul{flex-direction:column; gap:4px;}
+    nav.main-nav.open a{display:block; padding:10px 0;}
+    nav.main-nav.open a.active::after{display:none;}
+    .info-col{grid-template-columns:1fr;}
     .page-head h1{font-size:27px;}
     .map-box{aspect-ratio:4/3;}
   }
   @media (max-width:560px){
     .wrap{padding:0 18px;}
-    .two-col{grid-template-columns:1fr;}
-    .form-card{padding:22px;}
+    nav.main-nav.open{padding:12px 18px 18px;}
     .foot-grid{grid-template-columns:1fr;}
   }
 </style>
@@ -162,16 +127,17 @@
         <div class="tagline">สินค้า</div>
       </div>
     </div>
-    <nav class="main-nav">
+    <nav class="main-nav" id="mainNav">
       <ul>
         <li><a href="index.html">หน้าแรก</a></li>
         <li><a href="product.html">สินค้า</a></li>
-        <li><a href="contact.html">เกี่ยวกับเรา</a></li>
-        <li><a href="#">บทความ</a></li>
+        <li><a href="contact.html" class="active">เกี่ยวกับเรา</a></li>
+        <li><a href="Article.html">บทความ</a></li>
+        <li><a href="index.html#contact">ติดต่อเรา</a></li>
       </ul>
     </nav>
-    <a href="contact.html" class="nav-cta">ติดต่อเรา</a>
-    <button class="mobile-toggle" aria-label="เปิดเมนู"><span></span><span></span><span></span></button>
+    <a href="index.html#contact" class="nav-cta">ติดต่อเรา</a>
+    <button class="mobile-toggle" id="menuToggle" aria-label="เปิดเมนู" aria-expanded="false"><span></span><span></span><span></span></button>
   </div>
 </header>
 
@@ -183,7 +149,7 @@
   </div>
 </section>
 
-<section class="section">
+<section class="section" id="contact">
   <div class="wrap contact-grid">
 
     <!-- ===== Contact info ===== -->
@@ -216,59 +182,6 @@
       </div>
     </div>
 
-    <!-- ===== Inquiry form ===== -->
-    <div class="form-card">
-      <div id="formWrap">
-        <h2>ส่งข้อความถึงเรา</h2>
-        <p class="hint">ช่องที่มี * ต้องกรอก</p>
-
-        <form id="contactForm" novalidate>
-          <div class="two-col">
-            <div class="field" id="fName">
-              <label for="cName">ชื่อ-นามสกุล <span class="req">*</span></label>
-              <input type="text" id="cName" maxlength="100" placeholder="ชื่อ-นามสกุล">
-              <div class="err">กรุณากรอกชื่อ-นามสกุล</div>
-            </div>
-            <div class="field" id="fPhone">
-              <label for="cPhone">เบอร์โทรศัพท์</label>
-              <input type="tel" id="cPhone" maxlength="20" placeholder="0X-XXX-XXXX">
-              <div class="err">รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง</div>
-            </div>
-          </div>
-
-          <div class="field" id="fEmail">
-            <label for="cEmail">อีเมล</label>
-            <input type="email" id="cEmail" maxlength="120" placeholder="name@example.com">
-            <div class="err">รูปแบบอีเมลไม่ถูกต้อง</div>
-          </div>
-
-          <div class="field">
-            <label for="cSubject">หัวข้อ</label>
-            <select id="cSubject">
-              <option>สอบถามข้อมูลสินค้า</option>
-              <option>ข้อเสนอแนะ</option>
-              <option>อื่น ๆ</option>
-            </select>
-          </div>
-
-          <div class="field" id="fMsg">
-            <label for="cMsg">ข้อความ <span class="req">*</span></label>
-            <textarea id="cMsg" maxlength="1000" placeholder="พิมพ์ข้อความของคุณ"></textarea>
-            <div class="err">กรุณากรอกข้อความ</div>
-          </div>
-
-          <button type="submit" class="btn-primary">ส่งข้อความ</button>
-        </form>
-      </div>
-
-      <div class="success" id="success">
-        <div class="tick"><svg viewBox="0 0 24 24" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg></div>
-        <h3>ส่งข้อความเรียบร้อย</h3>
-        <p>ขอบคุณที่ติดต่อเรา ทีมงานจะติดต่อกลับโดยเร็วที่สุด</p>
-        <button type="button" class="btn-outline" id="againBtn">ส่งข้อความอีกครั้ง</button>
-      </div>
-    </div>
-
   </div>
 </section>
 
@@ -294,16 +207,17 @@
           <li><a href="index.html">หน้าแรก</a></li>
           <li><a href="product.html">สินค้า</a></li>
           <li><a href="contact.html">เกี่ยวกับเรา</a></li>
-          <li><a href="#">บทความ</a></li>
+          <li><a href="Article.html">บทความ</a></li>
+          <li><a href="index.html#contact">ติดต่อเรา</a></li>
         </ul>
       </div>
       <div>
         <h4>หมวดหมู่สินค้า</h4>
         <ul>
-          <li><a href="#">ข้อความ</a></li>
-          <li><a href="#">ข้อความ</a></li>
-          <li><a href="#">ข้อความ</a></li>
-          <li><a href="#">ข้อความ</a></li>
+          <li><a href="product.html">ข้อความ</a></li>
+          <li><a href="product.html">ข้อความ</a></li>
+          <li><a href="product.html">ข้อความ</a></li>
+          <li><a href="product.html">ข้อความ</a></li>
         </ul>
       </div>
       <div>
@@ -323,42 +237,15 @@
 </footer>
 
 <script>
-  const form = document.getElementById('contactForm');
-  const formWrap = document.getElementById('formWrap');
-  const success = document.getElementById('success');
-
-  const setInvalid = (id, bad) => document.getElementById(id).classList.toggle('invalid', bad);
-
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    const name  = document.getElementById('cName').value.trim();
-    const phone = document.getElementById('cPhone').value.trim();
-    const email = document.getElementById('cEmail').value.trim();
-    const msg   = document.getElementById('cMsg').value.trim();
-
-    const badName  = !name;
-    const badPhone = phone !== '' && !/^[0-9\-\s+()]{8,20}$/.test(phone);
-    const badEmail = email !== '' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    const badMsg   = !msg;
-
-    setInvalid('fName', badName);
-    setInvalid('fPhone', badPhone);
-    setInvalid('fEmail', badEmail);
-    setInvalid('fMsg', badMsg);
-    if(badName || badPhone || badEmail || badMsg) return;
-
-    // TODO: connect to a real backend or form service here (e.g. Formspree, Google Forms, or your own API).
-    // For now this only shows the confirmation message; nothing is actually sent.
-    formWrap.style.display = 'none';
-    success.classList.add('show');
-  });
-
-  document.getElementById('againBtn').addEventListener('click', () => {
-    form.reset();
-    ['fName','fPhone','fEmail','fMsg'].forEach(id => setInvalid(id, false));
-    success.classList.remove('show');
-    formWrap.style.display = '';
-  });
+  /* ===== Mobile menu ===== */
+  const nav = document.getElementById('mainNav');
+  const toggle = document.getElementById('menuToggle');
+  function setMenu(open){
+    nav.classList.toggle('open', open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  toggle.addEventListener('click', () => setMenu(!nav.classList.contains('open')));
+  nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setMenu(false)));
 </script>
 
 </body>

@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>หลังบ้าน | บทความ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Prompt:wght@400;700&family=Kanit:wght@400;700&family=Noto+Sans+Thai:wght@400;700&family=Mitr:wght@400;700&family=K2D:wght@400;700&family=Krub:wght@400;700&family=Athiti:wght@400;700&family=Bai+Jamjuree:wght@400;700&family=Niramit:wght@400;700&family=Mali:wght@400;700&family=Itim&family=Pattaya&family=Charm:wght@400;700&family=Pridi:wght@400;700&family=Taviraj:wght@400;700&family=Trirong:wght@400;700&family=Noto+Serif+Thai:wght@400;700&family=Chonburi&family=Srisakdi:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green-900:#0f3d24; --green-700:#1a5c37; --green-600:#22703f; --green-500:#2d8a4e;
+    --green-100:#e7f3ea; --green-050:#f5faf6; --cream:#fdfcf8; --ink:#152016; --ink-soft:#4c5c50;
+    --line:#dbe8dd; --white:#ffffff; --red:#b3382c; --red-100:#fbeceb; --side-w:264px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Sarabun', sans-serif; color:var(--ink); background:var(--cream); line-height:1.6;}
+  a{text-decoration:none; color:inherit;}
+  button, input, select, textarea{font-family:inherit;}
+
+  /* ===== Sidebar ===== */
+  .sidebar{
+    position:fixed; inset:0 auto 0 0; width:var(--side-w); background:var(--green-900); color:#fff;
+    display:flex; flex-direction:column; padding:22px 16px; z-index:200; overflow-y:auto;
+    transition:transform .25s ease;
+  }
+  .brand{display:flex; align-items:center; gap:12px; padding:0 6px 22px; border-bottom:1px solid rgba(255,255,255,.12);}
+  .logo-slot{
+    width:46px; height:46px; border-radius:12px; border:1.5px dashed rgba(255,255,255,.4); background:rgba(255,255,255,.06);
+    display:flex; align-items:center; justify-content:center; font-size:10px; color:#bfd8c7; text-align:center; line-height:1.3; flex-shrink:0;
+  }
+  .brand .name{font-size:19px; font-weight:700;}
+  .brand .tagline{font-size:12.5px; color:#9fbfa9;}
+  .side-label{font-size:11.5px; font-weight:600; letter-spacing:.5px; color:#7fa38b; margin:22px 10px 8px;}
+  .side-link{
+    display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:10px; margin-bottom:4px;
+    font-size:15px; font-weight:500; color:#d5e6da; transition:background .15s ease;
+  }
+  .side-link .ic{font-size:17px; width:22px; text-align:center;}
+  .side-link .n{margin-left:auto; font-size:12px; font-weight:600; background:rgba(255,255,255,.12); padding:1px 9px; border-radius:20px;}
+  .side-link:hover{background:rgba(255,255,255,.08);}
+  .side-link.active{background:var(--white); color:var(--green-900); font-weight:700;}
+  .side-link.active .n{background:var(--green-100); color:var(--green-700);}
+  .side-spacer{flex:1; min-height:20px;}
+  .side-link.out{font-size:14px; color:#b4cfbc;}
+  .backdrop{display:none; position:fixed; inset:0; background:rgba(10,30,18,.45); z-index:150;}
+
+  /* ===== Main ===== */
+  .main{margin-left:var(--side-w); min-height:100vh; display:flex; flex-direction:column;}
+  .topbar{display:none; position:sticky; top:0; z-index:100; background:var(--white); border-bottom:1px solid var(--line); height:60px; align-items:center; gap:12px; padding:0 18px;}
+  .menu-btn{width:40px; height:40px; border:1.5px solid var(--line); border-radius:9px; background:var(--white); font-size:20px; cursor:pointer; color:var(--green-900);}
+  .topbar .t{font-weight:700; color:var(--green-900);}
+  .wrap{max-width:1180px; width:100%; margin:0 auto; padding:0 32px;}
+
+  .page-head{background:linear-gradient(180deg, var(--green-050) 0%, var(--cream) 100%); padding:40px 0 24px;}
+  .eyebrow-tag{display:inline-block; font-size:13.5px; font-weight:600; color:var(--green-700); background:var(--green-100); padding:6px 14px; border-radius:20px; margin-bottom:14px;}
+  .page-head h1{font-size:30px; font-weight:700; color:var(--green-900); letter-spacing:-.3px;}
+  .page-head p{font-size:15px; color:var(--ink-soft); margin-top:8px; max-width:600px;}
+
+  .section{padding:8px 0 60px; flex:1;}
+  .view{display:none;}
+  .view.active{display:block;}
+  .admin-grid{display:grid; grid-template-columns:360px 1fr; gap:26px; align-items:start;}
+  .right-col{display:flex; flex-direction:column; gap:26px; min-width:0;}
+  .card{background:var(--white); border:1px solid var(--line); border-radius:18px; padding:26px;}
+  .form-card{position:sticky; top:24px;}
+  .card h2{font-size:18px; font-weight:700; color:var(--green-900);}
+  .card .hint{font-size:13.5px; color:var(--ink-soft); margin-top:4px;}
+
+  /* ===== Form ===== */
+  .field{margin-top:16px;}
+  .field label{display:block; font-size:13.5px; font-weight:600; color:var(--green-900); margin-bottom:6px;}
+  .field label .req{color:var(--red);}
+  .field input[type="text"], .field select, .field textarea{
+    width:100%; padding:11px 14px; border:1.5px solid var(--line); border-radius:10px;
+    font-size:14.5px; color:var(--ink); background:var(--cream); transition:border-color .15s ease;
+  }
+  .field textarea{resize:vertical; min-height:92px;}
+  .field textarea.tall{min-height:190px;}
+  .field input:focus, .field select:focus, .field textarea:focus{outline:none; border-color:var(--green-500);}
+  .field input::placeholder, .field textarea::placeholder{color:#8ea294;}
+  .field .err{display:none; color:var(--red); font-size:12.5px; margin-top:5px;}
+  .field.invalid input, .field.invalid select, .field.invalid textarea{border-color:var(--red);}
+  .field.invalid .err{display:block;}
+
+  .img-box{
+    aspect-ratio:4/3; border-radius:12px; overflow:hidden; border:1.5px dashed #b9d6c1; background:var(--green-050);
+    display:flex; align-items:center; justify-content:center; color:var(--green-600); font-size:13px; font-weight:500;
+  }
+  .img-box img{width:100%; height:100%; object-fit:cover; display:block;}
+  .img-actions{display:flex; gap:10px; margin-top:10px;}
+  .btn-sm{
+    padding:9px 16px; border-radius:9px; border:1.5px solid var(--line); background:var(--white);
+    font-size:13.5px; font-weight:600; color:var(--green-700); cursor:pointer; transition:background .15s ease, border-color .15s ease;
+  }
+  .btn-sm:hover{background:var(--green-050); border-color:#b9d6c1;}
+  input[type="file"]{display:none;}
+
+  .form-actions{display:flex; gap:12px; margin-top:24px;}
+  .btn-primary{
+    flex:1; background:var(--green-700); color:var(--white); border:none; padding:13px 24px;
+    border-radius:9px; font-weight:600; font-size:15.5px; cursor:pointer; transition:background .2s ease;
+  }
+  .btn-primary:hover{background:var(--green-900);}
+  .btn-ghost{
+    padding:13px 20px; border:1.5px solid var(--line); border-radius:9px; background:var(--white);
+    color:var(--ink-soft); font-size:14.5px; font-weight:600; cursor:pointer;
+  }
+  .btn-ghost:hover{background:var(--green-050);}
+  .edit-banner{display:none; margin-top:14px; padding:10px 14px; border-radius:10px; background:var(--green-100); color:var(--green-700); font-size:13.5px; font-weight:600;}
+  .edit-banner.show{display:block;}
+
+  /* ===== Categories ===== */
+  .cat-list{display:flex; flex-wrap:wrap; gap:10px; margin-top:16px; min-height:38px;}
+  .cat-item{
+    display:inline-flex; align-items:center; gap:2px; padding:4px 6px 4px 14px; border-radius:20px;
+    border:1.5px solid var(--line); background:var(--green-050); font-size:14px; font-weight:500;
+  }
+  .cat-item .nm{padding-right:6px;}
+  .icon-btn{
+    width:26px; height:26px; border:none; background:transparent; border-radius:50%; cursor:pointer;
+    color:var(--ink-soft); font-size:14px; line-height:1; display:flex; align-items:center; justify-content:center;
+  }
+  .icon-btn:hover{background:var(--green-100); color:var(--green-700);}
+  .icon-btn.x:hover{background:var(--red-100); color:var(--red);}
+  .cat-add{display:flex; gap:10px; margin-top:16px;}
+  .cat-add input{flex:1; padding:10px 14px; border:1.5px solid var(--line); border-radius:10px; font-size:14.5px; background:var(--cream);}
+  .cat-add input:focus{outline:none; border-color:var(--green-500);}
+  .cat-empty{font-size:13.5px; color:var(--ink-soft);}
+
+  /* ===== Lists ===== */
+  .list-head{display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap;}
+  .count-pill{display:inline-block; margin-left:8px; font-size:12.5px; font-weight:600; color:var(--green-700); background:var(--green-100); padding:2px 10px; border-radius:20px; vertical-align:middle;}
+  .list-tools{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  .list-tools input{padding:9px 14px; border:1.5px solid var(--line); border-radius:9px; font-size:14px; background:var(--cream); min-width:200px;}
+  .list-tools input:focus{outline:none; border-color:var(--green-500);}
+  .link-btn{background:none; border:none; color:var(--ink-soft); font-size:13px; text-decoration:underline; cursor:pointer;}
+  .link-btn:hover{color:var(--green-700);}
+
+  .list{margin-top:18px; display:flex; flex-direction:column;}
+  .row{display:grid; grid-template-columns:72px 1fr auto; gap:16px; align-items:center; padding:14px 0; border-top:1px solid var(--line);}
+  .row:first-child{border-top:none;}
+  .thumb{
+    width:72px; height:54px; border-radius:9px; overflow:hidden; border:1.5px dashed #b9d6c1; background:var(--green-050);
+    display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--green-600);
+  }
+  .thumb img{width:100%; height:100%; object-fit:cover; display:block;}
+  .info{min-width:0;}
+  .r-name{font-size:15.5px; font-weight:700; color:var(--green-900); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .r-meta{font-size:12.5px; color:var(--ink-soft); display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:2px;}
+  .pill{font-size:11.5px; font-weight:600; color:var(--green-700); background:var(--green-100); padding:2px 10px; border-radius:20px;}
+  .r-desc{font-size:13px; color:var(--ink-soft); margin-top:3px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical;}
+  .row-actions{display:flex; gap:8px;}
+  .del-btn{
+    padding:9px 16px; border-radius:9px; border:1.5px solid #efc9c5; background:var(--white);
+    color:var(--red); font-size:13.5px; font-weight:600; cursor:pointer; transition:background .15s ease;
+  }
+  .del-btn:hover{background:var(--red-100);}
+  .list-empty{display:none; text-align:center; padding:46px 20px; margin-top:18px; border:1.5px dashed var(--line); border-radius:14px; background:var(--green-050); color:var(--ink-soft); font-size:14.5px;}
+  .list-empty.show{display:block;}
+
+  /* ===== Rich text editor ===== */
+  .admin-stack{grid-template-columns:1fr;}
+  .admin-stack .form-card{position:static;}
+  .admin-stack .img-box{max-width:360px;}
+  .img-box.wide{aspect-ratio:3/1; max-width:none; width:100%;}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:0 16px;}
+  .two .full{grid-column:1 / -1;}
+  .sub{font-size:15.5px; font-weight:700; color:var(--green-900); margin-top:30px; padding-top:22px; border-top:1px solid var(--line);}
+  @media (max-width:700px){ .two{grid-template-columns:1fr;} }
+  .rt{border:1.5px solid var(--line); border-radius:12px; overflow:hidden; background:var(--white);}
+  .rt:focus-within{border-color:var(--green-500);}
+  .rt-bar{display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:8px; background:var(--green-050); border-bottom:1px solid var(--line);}
+  .rt-btn{min-width:36px; height:36px; padding:0 10px; border:1.5px solid var(--line); border-radius:8px; background:var(--white); color:var(--green-900); font-size:14px; font-weight:600; cursor:pointer;}
+  .rt-btn:hover{background:var(--green-100); border-color:#b9d6c1;}
+  .rt-sep{width:1px; height:24px; background:var(--line); margin:0 4px;}
+  .rt-sw{width:24px; height:24px; border-radius:50%; border:2px solid var(--white); box-shadow:0 0 0 1.5px var(--line); cursor:pointer; padding:0;}
+  .rt-bar input[type="color"]{display:block; width:34px; height:34px; border:1.5px solid var(--line); border-radius:8px; background:var(--white); padding:2px; cursor:pointer;}
+  .rt-body{min-height:240px; max-height:560px; overflow-y:auto; padding:16px 18px; font-size:15.5px; line-height:1.75; outline:none; background:var(--cream);}
+  .rt-body:empty:before{content:attr(data-ph); color:#8ea294;}
+  .rt-body a{color:var(--green-600); text-decoration:underline;}
+  .rt-body img{max-width:100%; height:auto; border-radius:10px; margin:8px 0; display:block;}
+  .rt-body h2{font-size:21px; color:var(--green-900); margin:14px 0 6px;}
+  .rt-body ul, .rt-body ol{padding-left:24px;}
+  .rt-hint{font-size:12.5px; color:var(--ink-soft); margin-top:6px;}
+
+  /* ===== Toast ===== */
+  #toast{
+    position:fixed; left:50%; bottom:28px; transform:translate(-50%, 20px); opacity:0; pointer-events:none;
+    background:var(--green-900); color:#fff; padding:12px 22px; border-radius:10px; font-size:14.5px; font-weight:500;
+    box-shadow:0 12px 30px rgba(15,61,36,.25); transition:opacity .2s ease, transform .2s ease; z-index:300; max-width:90vw;
+  }
+  #toast.show{opacity:1; transform:translate(-50%, 0);}
+  #toast.error{background:var(--red);}
+
+  footer{background:var(--white); border-top:1px solid var(--line); color:var(--ink-soft); padding:20px 0; font-size:12.5px;}
+
+  @media (max-width:1100px){
+    .admin-grid{grid-template-columns:1fr;}
+    .form-card{position:static;}
+  }
+  @media (max-width:860px){
+    .sidebar{transform:translateX(-100%);}
+    body.menu-open .sidebar{transform:none; box-shadow:0 0 40px rgba(0,0,0,.3);}
+    body.menu-open .backdrop{display:block;}
+    .main{margin-left:0;}
+    .topbar{display:flex;}
+  }
+  @media (max-width:560px){
+    .wrap{padding:0 18px;}
+    .row{grid-template-columns:56px 1fr;}
+    .thumb{width:56px; height:44px;}
+    .row-actions{grid-column:1 / -1;}
+    .row-actions button{flex:1;}
+    .list-tools input{min-width:0; width:100%;}
+  }
+
+  .rt-body img{display:inline-block;}
+  .rt-body video{max-width:100%; height:auto; border-radius:10px; margin:8px 0; background:#000;}
+  .rt-body iframe{width:min(100%, 560px); aspect-ratio:16/9; height:auto; border:0; border-radius:10px; margin:8px 0; background:#000;}
+  .vid-panel{display:none; gap:10px; align-items:center; flex-wrap:wrap; padding:10px 12px; background:var(--cream); border-bottom:1px solid var(--line);}
+  .vid-panel.show{display:flex;}
+  .vid-panel input[type="text"]{flex:1; min-width:220px; padding:9px 12px; border:1.5px solid var(--line); border-radius:9px; font-size:14px; background:var(--white);}
+  .vid-panel .or{font-size:13px; color:var(--ink-soft);}
+
+  /* ===== Font / size controls ===== */
+  .field .rt-bar select.rt-sel{width:auto; min-width:96px; max-width:170px; height:38px; padding:0 8px; line-height:1.5; border:1.5px solid var(--line); border-radius:8px; background:var(--white); color:var(--green-900); font-size:14px; font-weight:600; cursor:pointer;}
+  .field .rt-bar select.rt-sel.sm{min-width:80px; max-width:90px;}
+  .ts-row{display:flex; flex-wrap:wrap; gap:12px; align-items:center;}
+  .field .ts-row select{width:auto; min-width:170px; max-width:100%; height:42px; padding:0 10px; line-height:1.5; border:1.5px solid var(--line); border-radius:10px; background:var(--cream); font-size:14.5px; color:var(--ink);}
+  .ts-size{display:flex; align-items:center; gap:6px; font-size:13px; color:var(--ink-soft);}
+  .ts-size input{width:70px; height:40px; padding:0 8px; border:1.5px solid var(--line); border-radius:10px; background:var(--cream); font-size:14.5px; text-align:center; color:var(--ink);}
+  .ts-colors{display:flex; align-items:center; gap:8px;}
+  .ts-colors input[type="color"]{display:block; width:36px; height:36px; border:1.5px solid var(--line); border-radius:8px; background:var(--white); padding:2px; cursor:pointer;}
+  .ts-prev{margin-top:12px; padding:14px 16px; border:1.5px dashed #b9d6c1; border-radius:12px; background:var(--green-050); line-height:1.35; overflow-wrap:anywhere; min-height:60px; font-weight:700;}
+</style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="logo-slot">ใส่โลโก้</div>
+    <div>
+      <div class="name">เกษตร</div>
+      <div class="tagline">ระบบหลังบ้าน</div>
+    </div>
+  </div>
+
+  <div class="side-label">เมนูจัดการ</div>
+  <a href="admin products.html" class="side-link"><span class="ic">📦</span>จัดการสินค้า<span class="n" id="navCountP">0</span></a>
+  <a href="admin articles.html" class="side-link active"><span class="ic">📰</span>บทความ<span class="n" id="navCountA">0</span></a>
+
+  <div class="side-spacer"></div>
+  <div class="side-label">ดูหน้าเว็บ</div>
+  <a href="../product.html" class="side-link out"><span class="ic">↗</span>หน้าสินค้า</a>
+  <a href="../article.html" class="side-link out"><span class="ic">↗</span>หน้าบทความ</a>
+</aside>
+<div class="backdrop" id="backdrop"></div>
+
+<div class="main">
+  <div class="topbar">
+    <button type="button" class="menu-btn" id="menuBtn" aria-label="เปิดเมนู">☰</button>
+    <span class="t">บทความ</span>
+  </div>
+
+  <!-- ================= View: Articles ================= -->
+  <div class="view active" id="view-articles">
+    <section class="page-head">
+      <div class="wrap">
+        <span class="eyebrow-tag">หลังบ้าน</span>
+        <h1>บทความ</h1>
+        <p>เขียน แก้ไข หรือลบบทความประชาสัมพันธ์ ใส่รูป ปรับสี ตัวหนา และแนบลิงก์ได้ แล้วกด “หน้าบทความ” ที่แถบด้านข้างเพื่อดูผลที่หน้าเว็บ</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap admin-grid admin-stack">
+
+        <aside class="card form-card">
+          <h2 id="aFormTitle">เพิ่มบทความใหม่</h2>
+          <p class="hint">ช่องที่มี * ต้องกรอก</p>
+          <div class="edit-banner" id="aEditBanner">กำลังแก้ไขบทความ — กด “ยกเลิก” เพื่อกลับไปเพิ่มบทความใหม่</div>
+
+          <form id="articleForm" novalidate>
+            <div class="field">
+              <label>รูปปกบทความ</label>
+              <div class="img-box" id="aImgBox"><span>ยังไม่ได้เลือกรูป</span></div>
+              <div class="img-actions">
+                <button type="button" class="btn-sm" id="aPickBtn">เลือกรูป</button>
+                <button type="button" class="btn-sm" id="aRemoveImgBtn" style="display:none;">ลบรูป</button>
+              </div>
+              <input type="file" id="aFileInput" accept="image/*">
+            </div>
+
+            <div class="field" id="aFTitle">
+              <label for="aTitle">หัวข้อบทความ <span class="req">*</span></label>
+              <input type="text" id="aTitle" maxlength="150" placeholder="หัวข้อบทความ">
+              <div class="err">กรุณากรอกหัวข้อบทความ</div>
+            </div>
+
+            <div class="field">
+              <label>รูปแบบหัวข้อ (ฟอนต์ / ขนาด / สี)</label>
+              <div class="ts-row">
+                <select id="aTFont" title="ฟอนต์หัวข้อ"><option value="Sarabun" style="font-family:'Sarabun'">Sarabun</option><option value="Prompt" style="font-family:'Prompt'">Prompt</option><option value="Kanit" style="font-family:'Kanit'">Kanit</option><option value="Noto Sans Thai" style="font-family:'Noto Sans Thai'">Noto Sans Thai</option><option value="Mitr" style="font-family:'Mitr'">Mitr</option><option value="K2D" style="font-family:'K2D'">K2D</option><option value="Krub" style="font-family:'Krub'">Krub</option><option value="Athiti" style="font-family:'Athiti'">Athiti</option><option value="Bai Jamjuree" style="font-family:'Bai Jamjuree'">Bai Jamjuree</option><option value="Niramit" style="font-family:'Niramit'">Niramit</option><option value="Mali" style="font-family:'Mali'">Mali</option><option value="Itim" style="font-family:'Itim'">Itim</option><option value="Pattaya" style="font-family:'Pattaya'">Pattaya</option><option value="Charm" style="font-family:'Charm'">Charm</option><option value="Pridi" style="font-family:'Pridi'">Pridi</option><option value="Taviraj" style="font-family:'Taviraj'">Taviraj</option><option value="Trirong" style="font-family:'Trirong'">Trirong</option><option value="Noto Serif Thai" style="font-family:'Noto Serif Thai'">Noto Serif Thai</option><option value="Chonburi" style="font-family:'Chonburi'">Chonburi</option><option value="Srisakdi" style="font-family:'Srisakdi'">Srisakdi</option></select>
+                <div class="ts-size">
+                  <button type="button" class="btn-sm" id="aTMinus" title="เล็กลง">A−</button>
+                  <input type="number" id="aTSize" min="16" max="96" step="1" value="34" title="ขนาดหัวข้อ (px)">
+                  <span>px</span>
+                  <button type="button" class="btn-sm" id="aTPlus" title="ใหญ่ขึ้น">A+</button>
+                </div>
+                <div class="ts-colors">
+                  <button type="button" class="rt-sw" data-tc="#0f3d24" style="background:#0f3d24" title="เขียวเข้ม"></button>
+                  <button type="button" class="rt-sw" data-tc="#152016" style="background:#152016" title="ดำ"></button>
+                  <button type="button" class="rt-sw" data-tc="#b3382c" style="background:#b3382c" title="แดง"></button>
+                  <button type="button" class="rt-sw" data-tc="#d9822b" style="background:#d9822b" title="ส้ม"></button>
+                  <button type="button" class="rt-sw" data-tc="#2a6fb5" style="background:#2a6fb5" title="น้ำเงิน"></button>
+                  <input type="color" id="aTColor" value="#0f3d24" title="เลือกสีอื่น">
+                </div>
+                <button type="button" class="link-btn" id="aTReset">ค่าเริ่มต้น</button>
+              </div>
+              <div class="ts-prev" id="aTPrev">ตัวอย่างหัวข้อบทความ</div>
+            </div>
+
+            <div class="field">
+              <label for="aTag">ประเภท (ไม่บังคับ)</label>
+              <input type="text" id="aTag" maxlength="30" placeholder="เช่น ข่าวประชาสัมพันธ์ / ความรู้">
+            </div>
+
+            <div class="field">
+              <label for="aSummary">คำโปรย</label>
+              <textarea id="aSummary" maxlength="240" placeholder="สรุปสั้น ๆ ที่แสดงในรายการบทความ"></textarea>
+            </div>
+
+            <div class="field" id="aFBody">
+              <label>เนื้อหา <span class="req">*</span></label>
+              <div class="rt">
+                <div class="rt-bar" id="rtBar">
+                  <select class="rt-sel" id="rtFont" title="ฟอนต์ (เลือกข้อความก่อน)"><option value="">ฟอนต์</option><option value="Sarabun" style="font-family:'Sarabun'">Sarabun</option><option value="Prompt" style="font-family:'Prompt'">Prompt</option><option value="Kanit" style="font-family:'Kanit'">Kanit</option><option value="Noto Sans Thai" style="font-family:'Noto Sans Thai'">Noto Sans Thai</option><option value="Mitr" style="font-family:'Mitr'">Mitr</option><option value="K2D" style="font-family:'K2D'">K2D</option><option value="Krub" style="font-family:'Krub'">Krub</option><option value="Athiti" style="font-family:'Athiti'">Athiti</option><option value="Bai Jamjuree" style="font-family:'Bai Jamjuree'">Bai Jamjuree</option><option value="Niramit" style="font-family:'Niramit'">Niramit</option><option value="Mali" style="font-family:'Mali'">Mali</option><option value="Itim" style="font-family:'Itim'">Itim</option><option value="Pattaya" style="font-family:'Pattaya'">Pattaya</option><option value="Charm" style="font-family:'Charm'">Charm</option><option value="Pridi" style="font-family:'Pridi'">Pridi</option><option value="Taviraj" style="font-family:'Taviraj'">Taviraj</option><option value="Trirong" style="font-family:'Trirong'">Trirong</option><option value="Noto Serif Thai" style="font-family:'Noto Serif Thai'">Noto Serif Thai</option><option value="Chonburi" style="font-family:'Chonburi'">Chonburi</option><option value="Srisakdi" style="font-family:'Srisakdi'">Srisakdi</option></select>
+                  <select class="rt-sel sm" id="rtSize" title="ขนาดตัวอักษร px (เลือกข้อความก่อน)"><option value="">ขนาด</option><option value="12">12</option><option value="14">14</option><option value="16">16</option><option value="18">18</option><option value="20">20</option><option value="24">24</option><option value="28">28</option><option value="32">32</option><option value="40">40</option><option value="48">48</option><option value="64">64</option></select>
+                  <span class="rt-sep"></span>
+                  <button type="button" class="rt-btn" data-cmd="bold" title="ตัวหนา"><b>B</b></button>
+                  <button type="button" class="rt-btn" data-cmd="italic" title="ตัวเอียง"><i>I</i></button>
+                  <button type="button" class="rt-btn" data-cmd="underline" title="ขีดเส้นใต้"><u>U</u></button>
+                  <span class="rt-sep"></span>
+                  <button type="button" class="rt-btn" data-block="h2" title="หัวข้อ">หัวข้อ</button>
+                  <button type="button" class="rt-btn" data-block="p" title="ข้อความปกติ">ปกติ</button>
+                  <button type="button" class="rt-btn" data-cmd="insertUnorderedList" title="รายการ">• รายการ</button>
+                  <span class="rt-sep"></span>
+                  <button type="button" class="rt-btn" data-cmd="justifyLeft" title="ชิดซ้าย">ชิดซ้าย</button>
+                  <button type="button" class="rt-btn" data-cmd="justifyCenter" title="กึ่งกลาง">กึ่งกลาง</button>
+                  <button type="button" class="rt-btn" data-cmd="justifyRight" title="ชิดขวา">ชิดขวา</button>
+                  <span class="rt-sep"></span>
+                  <button type="button" class="rt-sw" data-color="#152016" style="background:#152016" title="ดำ"></button>
+                  <button type="button" class="rt-sw" data-color="#1a5c37" style="background:#1a5c37" title="เขียว"></button>
+                  <button type="button" class="rt-sw" data-color="#b3382c" style="background:#b3382c" title="แดง"></button>
+                  <button type="button" class="rt-sw" data-color="#d9822b" style="background:#d9822b" title="ส้ม"></button>
+                  <button type="button" class="rt-sw" data-color="#2a6fb5" style="background:#2a6fb5" title="น้ำเงิน"></button>
+                  <input type="color" id="rtColor" value="#1a5c37" title="เลือกสีอื่น">
+                  <span class="rt-sep"></span>
+                  <button type="button" class="rt-btn" id="rtLink" title="เพิ่มลิงก์">🔗 ลิงก์</button>
+                  <button type="button" class="rt-btn" id="rtUnlink" title="เอาลิงก์ออก">เอาลิงก์ออก</button>
+                  <button type="button" class="rt-btn" id="rtImg" title="แทรกรูปภาพ">🖼 รูปภาพ</button>
+                  <button type="button" class="rt-btn" id="rtVideo" title="แทรกวิดีโอ">🎬 วิดีโอ</button>
+                  <button type="button" class="rt-btn" data-cmd="removeFormat" title="ล้างรูปแบบ">ล้างรูปแบบ</button>
+                  <input type="file" id="rtImgInput" accept="image/*">
+                </div>
+                <div class="vid-panel" id="vidPanel">
+                  <input type="text" id="vidUrl" placeholder="วางลิงก์วิดีโอ (YouTube, Vimeo หรือไฟล์ .mp4 / .webm)">
+                  <button type="button" class="btn-sm" id="vidInsert">แทรกลิงก์</button>
+                  <span class="or">หรือ</span>
+                  <button type="button" class="btn-sm" id="vidPick">อัปโหลดไฟล์วิดีโอ</button>
+                  <input type="file" id="vidFile" accept="video/*">
+                  <button type="button" class="link-btn" id="vidClose">ปิด</button>
+                </div>
+                <div class="rt-body" id="aEditor" contenteditable="true" data-ph="พิมพ์เนื้อหาบทความที่นี่ แล้วเลือกข้อความเพื่อปรับแต่งด้วยแถบเครื่องมือด้านบน"></div>
+              </div>
+              <div class="rt-hint">คลิกที่รูปแล้วกดปุ่มชิดซ้าย / กึ่งกลาง / ชิดขวาเพื่อจัดตำแหน่ง หรือกด Delete / Backspace เพื่อลบ · วิดีโออัปโหลดจะเก็บในเบราว์เซอร์เครื่องนี้ ถ้าไฟล์ใหญ่แนะนำให้ใช้ลิงก์ YouTube</div>
+              <div class="err">กรุณากรอกเนื้อหาบทความ</div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn-primary" id="aSubmitBtn">เพิ่มบทความ</button>
+              <button type="button" class="btn-ghost" id="aResetBtn">ล้างฟอร์ม</button>
+            </div>
+          </form>
+        </aside>
+
+        <div class="right-col">
+          <div class="card">
+            <div class="list-head">
+              <h2>รายการบทความ<span class="count-pill" id="aCountPill">0</span></h2>
+              <div class="list-tools">
+                <input type="text" id="aSearch" placeholder="ค้นหาบทความ...">
+                <button type="button" class="link-btn" id="aRestoreBtn">คืนค่าบทความตัวอย่าง</button>
+              </div>
+            </div>
+            <div class="list" id="aList"></div>
+            <div class="list-empty" id="aEmpty">ยังไม่มีบทความ เพิ่มบทความได้จากฟอร์มด้านซ้าย</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+
+  <footer>
+    <div class="wrap">หน้านี้สำหรับผู้ดูแลระบบเท่านั้น</div>
+  </footer>
+</div>
+
+<div id="toast" role="status"></div>
+
+<script>
+
+  /* ===== Shared storage (same keys as product.html / article.html) ===== */
+  const KEYS = { products:'ks_products', cats:'ks_categories', articles:'ks_articles' };
+
+  function defaultCats(){
+    return [
+      {id:'cat1', name:'ข้อความ'}, {id:'cat2', name:'ข้อความ'},
+      {id:'cat3', name:'ข้อความ'}, {id:'cat4', name:'ข้อความ'}
+    ];
+  }
+  function defaultProducts(){
+    const catOf = ['cat1','cat2','cat3','cat4','cat1','cat2','cat3','cat4'];
+    const badged = [0,2,5];
+    return catOf.map((c,i) => ({
+      id:'p'+(i+1), cat:c, name:'ข้อความ', desc:'ข้อความ', price:'ข้อความ',
+      loc:'ข้อความ', badge: badged.includes(i) ? 'ข้อความ' : '', img:'', updated:'ข้อความ'
+    }));
+  }
+  function defaultArticles(){
+    return [1,2,3].map(i => ({
+      id:'a'+i, title:'ข้อความ', tag:'ข้อความ', summary:'ข้อความ', body:'ข้อความ', img:'', updated:'ข้อความ'
+    }));
+  }
+  function load(key, fallback){
+    try{
+      const raw = localStorage.getItem(key);
+      if(raw === null) return fallback();
+      const v = JSON.parse(raw);
+      return Array.isArray(v) ? v : fallback();
+    }catch(e){ return fallback(); }
+  }
+  function save(key, val){
+    try{ localStorage.setItem(key, JSON.stringify(val)); return true; }
+    catch(e){ return false; }
+  }
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, ch =>
+      ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+
+  /* ===== State ===== */
+  let products = load(KEYS.products, defaultProducts);
+  let cats     = load(KEYS.cats, defaultCats);
+  let articles = load(KEYS.articles, defaultArticles);
+  let currentImg = '';
+  let aImg = '';
+  let editingId = null;
+
+  const $ = id => document.getElementById(id);
+  const STORAGE_ERR = 'บันทึกไม่สำเร็จ: พื้นที่เก็บข้อมูลเต็มหรือเบราว์เซอร์ไม่อนุญาต ลองลบรายการเดิมหรือใช้รูปที่เล็กลง';
+
+  function persist(){ return save(KEYS.products, products) && save(KEYS.cats, cats); }
+  function persistArticles(){ return save(KEYS.articles, articles); }
+
+  let toastTimer;
+  function toast(msg, isError){
+    const t = $('toast');
+    t.textContent = msg;
+    t.className = 'show' + (isError ? ' error' : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.className = ''; }, 2800);
+  }
+  function thaiDate(){
+    return new Date().toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'numeric'});
+  }
+  function newId(prefix){
+    return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  }
+  function setInvalid(fieldId, bad){ $(fieldId).classList.toggle('invalid', bad); }
+
+  $('menuBtn').addEventListener('click', () => document.body.classList.toggle('menu-open'));
+  $('backdrop').addEventListener('click', () => document.body.classList.remove('menu-open'));
+
+  /* ===== Image: pick, shrink ===== */
+  function shrinkImage(file, maxW){
+    return new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onerror = reject;
+      fr.onload = () => {
+        const img = new Image();
+        img.onerror = reject;
+        img.onload = () => {
+          const s = Math.min(1, maxW / img.width);
+          const c = document.createElement('canvas');
+          c.width = Math.round(img.width * s);
+          c.height = Math.round(img.height * s);
+          const ctx = c.getContext('2d');
+          ctx.fillStyle = '#fff';
+          ctx.fillRect(0, 0, c.width, c.height);
+          ctx.drawImage(img, 0, 0, c.width, c.height);
+          resolve(c.toDataURL('image/jpeg', 0.8));
+        };
+        img.src = fr.result;
+      };
+      fr.readAsDataURL(file);
+    });
+  }
+  function paintPreview(box, removeBtn, src){
+    box.innerHTML = '';
+    if(src){
+      const im = document.createElement('img');
+      im.src = src; im.alt = 'ตัวอย่างรูป';
+      box.appendChild(im);
+    }else{
+      box.innerHTML = '<span>ยังไม่ได้เลือกรูป</span>';
+    }
+    removeBtn.style.display = src ? '' : 'none';
+  }
+  /* wires one image picker; get/set hold the current image string */
+  function wireImagePicker(o){
+    o.pick.addEventListener('click', () => o.input.click());
+    o.remove.addEventListener('click', () => { o.set(''); o.input.value = ''; o.paint(); });
+    o.input.addEventListener('change', async () => {
+      const f = o.input.files[0];
+      if(!f) return;
+      if(!f.type.startsWith('image/')){ toast('กรุณาเลือกไฟล์รูปภาพ', true); o.input.value = ''; return; }
+      try{ o.set(await shrinkImage(f, o.maxW || 640)); o.paint(); }
+      catch(e){ toast('อ่านไฟล์รูปไม่ได้ ลองเลือกไฟล์อื่น', true); }
+    });
+  }
+
+  function updateNavCounts(){
+    $('navCountP').textContent = products.length;
+    $('navCountA').textContent = articles.length;
+  }
+  function showAPreview(){ paintPreview($('aImgBox'), $('aRemoveImgBtn'), aImg); }
+  wireImagePicker({pick:$('aPickBtn'), remove:$('aRemoveImgBtn'), input:$('aFileInput'), set:v => aImg = v, paint:showAPreview});
+
+  /* ===== RICH TEXT EDITOR ===== */
+  /* uploaded videos live in IndexedDB (too big for localStorage) */
+  const VDB = {
+    open(){ return new Promise((res, rej) => { const r = indexedDB.open('ks_videos', 1); r.onupgradeneeded = () => r.result.createObjectStore('v'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); },
+    async put(id, blob){ const db = await this.open(); return new Promise((res, rej) => { const t = db.transaction('v', 'readwrite'); t.objectStore('v').put(blob, id); t.oncomplete = () => res(); t.onerror = () => rej(t.error); }); },
+    async get(id){ const db = await this.open(); return new Promise((res, rej) => { const q = db.transaction('v').objectStore('v').get(id); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
+  };
+  async function hydrateVideos(root, note){
+    for(const v of root.querySelectorAll('video[data-vid]')){
+      try{ const b = await VDB.get(v.dataset.vid); if(b){ v.src = URL.createObjectURL(b); continue; } }catch(e){}
+      if(note) v.replaceWith(Object.assign(document.createElement('div'), {className:'vnote', textContent:'ไม่พบไฟล์วิดีโอนี้ในเบราว์เซอร์เครื่องนี้'}));
+    }
+  }
+  /* ===== Fonts (names must match the Google Fonts link in <head>) ===== */
+  const FONTS = {'Sarabun':'sans-serif', 'Prompt':'sans-serif', 'Kanit':'sans-serif', 'Noto Sans Thai':'sans-serif', 'Mitr':'sans-serif', 'K2D':'sans-serif', 'Krub':'sans-serif', 'Athiti':'sans-serif', 'Bai Jamjuree':'sans-serif', 'Niramit':'sans-serif', 'Mali':'cursive', 'Itim':'cursive', 'Pattaya':'sans-serif', 'Charm':'serif', 'Pridi':'serif', 'Taviraj':'serif', 'Trirong':'serif', 'Noto Serif Thai':'serif', 'Chonburi':'serif', 'Srisakdi':'cursive'};
+  function famCss(n){ return FONTS.hasOwnProperty(n) ? "'" + n + "'," + FONTS[n] : ''; }
+  function famName(css){ const n = String(css || '').split(',')[0].replace(/["']/g, '').trim(); return FONTS.hasOwnProperty(n) ? n : ''; }
+
+  function cleanHTML(html){
+    const doc = new DOMParser().parseFromString('<body>' + html, 'text/html');
+    const OK = {B:1,STRONG:1,I:1,EM:1,U:1,A:1,SPAN:1,P:1,BR:1,DIV:1,IMG:1,H2:1,H3:1,UL:1,OL:1,LI:1,FONT:1,VIDEO:1,IFRAME:1};
+    const DROP = {SCRIPT:1,STYLE:1,OBJECT:1,EMBED:1,LINK:1,META:1};
+    const COLOR = /^(#[0-9a-f]{3,8}|rgba?\([\d\s,.]+\)|[a-z]+)$/i;
+    const EMBED = /^https:\/\/(www\.youtube\.com\/embed\/[\w-]{11}|player\.vimeo\.com\/video\/\d+)$/;
+    const VID = /^v[\w-]{4,40}$/;
+    (function walk(n){
+      Array.from(n.childNodes).forEach(c => {
+        if(c.nodeType === 3) return;
+        if(c.nodeType !== 1){ c.remove(); return; }
+        const t = c.tagName;
+        if(DROP[t]){ c.remove(); return; }
+        if(!OK[t]){ walk(c); c.replaceWith(...c.childNodes); return; }
+        const href = c.getAttribute('href') || '', src = c.getAttribute('src') || '', vid = c.getAttribute('data-vid') || '';
+        const col = (c.style && c.style.color) || c.getAttribute('color') || '';
+        const ta = (c.style && c.style.textAlign) || c.getAttribute('align') || '';
+        const ff = famName(c.style && c.style.fontFamily);
+        const fsm = String((c.style && c.style.fontSize) || '').match(/^(\d+(?:\.\d+)?)px$/);
+        const fs = fsm && +fsm[1] >= 10 && +fsm[1] <= 96 ? +fsm[1] : 0;
+        if(t === 'IMG' && !/^(data:image\/(png|jpe?g|gif|webp);base64,|https?:)/i.test(src)){ c.remove(); return; }
+        if(t === 'A' && !/^(https?:|mailto:|tel:)/i.test(href)){ walk(c); c.replaceWith(...c.childNodes); return; }
+        if(t === 'IFRAME' && !EMBED.test(src)){ c.remove(); return; }
+        if(t === 'VIDEO' && !VID.test(vid) && !/^https?:/i.test(src)){ c.remove(); return; }
+        Array.from(c.attributes).forEach(a => c.removeAttribute(a.name));
+        if(t === 'IMG'){ c.setAttribute('src', src); c.setAttribute('alt', ''); }
+        if(t === 'A'){ c.setAttribute('href', href); c.setAttribute('target', '_blank'); c.setAttribute('rel', 'noopener noreferrer'); }
+        if(t === 'IFRAME'){ c.setAttribute('src', src); c.setAttribute('allowfullscreen', ''); c.setAttribute('loading', 'lazy'); }
+        if(t === 'VIDEO'){ c.setAttribute('controls', ''); c.setAttribute('preload', 'metadata'); if(VID.test(vid)) c.setAttribute('data-vid', vid); else c.setAttribute('src', src); }
+        if(col && COLOR.test(col)) c.style.color = col;
+        if(/^(left|center|right|justify)$/.test(ta)) c.style.textAlign = ta;
+        if(ff) c.style.fontFamily = famCss(ff);
+        if(fs) c.style.fontSize = fs + 'px';
+        if(t !== 'IFRAME') walk(c);
+      });
+    })(doc.body);
+    return doc.body.innerHTML;
+  }
+
+  const ed = $('aEditor');
+  let savedRange = null;
+  function saveSel(){
+    const s = getSelection();
+    if(s.rangeCount && ed.contains(s.anchorNode)) savedRange = s.getRangeAt(0).cloneRange();
+  }
+  function restoreSel(){
+    ed.focus();
+    if(savedRange){ const s = getSelection(); s.removeAllRanges(); s.addRange(savedRange); }
+  }
+  function cmd(c, v){
+    restoreSel();
+    document.execCommand('styleWithCSS', false, true);
+    document.execCommand(c, false, v || null);
+    saveSel();
+  }
+  ['keyup','mouseup','input','blur'].forEach(ev => ed.addEventListener(ev, saveSel));
+
+  $('rtBar').addEventListener('mousedown', e => { if(e.target.closest('button')) e.preventDefault(); });
+  $('rtBar').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if(!b) return;
+    if(b.dataset.cmd) cmd(b.dataset.cmd);
+    if(b.dataset.block) cmd('formatBlock', b.dataset.block);
+    if(b.dataset.color) cmd('foreColor', b.dataset.color);
+  });
+  $('rtColor').addEventListener('input', e => cmd('foreColor', e.target.value));
+
+  /* font + size for the selected text */
+  function applyFont(name){
+    restoreSel();
+    document.execCommand('styleWithCSS', false, true);
+    document.execCommand('fontName', false, name);
+    saveSel();
+  }
+  function applySize(px){
+    restoreSel();
+    document.execCommand('styleWithCSS', false, true);
+    document.execCommand('fontSize', false, '7');   /* marker, replaced by the real px size below */
+    ed.querySelectorAll('font[size="7"]').forEach(f => {
+      const sp = document.createElement('span');
+      sp.style.fontSize = px + 'px';
+      while(f.firstChild) sp.appendChild(f.firstChild);
+      f.replaceWith(sp);
+    });
+    ed.querySelectorAll('span').forEach(sp => {
+      if(sp.style.fontSize === 'xxx-large'){
+        sp.style.fontSize = px + 'px';
+        sp.querySelectorAll('[style*="font-size"]').forEach(x => { x.style.fontSize = ''; });
+      }
+    });
+    saveSel();
+  }
+  $('rtFont').addEventListener('change', e => { const v = e.target.value; e.target.value = ''; if(v) applyFont(v); });
+  $('rtSize').addEventListener('change', e => { const v = e.target.value; e.target.value = ''; if(v) applySize(+v); });
+
+  $('rtLink').addEventListener('click', () => {
+    saveSel();
+    const hasSel = savedRange && !savedRange.collapsed;
+    let url = prompt('วางลิงก์ที่ต้องการแนบ (เช่น https://example.com)', 'https://');
+    if(!url || !url.trim() || url.trim() === 'https://') return;
+    url = url.trim();
+    if(!/^(https?:|mailto:|tel:)/i.test(url)) url = 'https://' + url.replace(/^\/+/, '');
+    if(hasSel){
+      restoreSel();
+      document.execCommand('createLink', false, url);
+    }else{
+      const txt = prompt('ข้อความที่จะแสดงเป็นลิงก์:', url);
+      if(txt === null) return;
+      restoreSel();
+      document.execCommand('insertHTML', false, '<a href="' + esc(url) + '">' + esc(txt.trim() || url) + '</a>&nbsp;');
+    }
+    saveSel();
+  });
+  $('rtUnlink').addEventListener('click', () => cmd('unlink'));
+
+  $('rtImg').addEventListener('click', () => { saveSel(); $('rtImgInput').click(); });
+  $('rtImgInput').addEventListener('change', async e => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    if(!f) return;
+    if(!f.type.startsWith('image/')){ toast('กรุณาเลือกไฟล์รูปภาพ', true); return; }
+    try{
+      const url = await shrinkImage(f, 800);
+      restoreSel();
+      document.execCommand('insertHTML', false, '<img src="' + url + '" alt="">');
+      saveSel();
+    }catch(err){ toast('อ่านไฟล์รูปไม่ได้ ลองเลือกไฟล์อื่น', true); }
+  });
+
+  /* paste as plain text so pasted styles don't leak in */
+  ed.addEventListener('paste', e => {
+    e.preventDefault();
+    const t = (e.clipboardData || window.clipboardData).getData('text/plain');
+    document.execCommand('insertText', false, t);
+  });
+
+  function bodyHTML(){
+    if(ed.textContent.trim() === '' && !ed.querySelector('img,video,iframe')) return '';
+    return cleanHTML(ed.innerHTML).trim();
+  }
+
+  /* ----- Video (link or upload) ----- */
+  function videoEmbed(url){
+    url = url.trim(); let m;
+    if((m = url.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/i)))
+      return '<iframe src="https://www.youtube.com/embed/' + m[1] + '"></iframe>';
+    if((m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/i)))
+      return '<iframe src="https://player.vimeo.com/video/' + m[1] + '"></iframe>';
+    if(/^https?:\/\/\S+\.(mp4|webm|ogg|mov)(\?\S*)?$/i.test(url))
+      return '<video src="' + esc(url) + '" controls></video>';
+    return '';
+  }
+  function putHTML(html){ restoreSel(); document.execCommand('insertHTML', false, html); saveSel(); }
+  function closeVid(){ $('vidPanel').classList.remove('show'); }
+  $('rtVideo').addEventListener('click', () => { saveSel(); $('vidPanel').classList.toggle('show'); if($('vidPanel').classList.contains('show')) $('vidUrl').focus(); });
+  $('vidClose').addEventListener('click', closeVid);
+  $('vidInsert').addEventListener('click', () => {
+    const h = videoEmbed($('vidUrl').value);
+    if(!h){ toast('ลิงก์วิดีโอไม่ถูกต้อง ใช้ลิงก์ YouTube, Vimeo หรือไฟล์ .mp4 / .webm', true); return; }
+    putHTML('<div>' + h + '</div><div><br></div>');
+    $('vidUrl').value = ''; closeVid();
+  });
+  $('vidPick').addEventListener('click', () => { saveSel(); $('vidFile').click(); });
+  $('vidFile').addEventListener('change', async e => {
+    const f = e.target.files[0]; e.target.value = '';
+    if(!f) return;
+    if(!f.type.startsWith('video/')){ toast('กรุณาเลือกไฟล์วิดีโอ', true); return; }
+    if(f.size > 300 * 1024 * 1024){ toast('ไฟล์ใหญ่เกิน 300 MB ลองบีบอัดไฟล์หรือใช้ลิงก์แทน', true); return; }
+    const id = newId('v');
+    try{
+      await VDB.put(id, f);
+      putHTML('<div><video data-vid="' + id + '" controls></video></div><div><br></div>');
+      hydrateVideos(ed); closeVid(); toast('แทรกวิดีโอแล้ว');
+    }catch(err){ toast('บันทึกวิดีโอไม่สำเร็จ ลองใช้ลิงก์แทน', true); }
+  });
+  /* click an image/video to select it, so the left/center/right buttons apply to it */
+  ed.addEventListener('click', e => {
+    if(e.target.tagName === 'IMG' || e.target.tagName === 'VIDEO'){
+      const r = document.createRange(); r.selectNode(e.target);
+      const s = getSelection(); s.removeAllRanges(); s.addRange(r); saveSel();
+    }
+  });
+
+
+  /* ===== ARTICLES ===== */
+  const aForm = $('articleForm'), aList = $('aList'), aEmpty = $('aEmpty'), aSearch = $('aSearch');
+
+  function renderArticles(){
+    const q = aSearch.value.trim().toLowerCase();
+    const shown = articles.filter(a => q === '' ||
+      (a.title || '').toLowerCase().includes(q) || (a.tag || '').toLowerCase().includes(q));
+
+    $('aCountPill').textContent = articles.length;
+    updateNavCounts();
+    aList.innerHTML = '';
+    shown.forEach(a => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML =
+        '<div class="thumb">' + (a.img ? '<img src="' + esc(a.img) + '" alt="">' : 'ไม่มีรูป') + '</div>' +
+        '<div class="info">' +
+          '<div class="r-name">' + esc(a.title) + '</div>' +
+          '<div class="r-meta">' + (a.tag ? '<span class="pill">' + esc(a.tag) + '</span>' : '') +
+            (a.updated ? '<span>' + esc(a.updated) + '</span>' : '') + '</div>' +
+          (a.summary ? '<div class="r-desc">' + esc(a.summary) + '</div>' : '') +
+        '</div>' +
+        '<div class="row-actions">' +
+          '<button type="button" class="btn-sm" data-aedit="' + esc(a.id) + '">แก้ไข</button>' +
+          '<button type="button" class="del-btn" data-adel="' + esc(a.id) + '">ลบ</button>' +
+        '</div>';
+      aList.appendChild(row);
+    });
+
+    aEmpty.classList.toggle('show', shown.length === 0);
+    aEmpty.textContent = articles.length === 0
+      ? 'ยังไม่มีบทความ เพิ่มบทความได้จากฟอร์มด้านซ้าย'
+      : 'ไม่พบบทความที่ค้นหา';
+  }
+  aSearch.addEventListener('input', renderArticles);
+
+  function setEditMode(a){
+    editingId = a ? a.id : null;
+    $('aFormTitle').textContent = a ? 'แก้ไขบทความ' : 'เพิ่มบทความใหม่';
+    $('aSubmitBtn').textContent = a ? 'บันทึกการแก้ไข' : 'เพิ่มบทความ';
+    $('aResetBtn').textContent  = a ? 'ยกเลิก' : 'ล้างฟอร์ม';
+    $('aEditBanner').classList.toggle('show', !!a);
+  }
+  function clearArticleForm(){
+    aForm.reset();
+    ed.innerHTML = '';
+    aImg = '';
+    $('aFileInput').value = '';
+    setTStyle();
+    showAPreview();
+    setInvalid('aFTitle', false);
+    setInvalid('aFBody', false);
+    setEditMode(null);
+  }
+
+  aList.addEventListener('click', e => {
+    const editId = e.target.getAttribute('data-aedit');
+    const delId  = e.target.getAttribute('data-adel');
+    if(editId){
+      const a = articles.find(x => x.id === editId);
+      if(!a) return;
+      $('aTitle').value = a.title || '';
+      $('aTag').value = a.tag || '';
+      $('aSummary').value = a.summary || '';
+      setTStyle(a.tStyle);
+      ed.innerHTML = cleanHTML(a.body || ''); hydrateVideos(ed);
+      aImg = a.img || '';
+      showAPreview();
+      setEditMode(a);
+      $('aTitle').focus();
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+    if(delId){
+      const idx = articles.findIndex(x => x.id === delId);
+      if(idx < 0) return;
+      const a = articles[idx];
+      if(!confirm('ลบบทความ "' + a.title + '" ?\nบทความนี้จะหายไปจากหน้าเว็บทันที')) return;
+      articles.splice(idx, 1);
+      if(!persistArticles()){ articles.splice(idx, 0, a); toast(STORAGE_ERR, true); return; }
+      if(editingId === delId) clearArticleForm();
+      renderArticles();
+      toast('ลบบทความแล้ว');
+    }
+  });
+
+  aForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const title = $('aTitle').value.trim();
+    const body = bodyHTML();
+    setInvalid('aFTitle', !title);
+    setInvalid('aFBody', !body);
+    if(!title || !body) return;
+
+    const data = {
+      title, body,
+      tag:     $('aTag').value.trim(),
+      summary: $('aSummary').value.trim(),
+      img:     aImg,
+      updated: thaiDate(),
+      tStyle:  getTStyle()
+    };
+
+    if(editingId){
+      const a = articles.find(x => x.id === editingId);
+      const backup = Object.assign({}, a);
+      Object.assign(a, data);
+      if(!persistArticles()){ Object.assign(a, backup); toast(STORAGE_ERR, true); return; }
+      clearArticleForm();
+      renderArticles();
+      toast('บันทึกการแก้ไขแล้ว');
+    }else{
+      articles.unshift(Object.assign({id:newId('a')}, data));
+      if(!persistArticles()){ articles.shift(); toast(STORAGE_ERR, true); return; }
+      clearArticleForm();
+      renderArticles();
+      toast('เพิ่มบทความแล้ว');
+    }
+  });
+
+  $('aResetBtn').addEventListener('click', clearArticleForm);
+  $('aTitle').addEventListener('input', () => setInvalid('aFTitle', false));
+  ed.addEventListener('input', () => setInvalid('aFBody', false));
+
+  $('aRestoreBtn').addEventListener('click', () => {
+    if(!confirm('คืนค่าเป็นบทความตัวอย่างเริ่มต้น?\nบทความที่เพิ่มไว้ทั้งหมดจะหายไป')) return;
+    const old = articles;
+    articles = defaultArticles();
+    if(!persistArticles()){ articles = old; toast(STORAGE_ERR, true); return; }
+    clearArticleForm();
+    renderArticles();
+    toast('คืนค่าตัวอย่างแล้ว');
+  });
+
+  /* ===== Title style (font / size / colour) ===== */
+  const T_DEF = {font:'Sarabun', size:34, color:'#0f3d24'};
+  function getTStyle(){
+    const sz = Math.max(16, Math.min(96, parseInt($('aTSize').value, 10) || T_DEF.size));
+    return {font: $('aTFont').value || T_DEF.font, size: sz, color: $('aTColor').value || T_DEF.color};
+  }
+  function paintTPrev(){
+    const t = getTStyle(), p = $('aTPrev');
+    p.textContent = $('aTitle').value.trim() || 'ตัวอย่างหัวข้อบทความ';
+    p.style.fontFamily = famCss(t.font);
+    p.style.fontSize = t.size + 'px';
+    p.style.color = t.color;
+  }
+  function setTStyle(t){
+    t = Object.assign({}, T_DEF, t || {});
+    if(!FONTS.hasOwnProperty(t.font)) t.font = T_DEF.font;
+    $('aTFont').value = t.font;
+    $('aTSize').value = Math.max(16, Math.min(96, +t.size || T_DEF.size));
+    $('aTColor').value = /^#[0-9a-f]{6}$/i.test(t.color || '') ? t.color : T_DEF.color;
+    paintTPrev();
+  }
+  $('aTFont').addEventListener('change', paintTPrev);
+  $('aTSize').addEventListener('input', paintTPrev);
+  $('aTColor').addEventListener('input', paintTPrev);
+  $('aTitle').addEventListener('input', paintTPrev);
+  $('aTMinus').addEventListener('click', () => { $('aTSize').value = Math.max(16, getTStyle().size - 2); paintTPrev(); });
+  $('aTPlus').addEventListener('click', () => { $('aTSize').value = Math.min(96, getTStyle().size + 2); paintTPrev(); });
+  $('aTReset').addEventListener('click', () => setTStyle());
+  document.querySelectorAll('[data-tc]').forEach(b => b.addEventListener('click', () => { $('aTColor').value = b.dataset.tc; paintTPrev(); }));
+  paintTPrev();
+
+  /* ===== Init ===== */
+  renderArticles();
+  showAPreview();
+</script>
+
+</body>
+</html>
