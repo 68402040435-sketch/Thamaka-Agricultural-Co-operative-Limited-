@@ -5,7 +5,8 @@ window.createSupabaseClient = function createSupabaseClient() {
   if (
     !window.supabaseUrl ||
     !window.supabaseAnonKey ||
-    (!window.supabaseAnonKey.startsWith("eyJ") && !window.supabaseAnonKey.startsWith("sb_publishable_"))
+    (!window.supabaseAnonKey.startsWith("eyJ") &&
+      !window.supabaseAnonKey.startsWith("sb_publishable_"))
   ) {
     throw new Error(
       "ยังไม่ได้ใส่ Publishable key ให้ถูกต้อง กรุณาตรวจสอบค่าที่นำมาวาง"
